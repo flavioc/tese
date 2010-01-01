@@ -1,0 +1,74 @@
+\documentclass[11pt]{report}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+%\usepackage{citesort} % sorts citation numbers appropriately
+\usepackage[]{graphicx} % use this when importing ps- and eps-files
+\usepackage{url}
+\usepackage{listings}
+\usepackage[boxed,linesnumbered]{algorithm2e}
+\usepackage{fix-cm}
+\usepackage{cite}
+% \usepackage[pdftex]{graphicx} % use this when importing PDF files
+
+% horizontal margins: 1.0 + 6.5 + 1.0 = 8.5
+\setlength{\oddsidemargin}{0.0in}
+\setlength{\textwidth}{6.5in}
+% vertical margins: 1.0 + 9.0 + 1.0 = 11.0
+\setlength{\topmargin}{0.0in}
+\setlength{\headheight}{12pt}
+\setlength{\headsep}{13pt}
+\setlength{\textheight}{625pt}
+\setlength{\footskip}{24pt}
+
+\pagestyle{myheadings}
+
+\title{\fontsize{20}{30}\bfseries This is a title}
+\author{Flávio Manuel Fernandes Cruz \\}
+\date{\today}
+
+\begin{document}
+  
+\begin{titlepage}
+
+\begin{center}
+  
+\textsc{\large Flávio Manuel Fernandes Cruz}\\[1.5cm]
+
+\textsc{\LARGE TITULO DA TESE}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.7]{04.png}
+\end{figure}
+
+
+\textsc{\large Faculdade de Engenharia da Universidade do Porto\\ \small Rua Dr. Roberto Frias, s/n \\ 4200-465 Porto PORTUGAL}\\[1.5cm]
+  
+\end{center}
+\end{titlepage}
+
+\addcontentsline{toc}{chapter}{Contents}
+\tableofcontents
+\listoffigures
+\listoftables
+\lstlistoflistings
+\listofalgorithms
+\clearpage
+
+\chapter{Introduction}
+\input{introduction}
+
+\chapter{Logic Programming and Tabling}
+\input{state}
+
+\chapter{Subsumption Tabling}
+\chapter{Implementation Details}
+\chapter{Experimental Results}
+\chapter{Conclusions and further work}
+  
+\renewcommand{\bibname}{References}
+\bibliography{references}{}
+\bibliographystyle{plain}
+
+\bibliographystyle{plain}
+
+\end{document}
