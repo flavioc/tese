@@ -1,4 +1,4 @@
-\documentclass[11pt]{report}
+\documentclass[12pt]{report}
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 %\usepackage{citesort} % sorts citation numbers appropriately
@@ -8,6 +8,10 @@
 \usepackage[boxed,linesnumbered]{algorithm2e}
 \usepackage{fix-cm}
 \usepackage{cite}
+
+\usepackage{setspace}
+\doublespacing
+
 % \usepackage[pdftex]{graphicx} % use this when importing PDF files
 
 % horizontal margins: 1.0 + 6.5 + 1.0 = 8.5
@@ -66,9 +70,7 @@
 \chapter{Conclusions and further work}
   
 \renewcommand{\bibname}{References}
+\bibliographystyle{alpha}
 \bibliography{references}{}
-\bibliographystyle{plain}
-
-\bibliographystyle{plain}
 
 \end{document}
