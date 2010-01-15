@@ -190,11 +190,123 @@ The WAM being a complex topic has complete books dedicated in explaining its int
 An example is the \textit{Warren's Abstract Machine -- A Tutorial Reconstruction} written by H. A\"{\i}t-Kaci \cite{Aitkaci-91}. 
 
 \section{Tabling}
+
+Despite Prolog's declarativeness and expressiveness, the past few years have seen wide efforts at
+solving shortcomings that arise when using SLD resolution.
+One proposal that has gained popularity is \textit{tabling} or \textit{tabulation} \cite{Chen-96}.
+In comparison to the traditional resolution method, tabling can reduce the search space to cut redundant computations,
+avoids looping and has better termination properties \cite{Tamaki-86}.
+
+In a nutshell, tabling is a refinement of the SLD resolution that consists in storing intermediate answers for
+subgoals so that they can be reused when a repeated subgoal appears in the resolution process.
+The use of tabling enables the programmer to write more expressive, but still valid, logical clauses.
+
+One classical example that is used to demonstrate the need of tabling is presented in Listing \ref{prolog_path}.
+This program describes the predicate \textbf{path/2} that can compute reachability between two nodes on a directed graph.
+Connections are established as facts using the \textbf{edge/2} predicate.
+
+\begin{lstlisting}[language=prolog,basicstyle=\footnotesize,float,frame=single,caption={\textit{path} program.},label=prolog_path]
+:- table path/2.
+
+path(X, Z) :- edge(X, Y), path(Y, Z).
+path(X, Z) :- edge(X, Z).
+
+edge(a, b).
+edge(b, a).
+\end{lstlisting}
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.5]{infinite_loop.png}
+  \caption{\textbf{path(X, Z)} infinite loop.}
+  \label{fig:infinite_loop}
+\end{figure}
+
+If we tried to evaluate the query goal \textbf{?- path(X, Z).}, traditional Prolog would enter an infinite loop (Figure \ref{fig:infinite_loop})
+because the first clause of \textbf{path/2} is right recursive, leading to a repeated call.
+
+In this new method of evaluation when a tabled subgoal is first called, a new entry is allocated on the \textit{table space}. Table
+entries are used to store subgoal calls but they also store answers found during evaluation. Each time a tabled subgoal is called, we
+know if it is a repeated call by inspecting the table space. Nodes in the search space can be classified as:
+\textit{generator nodes}, if they are being called for the first time; \textit{consumer nodes} if they are repeated calls;
+or \textit{interior nodes} if the are non-tabled subgoals. Generator nodes are matched against the predicate clauses as usual but
+consumer nodes are not, instead they consume answers stored in the table space from the respective subgoal.
+
+In Figure \ref{fig:tabling_path} we depict the tabled evaluation of \textbf{?- path(X, Z).}.
+Generator nodes are represented by rectangles with double lines and consumer nodes by simple rectangles.
+Note that we apply to \textbf{path/2} the \textbf{table} directive to use tabling resolution.
+
+Tabled evaluation starts by inserting a new entry in the table space and by allocating a generator
+node to represent \textbf{path(X, Z)} (step 1). Like SLD, \textbf{path(X, Z)} is resolved against the first \textbf{path/2} clause (step 2).
+The goal \textbf{edge(X, Y)} is not tabled and is resolved as usual. We use the first \textbf{edge/2} clause with $X = a, Z = b$
+and these values are carried to \textbf{path(b, Z)} (step 3). This goal is not yet in the table space, hence we add a new entry for it.
+
+\textbf{path(b, Z)} is then resolved against the first clause of \textbf{path/2} (step 4). \textbf{edge(b, Y)} fails against the first clause but succeeds
+with $Y = a$. A new tabled subgoal \textbf{path(a, Z)} is registered in the tabled space (step 6) and resolved against the first clause
+of \textbf{path/2} (step 7). This time the \textbf{edge/2} subgoal matches with the first clause ($Y = b$). A repeated tabled subgoal
+\textbf{path(b, Z)} is called and the first consumer node is allocated (step 8). As we have no answers for \textbf{path(b, Z)} to consume,
+the current evaluation point is \textit{suspended}. Later on, this node can be resumed to consume new answers.
+
+Next, we backtrack to node 7 and try the second \textbf{edge/2} clause, but resolution fails (step 9). We backtrack again, this time to
+node 6 to try the second clause of \textbf{path/2} (step 10). Here \textbf{edge(a, Z)} is resolved against the first clause of \textbf{edge/2}
+and the solution $Z = b$ is found for the subgoal \textbf{path(a, Z)}. This solution is stored in the table space and forward
+execution, propagating the binding $Z = b$ to \textbf{path(b, Z)} (step 12) and the first solution to this subgoal is found and stored.
+We continue forward execution and the binding is once again propagated, this time to node 3 (step 13) and we find a solution to
+\textbf{path(X, Z)}, $X = a, Z = b$.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{tabling_path.png}
+  \caption{Tabled evaluation of \textbf{path(X, Z)}.}
+  \label{fig:tabling_path}
+\end{figure}
+
+We return to node 10 to try the second clause of \textbf{edge/2}, but we fail (step 14). With no more clauses to try at node 6,
+we check wether consumer in node 8 can be resumed. It can, as now it has one unconsumed answer. We resume computation on node 8,
+the answer $Z = b$ is consumed and forwarded to subgoal \textbf{path(a, Z)} at node 6. Here, we note that it is a repeated answer
+to this subgoal by inspecting the table space, and thus we mark step 15 as \textbf{fail}. Failing repeated answers is crucial
+to avoid unnecessary computations and sometimes looping.
+
+At this point, we return again to node 6 but no consumers with unconsumed answers exist and the subgoal cannot be \textit{completed}.
+Completing \textbf{path(a, Z)} earlier is not safe, because the consumer under it depends on generator node 3, the subgoal \textbf{path(b, Z)}.
+If new answers are found, node 8 should be resumed to consume them, which then can lead to new answers for \textbf{path(a, Z)}.
+Completing prematurely would result in lost answers.
+
+We thus backtrack to node 3
+to try the second clause (step 16). The first clause of \textbf{edge/2} fails but the second succeeds (step 18), culminating in
+a new answer for \textbf{path(b, Z)}, $Z = a$, that is stored. We propagate variable bindings in step 19, generating a new answer
+to subgoal \textbf{path(X, Z)}, $X = a, Z = a$.
+
+Every clause in generator node 3 has been tried, so we check if it can be completed. Note that we can safely complete this node,
+as it is the youngest generator in which younger consumer nodes have no dependencies on older generator nodes.
+Node 3 is called, by definition, a \textit{leader node} and the branch of nodes
+below it form a \textit{Strongly Connected Component} (SCC) \cite{Tarjan-72}.
+
+When trying to complete node 3, we verify that node 8 has unconsumed answers. The answer $Z = a$ is fetched (step 20) and propagated
+to node 6, generating a new answer to \textbf{path(a, Z)}. This binding is once again propagated, now for node 3 (step 21) but it is
+a repeated answer, thus the computation fails. We return back to node 3 to re-attempt completion. This time, no consumers have unconsumed
+answers and we can safely complete (step 22). Subgoals \textbf{path(b, Z)} (node 3) and \textbf{path(a, Z)} (node 6) are marked as \textbf{complete}
+in the table space and no new answers are accepted.
+
+Next, we backtrack to node 2 to try the second \textbf{edge/2} clause. A new consumer node is allocated (step 23) and answers can be
+promptly consumed from the table space. As the subgoal \textbf{path(a, Z)} as been completed before, the consumer node is thus deallocated.
+The retrieved answers in step 23 are propagated to node 1 and new answers are generated (step 24 and 25).
+
+We backtrack to node 1 to try the second \textbf{edge/2} clause. Resolution succeeds for both clauses but as the newly found answers
+are repeated we fail for both cases (step 27 and 28). The process backtracks again to node 1 and with no more clauses to try,
+we attempt completion. As there are no consumer nodes, completion is done (step 29) and computation terminates successfully.
+
+
+
+
   \subsection{Yap and XSB}
   
   \subsection{Table Space}
     \subsubsection{Tries}
     \subsubsection{Subgoal frames}
     \subsubsection{Choice Point and Execution}
-  \subsection{Tabling by call subsumption}
+
+\section{Tabling by Call Subsumption}
+  \subsection{Dynamic Threaded Sequential Automata}
+  \subsection{Time Stamped Tries}
 
