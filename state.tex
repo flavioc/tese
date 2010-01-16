@@ -225,11 +225,13 @@ edge(b, a).
 If we tried to evaluate the query goal \textbf{?- path(X, Z).}, traditional Prolog would enter an infinite loop (Figure \ref{fig:infinite_loop})
 because the first clause of \textbf{path/2} is right recursive, leading to a repeated call.
 
+\subsubsection{Tabling evaluation}
+
 In this new method of evaluation when a tabled subgoal is first called, a new entry is allocated on the \textit{table space}. Table
 entries are used to store subgoal calls but they also store answers found during evaluation. Each time a tabled subgoal is called, we
 know if it is a repeated call by inspecting the table space. Nodes in the search space can be classified as:
 \textit{generator nodes}, if they are being called for the first time; \textit{consumer nodes} if they are repeated calls;
-or \textit{interior nodes} if the are non-tabled subgoals. Generator nodes are matched against the predicate clauses as usual but
+or \textit{interior nodes} if they are non-tabled subgoals. Generator nodes are matched against the predicate clauses as usual but
 consumer nodes are not, instead they consume answers stored in the table space from the respective subgoal.
 
 In Figure \ref{fig:tabling_path} we depict the tabled evaluation of \textbf{?- path(X, Z).}.
@@ -296,17 +298,127 @@ We backtrack to node 1 to try the second \textbf{edge/2} clause. Resolution succ
 are repeated we fail for both cases (step 27 and 28). The process backtracks again to node 1 and with no more clauses to try,
 we attempt completion. As there are no consumer nodes, completion is done (step 29) and computation terminates successfully.
 
+From the described example we can summarize four main operations needed to support tabled evaluation:
 
+\begin{itemize}
+  \item The \textit{tabled subgoal call} operation represents a call to a tabled subgoal.
+  If the subgoal is already in the tabled subgoal it creates a new consumer node to consume answers.
+  If it is a new subgoal call it creates a new generator node and adds a new entry to the table space.
+  Each new entry contains an empty set $S$ that will contain answers for the subgoal. 
+  
+  \item The \textit{new answer} operation adds a new answer $s$ to the table space. If the answer is repeated the operation fails.
+  A new answer set $S'$ for the subgoal is generated: $S' \equiv S \cup {s}$.
+  
+  \item The \textit{answer resolution} operation checks wether new answers from the table space are available for consumption.
+  When no new answers are available, the consumer node is \textit{suspended} and execution proceeds using a specific strategy.
+  Given the last consumed answer, we determine the unconsumed answer
+  set $R$ ($R \subseteq S$) and fetch the element $r \in R$, which is the first element from the set $R$. The last consumed answer
+  can be seen as a \textit{continuation} that is stored in each consumer node and is used to determine the next available answer.
+  
+  \item The \textit{completion} operation determines if a tabled subgoal is \textit{completely evaluated}.
+  Only leader nodes can complete themselves and younger generator nodes.
+  Once a subgoal is completed the set of answers $S$ is closed and no more answers are accepted; future subgoal calls
+  can use the set $S$ without the need to suspend.
+\end{itemize}
 
+\subsubsection{Scheduling strategies}
+
+Ensuring efficient execution of tabled evaluation requires different \textit{scheduling strategies}.
+During evaluation of the previous example it is very clear that at several points we can choose between
+different strategies: continue forward execution, backtrack to interior nodes,
+return answers to consumer nodes, or perform completion. Depending on how and when the return of answers is scheduled, different
+strategies and searches can be formulated. It is also well known
+that using different strategies leads to tremendous effect on performance as some predicates are better suited to specific strategies. 
+The most popular scheduling strategies are batched scheduling and local scheduling \cite{Freire-96}.
+
+\textit{Batched scheduling} reduces the need to suspend and move around the search tree by batching the return of answers.
+When the engine generates answers, while evaluating a particular goal, the answers are added to the table and the subgoal continues its normal
+evaluation until it resolves all available program clauses. Only then the answers are consumed by consumer nodes \cite{Freire-96}.
+In some cases, this results in creating dependencies to older subgoals, therefore enlarging the current SCC and delaying completion
+to older generator nodes. When backtracking, three situations may arise:
+
+\begin{itemize}
+  \item if backtracking to a generator or interior node, try the next available clause.
+  \item if backtracking to a consumer node, consume new answers.
+  \item if no more clauses are left to try or no more unconsumed answers are available, two options are available:
+    \begin{itemize}
+      \item if the node is a leader node, attempt completion.
+      \item if not, backtrack to a previous branch.
+    \end{itemize}
+\end{itemize}
+
+For some problems, \textit{local scheduling} is better suited because it tries to evaluate a single exact SCC at a time, preserving the dynamic
+SCC ordering during the evaluation. In other words, in a local evaluation, answers are returned to consuming nodes outside of an SCC only after that
+SCC is completely evaluated \cite{Freire-96}.
+It differs from batched scheduling in that once the answers are found, they are added to the table space, but execution
+\textit{fails}. Because this strategy tries to complete sooner rather than later, we can expect less dependencies between subgoals.
+
+\subsubsection{Variant tabling}
+
+When the subgoal \textbf{path(X, Z)} is called, a check for the presence of this subgoal in the table space is done first.
+In the example in Figure \ref{fig:tabling_path}, this was done by checking wether a \textit{variant} of the new goal already
+exists in the table. We say that two terms $t_1$ and $t_2$ are variants of each other if they are identical up to renaming of their
+variables.
+
+For example, \textbf{path(X, Z)} is variant of the subgoal \textbf{path(X, Y)}, as they represent the same subgoal if we try
+to rename their variables to a standardized format. One format was proposed by Bachmair \textit{et al} \cite{Bachmair-93}. Formally,
+we have a set $V$ of variables present in a term and a function $renameVar$, such that the first term variable $a \in V$
+results in $renameVar(a) = VAR0$ and the following distinct variables are named incrementally ($VAR1, VAR2, ...$).
+Using this mechanism, \textbf{path(X, Z)} and \textbf{path(X, Y)} results in \textbf{path(VAR0, VAR1)}. The resulting
+standardized subgoal is then checked against the table space to verify if it is a repeated subgoal call.
+
+The variant approach is widely used in tabling systems, but other approaches do exist. One approach named
+\textit{call by subsumption} works by checking wether the new goal is subsumed by another goal in the table space.
+In other words, we verify if there is a more general subgoal than the one being called. For example
+\textbf{path(b, Z)} is subsumed by the subgoal \textbf{path(X, Z)}.
+
+In this approach, instead of creating
+a new generator node in step 3, we would create a consumer node that would consume answers stored in the subgoal \textbf{path(X, Z)}.
+For correct results, it should be clear that the answers used from the table space must unify with \textbf{path(b, Z)}.
+Like variant tabling, those new consumer nodes do not expand by using the program clauses, hence the search tree for this new
+method will be greatly reduced. This new approach will be throughly explored in Section \ref{sec:subsumption} (Tabling by Call Subsumption).
 
   \subsection{Yap and XSB}
   
-  \subsection{Table Space}
+  Yap \cite{system-yap} and XSB \cite{system-xsb} are two well known Prolog systems that implement tabling.
+  
+  The YAP Prolog System is a high-performance Prolog compiler developed at LIACC, Universidade do Porto.
+  It is one of the fastest available Prolog systems and implements a wide range of functionalities: 
+  stream I/O, sockets, modules, exceptions, debugging, a C-interface, dynamic code, internal database, DCGs, saved states, co-routining, arrays and threads.
+  It is based on the WAM and follows the Edinburgh tradition. Most of the ISO-Prolog standard is implemented.
+  
+  Tabling in Yap is implemented through the YapTab sub-system \cite{Rocha-03c}, a delaying based tabling engine supporting evaluation of
+  definite programs. YapTab follows the seminal SLG-WAM (Linear resolution with Selection function for General logic programs in WAM)
+  design from XSB Prolog,
+  but it innovates by proposing a new fix-point check algorithm, and by considering that the control of fix-point detection should be
+  performed at the level of the data structures corresponding to suspended sub-computations. YapTab was originally designed to achieve
+  good results in sequential tabling, but could be extended with the OPTYap engine, for parallel execution \cite{Rocha-05a}.
+  Other innovations in YapTab include: support for a dynamic combination of batched and local scheduling and efficient handling of \textit{incomplete
+  tables}. Incomplete tables are created when the current computation is pruned from the execution stacks, keeping the pruned subgoals from retrieving
+  the complete answer set. Currently, only call by variant checking is supported.
+  
+  XSB is a research-oriented logic programming system for Unix and Windows based systems. In addition to providing all the functionality
+  of the Prolog language, XSB contains several features not usually found in logic programming systems, namely, evaluation according to the
+  Well-Founded Semantics (tabling with negation) \cite{Gelder-91} through the use of a delayed-based tabling engine, the SLG-WAM \cite{Chen-96}.
+  
+  Other features of XSB include: a fully threaded engine, constraint handling for tabled programs on a engine level, a variety of indexing
+  techniques, interfaces to other languages, among other things \cite{system-xsb}.
+  
+  SLG-WAM supports both tabling by variant checking and by subsumption checking. Predicates are available to choose between the two mechanisms.
+  XSB also implements a compiler directive, \textbf{auto\_table}, that does static analysis to decide which predicates to table, usually predicates that contain an infinite loop. Tabling by call-subsumption is implemented by a technique called \textit{Time Stamped Tries} \cite{Johnson-99} (described in Section \ref{sec:time_stamped_tries}).
+  
+  In the next section (Section \ref{sec:table_space}), the table space used to implement
+  a call by variance engine is described. Both SLG-WAM and YapTab
+  share a lot of similarities in how the table space is organized when using variant checking, hence the description covers
+  the common ground between the two systems. Next, in Section \ref{sec:subsumption}, we explore two known mechanisms that
+  modify the previous table space for call by subsumption. Those two mechanisms have already been implemented in XSB (\cite{Rao-96} and \cite{Johnson-99}).
+  
+  \subsection{Table Space} \label{sec:table_space}
     \subsubsection{Tries}
     \subsubsection{Subgoal frames}
     \subsubsection{Choice Point and Execution}
 
-\section{Tabling by Call Subsumption}
+\section{Tabling by Call Subsumption} \label{sec:subsumption}
   \subsection{Dynamic Threaded Sequential Automata}
-  \subsection{Time Stamped Tries}
+  \subsection{Time Stamped Tries} \label{sec:time_stamped_tries}
 
