@@ -353,7 +353,7 @@ SCC is completely evaluated \cite{Freire-96}.
 It differs from batched scheduling in that once the answers are found, they are added to the table space, but execution
 \textit{fails}. Because this strategy tries to complete sooner rather than later, we can expect less dependencies between subgoals.
 
-\subsubsection{Variant tabling}
+\subsubsection{Variant tabling} \label{sec:variant_tabling}
 
 When the subgoal \textbf{path(X, Z)} is called, a check for the presence of this subgoal in the table space is done first.
 In the example in Figure \ref{fig:tabling_path}, this was done by checking wether a \textit{variant} of the new goal already
@@ -373,7 +373,7 @@ In other words, we verify if there is a more general subgoal than the one being 
 \textbf{path(b, Z)} is subsumed by the subgoal \textbf{path(X, Z)}.
 
 In this approach, instead of creating
-a new generator node in step 3, we would create a consumer node that would consume answers stored in the subgoal \textbf{path(X, Z)}.
+a new generator node in step 3, we create a consumer node that would consume answers stored in the subgoal \textbf{path(X, Z)}.
 For correct results, it should be clear that the answers used from the table space must unify with \textbf{path(b, Z)}.
 Like variant tabling, those new consumer nodes do not expand by using the program clauses, hence the search tree for this new
 method will be greatly reduced. This new approach will be throughly explored in Section \ref{sec:subsumption} (Tabling by Call Subsumption).
@@ -413,12 +413,193 @@ method will be greatly reduced. This new approach will be throughly explored in 
   the common ground between the two systems. Next, in Section \ref{sec:subsumption}, we explore two known mechanisms that
   modify the previous table space for call by subsumption. Those two mechanisms have already been implemented in XSB (\cite{Rao-96} and \cite{Johnson-99}).
   
-  \subsection{Table Space} \label{sec:table_space}
-    \subsubsection{Tries}
-    \subsubsection{Subgoal frames}
-    \subsubsection{Choice Point and Execution}
+\subsection{Table Space} \label{sec:table_space}
+  
+  Implementing a tabling engine on a Prolog system involves the design of compact and time efficient data structures
+  to organize the table space. The table space is heavily used throughout the evaluation process in various operations:
+  
+  \begin{itemize}
+    \item to lookup if a subgoal is in the table, and if not insert it;
+    \item to verify wether a newly found answer is already in the table, and if not insert it;
+    \item to retrieve answers for consumer nodes.
+  \end{itemize}
+  
+  \subsubsection{Tries}
+  
+  Clearly, the success of tabling is highly dependent on the data structures used.
+  Both Yap \cite{Rocha-03c} and XSB \cite{RamakrishnanIV-95} use a trie-based tabling approach.
+  
+  Tries were initially proposed to index dictionaries \cite{Fredkin-62} and have since been generalized to index recursive data structures
+  such as terms. The essential idea underlying a tabling trie is to partition a set $T$ of terms based upon their structure,
+  hence common term prefixes are represented only once.
+  
+  A trie is a tree-structured automaton with the root as the start state and each leaf state is associated with a term in $T$.
+  Each state specifies the position to be inspected in the input term on reaching that state.
+  The outgoing transitions specify the function symbols expected at that position.
+  A transition is taken if the current symbol in the input term matches the symbol of the transition.
+  If we recursively reach a leaf state we say that the input term \textit{matches} the term represented by the leaf state.
+  A complete path, from the root to a leaf, corresponds to a pre-order traversal of the matching term.
+  If no transition can be taken, the lookup operation fails. On the other hand, for an insert operation
+  we add a new outgoing transition for the current input symbol and a new node, which is linked to this transition.
+  To complete the insert operation, we consume the rest of the input term, until a leaf node is created that represents
+  the newly inserted term.
+  
+  Given the nature of tries, the following conclusions can be made:
+  
+  \begin{itemize}
+    \item it is possible to do a single pass check/insert. If the lookup
+    fails, it is possible to complete an insert operation using the last lookup state;
+    \item the efficiency and memory consumption of a
+    particular trie depends on the percentage of terms that have common prefixes.
+  \end{itemize}
+  
+  When creating transitions for variables, we use the format outlined by Bachmair \textit{et al} \cite{Bachmair-93}.
+  It was described in Section \ref{sec:variant_tabling} (Variant tabling).
+  
+  \begin{figure}[ht]
+    \centering
+      \includegraphics[scale=0.6]{tries.png}
+    \caption{Using tries to represent terms.}
+    \label{fig:tries_use}
+  \end{figure}
+  
+  The Figure \ref{fig:tries_use} shows a trie with three terms. First, in \textbf{(a)} the trie is represented by a \textit{root node} and has
+  no terms. Next, in \textbf{(b)} the term \textbf{t(X, a)} is inserted and three nodes are created that represent each part of the term.
+  In \textbf{(c)} a new term, \textbf{u(X, b, Y)} is inserted. This new term differs from the first one and a new distinct branch is created.
+  Finally, in \textbf{(d)}, the input term is \textbf{t(Y, 1)} and only a new node needs to be created as this term shares two nodes
+  with \textbf{t(X, a)}.
+  
+  Yap and XSB use two levels of tries to implement tabling:
+  
+  \begin{itemize}
+    \item One level stores subgoal calls for each predicate;
+    \item The second level stores answers for a specific subgoal.
+  \end{itemize}
+  
+  \begin{figure}[ht]
+     \centering
+       \includegraphics[scale=0.6]{two_level_tries.png}
+     \caption{Organizing the table space with tries.}
+     \label{fig:table_space_tries}
+   \end{figure}
+  
+  For both levels, each trie node usually contains four fields. The first field represents the \textbf{symbol} (or \textbf{atom})
+  of the transition. The second points to the first descendant transition (called the \textbf{child node})
+  and the third stores a pointer to the \textbf{parent} node.
+  The fourth field points to a \textbf{sibling} node.
+  
+  When the chain of sibling nodes gets too big, an hashing scheme is dynamically employed to provide direct
+  access to nodes, optimizing the search of transitions.
+  
+  Each tabled predicate contains a \textit{table entry} that points to a \textit{subgoal trie}.
+  Only the subgoal arguments are stored.
+  Each different call to a tabled predicate corresponds to a unique path through the trie.
+  The leaf points to a data structure called \textit{subgoal frame}. The frame stores
+  information about the subgoal, namely an entry point to its \textit{answer trie}.
+  
+  The answer trie stores answers to the subgoal. When inserting answers only substitutions
+  for the variables in the call are stored. This optimization is called \textit{substitution factoring} \cite{RamakrishnanIV-95}.
+  
+  Figure \ref{fig:table_space_tries} shows the table space after evaluating \textbf{path(X, Z)} (example in Figure \ref{fig:tabling_path}).
+  Subgoals \textbf{path(X, Z)}, \textbf{path(b, Z)} and \textbf{path(a, Z)} are stored in the \textbf{path/2} subgoal trie.
+  Only the answer trie for \textbf{path(a, Z)} is represented. Using substitution factoring only \textbf{Z = b} and \textbf{Z = a}
+  were stored.
+  
+  \subsubsection{Subgoal frames}
+  
+  A subgoal frame contains general information about the state of a tabled subgoal.
+  To access answers, this frames contain a pointer to the root of the answer trie.
+  
+  A chain of answers used by consumers is also kept in the form of head and tail pointers.
+  In XSB, a \textit{answer return list} is built and the consumer has a pointer to the last consumed node of the list.
+  In Yap, answers are chained using the \textbf{child} pointer of the leaf answer nodes. Yap's consumers only keep
+  the last consumed answer leaf. The last consumed answer pointer is an \textit{answer continuation}. Thus, when
+  a consumer needs to verify or consume the next available answer, it uses the continuation to retrieve the next
+  answer, following the chain of answers. To load an answer, the trie nodes are traversed in bottom-up order and the answer is reconstructed.
+  
+  To facilitate memory management, both systems link subgoal frames by storing \textbf{next} and \textbf{previous} pointers in each subgoal frame,
+  forming a double linked list.
+  
+  Information about the current evaluation state of the subgoal is usually kept. Yap has the following states:
+  \textit{ready}, \textit{evaluating}, \textit{complete} and \textit{incomplete}.
+  
+  \subsubsection{Choice Point and Execution}
+  
+  The YapTab design mostly follows XSB's SLG-WAM approach (\cite{Sagonas-96} and \cite{Sagonas-98}).
+  Both introduce the table space,
+  a new set of registers, the \textit{freeze registers}, one per stack (local stack, heap and trail);
+  an extension of the standard trail,
+  called the \textit{forward trail}; and the tabling operations: \textit{tabled subgoal call},
+  \textit{new answer}, \textit{answer resolution}, and \textit{completion}.
+  
+  The set of freeze registers says where stacks are frozen and protect the space belonging to suspended
+  computations until the completion of the appropriate SCC takes place. They need to be adjusted
+  in two different situations: when a computation suspends, increasing the portion of frozen stacks; and when a completion takes place,
+  releasing part of space previously frozen.
+  
+  The forward trail is used to restore all the variable bindings to their state at the time the computation was suspended.
+  Thus, the WAM trail is extended with parent trail entry pointers to create this new trail.
+  Also, a new register is created, the \textbf{TR\_FZ} trail freeze register.
+  
+  The differences between SLG-WAM and YapTab reside in the data structures and algorithms used to control the process of leader detection
+  and the scheduling of unconsumed answers. Each engine is described in the next two sections.
+  
+  \subsubsection{SLG-WAM}
+  
+  The SLG-WAM considers that evaluation control should be done at the level of the data structures
+  corresponding to first calls to tabled subgoals, and does so by associating \textit{completion frames}
+  to generator nodes \cite{Sagonas-98}.
+  
+  The \textit{completion stack} maintains, for each subgoal $S$, a representation of the deepest subgoal
+  $S_{dep}$ upon which $S$ or any subgoal on top of $S$ may depend.
+  
+  When $S$ and all subgoals on top of $S$ have exhausted all program and answer clause resolution,
+  $S$ is checked for completion. If $S$ depends on no subgoals deeper than itself, $S$ and
+  all subgoals on top of $S$ are completely evaluated. Otherwise, if $S_{dep}$ is deepr in the completion
+  stack than $S$, $S$ may depend upon subgoals that appear below it in the completion stack, and cannot be completed \cite{Sagonas-98}.
+  
+  A one-to-one correspondence exist between completion stack frames and generator nodes, as the completion stack frame
+  is pushed onto the stack when a new tabled subgoal is called. A completion frame is popped off when a subgoal is
+  completed. Also, each subgoal frame contains a pointer to completion frame.
+  
+  Consumer and generator choice points are extended to support the suspend and resume mechanism.
+  
+  The generator choice contains the following extra data: an explicit pointer of the failure continuation to take
+  upon backtracking out of the choice point; a cell that records the value of a new global register,
+  called the \textbf{RS} (\textit{root subgoal register}) register,
+  which points to the root subgoal of the node currently under execution;
+  a pointer to the subgoal frame; a set of freeze registers, so that the stored values can be restored later on;
+  and an area called the \textit{substitution factor}, the set of free variables which exist in the terms in the argument registers.
+  
+  The consumer choice point is extended with: a copy of the \textbf{RS} register; a pointer of the failure continuation to take
+  upon backtracking; a substitution factor; the last consumed answer continuation; and a pointer to chain
+  together all consumer choice points of the same subgoal. 
 
+  \subsubsection{YapTab}
+  
+  In YapTab, it is considered that the control of leader detection and scheduling of unconsumed answers should be
+  performed through the data structures corresponding to repeated calls to tabled subgoals, and it associates a new
+  data structure, the \textit{dependency frame}, to consumer nodes \cite{Rocha-03c}.
+  
+  Dependency frames are used to check for completion points and to move across the consumer nodes with unconsumed answers,
+  thus they are linked together, forming the \textit{dependency space}.
+  They reduce the number of extra fields in tabled choice points.
+  
+  Each consumer choice point contains a field that points to the respective dependency frame. Generator choice points
+  have two extra fields: a pointer to the subgoal frame; the substitution factor; and, optionally, a pointer to a dependency frame. This pointer
+  is only used when local scheduling is employed. A generator node for local scheduling only exports its answers to the calling
+  environment when all clauses for the subgoal have been exhausted, hence it must act like a consumer.
+  
+  In SLG-WAM if we want to release space previously frozen, the stored values in the generator choice point are used. In
+  YapTab, as they are not saved there, the top stack values kept in the youngest consumer choice point younger than
+  the current completion point are used.
+  
+  Each dependency frame contains the following fields: the last answer continuation for this consumer called \textbf{try\_answer};
+  a pointer to the consumer choice point (\textbf{cons\_cp}); the \textbf{leader} field which points to the leader node
+  at creation time; and the \textbf{back\_leader} field that changes during evaluation, pointing to the leader node where we
+  performed the last unsuccessful completion operation. 
+  A new global register, called \textbf{TOP\_DF}, always points to the youngest dependency frame.
+  
 \section{Tabling by Call Subsumption} \label{sec:subsumption}
   \subsection{Dynamic Threaded Sequential Automata}
   \subsection{Time Stamped Tries} \label{sec:time_stamped_tries}
-
