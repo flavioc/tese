@@ -218,7 +218,7 @@ edge(b, a).
 \begin{figure}[ht]
   \centering
     \includegraphics[scale=0.5]{infinite_loop.png}
-  \caption{\textbf{path(X, Z)} infinite loop.}
+  \caption{Infinite loop evaluating \textbf{path(X, Z)}.}
   \label{fig:infinite_loop}
 \end{figure}
 
@@ -601,5 +601,119 @@ method will be greatly reduced. This new approach will be throughly explored in 
   A new global register, called \textbf{TOP\_DF}, always points to the youngest dependency frame.
   
 \section{Tabling by Call Subsumption} \label{sec:subsumption}
+
+Although variant based tabling has proven to be greatly beneficial in solving some shortcomings of the SLD resolution,
+other approaches are possible. Tabling by call subsumption aims to reuse answer computations by sharing answers from
+\textit{more general} goals \cite{Johnson-99}.
+
+When a subgoal is first called, a variant engine will lookup in the table space for a variant subgoal, one that is
+identical by renaming the variables. If a subgoal already exists on the subgoal trie, a new consumer is created which
+consumes answers from the variant subgoal.
+
+Although a variant check is a light-weight operation computationally,
+tabling engines using such checks can end up computing answers through program clause resolution, which takes time and space,
+when they could retrieve answers from a subgoal that \textit{subsumes} the new call. By other words, a more specific subgoal
+could consume answers from a general subgoal, which contains the full set of answers for the specific subgoal among the complete set.
+
+Formally, if two subgoals $G$ and $G'$ exist, such that $S$ and $S'$ are the respective answer sets and
+$G'$ subsumes $G$, we can conclude that $S \subseteq S'$.
+
+The effects of using subsumptive checks are greater reuse of computed answers and reduced program clause resolution, yielding
+superior time performance. In terms of space, improvements can be made since fewer calls and their associated answer sets
+need to be preserved \cite{Johnson-99}.
+However, implementing call subsumption poses various challenges:
+
+\begin{itemize}
+  \item Efficiently check for subsuming subgoals in the subgoal trie;
+  \item The design of new mechanisms that represent answers and support fast retrieving of subsets that are only related to a subsumed call;
+  \item Support for incremental retrieving of the answer subset. During evaluation is not possible for a subgoal to
+  contain all answers, as the process of generating answers is incremental.
+\end{itemize}
+
+For illustration purposes, we describe the evaluation of \textbf{?- path(X, Z)} (Figure \ref{fig:tabling_path_sub}) using the program presented in Listing \ref{prolog_path}
+and compare it against the variant approach in Figure \ref{fig:tabling_path}.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{tabling_path_sub.png}
+  \caption{Tabling \textbf{path(X, Z)} using call by subsumption.}
+  \label{fig:tabling_path_sub}
+\end{figure}
+
+At step 1 the subgoal \textbf{path(X, Z)} is called and a new generator node is created as there is no existing subgoals in the table space
+that could be variant or subsuming. Being a generator node, it is evaluated using the program clauses (step 2). The first solution
+for the \textbf{edge(X, Y)} predicate is evaluated using Prolog's standard rules and yields a subgoal call to \textbf{path(b, Z)} (step 3).
+
+In variant tabling the engine would search for a variant subgoal in the table space, thus failing and creating a new generator node,
+meanwhile expanding the execution tree by means of program clause resolution. In subsumptive tabling, the engine searches for a subsuming call,
+and finds \textbf{path(X, Z)}. This subgoal
+is more general than \textbf{path(b, Z)} and contains all the answers need for the subsumed goal.
+A special type of consumer called a \textit{subsumptive consumer} is created. This consumer knows the subsuming subgoal and can retrieve
+the answers that unify with the subsumed call.
+
+As \textbf{path(X, Z)} has no answers and thus, no answers that can be consumed by \textbf{path(b, Z)}, the consumer node is suspended
+and execution backtracks to node 2. The second clause of \textbf{edge/2} is tried and a new tabled subgoal is called: \textbf{path(a, Z)} (step 4).
+Like \textbf{path(b, Z)}, this subgoal is subsumed by \textbf{path(X, Z)}, hence a new subsumptive consumer node is created. Execution suspends
+once again because no answers are available and the engine goes back to node 1 to try the second \textbf{path/2} clause (step 5).
+
+Solutions for \textbf{path(X, Z)} are found in steps 6 and 7, \textbf{X = a, Z = b} and \textbf{X = b, Z = a}, and stored in the answer set
+for this generator node. Execution thus backtracks to node 1 and completion is attempted. Node 1 verifies that node 3 and 4 have
+unconsumed answers and starts by resuming computation at node 3.
+
+Node 3 being a subsumptive consumer looks up in the \textbf{path(X, Z)}
+answer set for answers specific to \textbf{path(b, Z)}, finding one: \textbf{Z = a} (step 8). At this point, the consumer stores the answer
+for later retrieval, so that answers can be immediately consumed when a variant subgoal is called.
+Like variant tabling, the consumer keeps a last consumed answer continuation to know which answers have already been consumed.
+Once the answer is stored, the variable bindings are propagated and a new answer to \textbf{path(X, Z)} is found: \textbf{X = a, Z = a}.
+Node 3 tries to consume a new answer, but no new answers are available for this subgoal.
+
+Execution suspends node 3 and resumes computation at node 4. Here \textbf{path(a, Z)} begins to consume answers from \textbf{path(X, Z)}
+using the subsumption mechanism. The first answer in \textbf{path(X, Z)}, \textbf{X = a, Z = b}, unifies with the subsumed goal and
+is consumed (step 9). By variable propagation, a new answer for \textbf{path(X, Z)} is also generated, \textbf{X = b, Z = b}.
+Node 3 then tries to consume a new answer and finds \textbf{X = a, Z = a} (step 10). This new answer
+is added to the \textbf{path(a, Z)} table space. As the new variable bindings are propagated, a new answer is also generated
+for top subgoal, but the answer is repeated (\textbf{X = b, Z = a}), hence is not inserted into the table space.
+
+As each consumer uses the available answers, execution backtracks to the leader node, \textbf{path(X, Z)}, that will once
+again attempt completion. By using the last consumed answer continuation, it is verified that node 3 has unconsumed answers.
+Execution thus resumes at node 3.
+
+Node 3 inspects \textbf{path(X, Z)} answer set and consumes the next matching answer, \textbf{X = b, Z = b} (step 11). A new answer
+for \textbf{path(b, Z)} is generated and variable bindings are propagated to the leader node. The new answer is already
+stored in the table space and it is not used.
+
+Once again, evaluation returns to the leader node and completion is attained (step 12) as each consumer has exhausted the
+available answers.
+
+This evaluation example, when compared to variant tabling, shows a smaller execution tree with less
+program clauses expanded. The subsumptive computation also took less steps to complete and a greater
+reuse of answers was done between \textbf{path(X, Z)}, \textbf{path(b, Z)} and \textbf{path(a, Z)}.
+
+Although this example shows a very good performance of this method of evaluation, if we tried
+to evaluate \textbf{path(a, Z)} and then \textbf{path(X, Z)}, no reuse could be done with \textbf{path(a, Z)}
+because not previous subsuming goal was present. The more general subgoals are called first, the greater
+the reuse in call subsumption.
+
+Like variant tabling, the same four main operations are used when evaluating subsumptive subgoals.
+These operations are very similar, with a few differences. Operations \textit{new answer} and
+\textit{completion} remain the same, while the \textit{tabled subgoal call} and \textit{answer resolution}
+work differently:
+
+\begin{itemize}
+  \item The \textit{tabled subgoal call} operation represents a call to a tabled subgoal.
+  If the subgoal $c$ is called, a search for a subsuming subgoal $c'$ is done. If such subgoal is found,
+  the new subgoal will be resolved using \textit{answer clause resolution}, thus consuming answers from the subgoal $c'$.
+  If no subgoal $c'$ is found, then $c$ is inserted into the table space and the new generator node is evaluated using
+  program clause resolution.
+  
+  \item The \textit{answer resolution} operation checks wether new answers from the table space are available for consumption.
+  Each subsumptive consumer node uses an answer continuation that represents
+  the set of remaining answers to be consumed. Given an answer continuation we inspect the answer trie from the subsuming subgoal
+  and retrieve the next answer $T$ that matches with the subsumed goal. Once the answer is retrieved and loaded, the answer
+  continuation is updated to reflect the new answer consumed.
+\end{itemize}
+
+The next sections describe two known techniques that implement subsumptive tabling. These two approaches were all implemented in XSB.
+
   \subsection{Dynamic Threaded Sequential Automata}
   \subsection{Time Stamped Tries} \label{sec:time_stamped_tries}
