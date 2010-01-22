@@ -715,5 +715,107 @@ work differently:
 
 The next sections describe two known techniques that implement subsumptive tabling. These two approaches were all implemented in XSB.
 
-  \subsection{Dynamic Threaded Sequential Automata}
+  \subsection{Dynamic Threaded Sequential Automata}\label{sec:dtsa}
+
+  DTSA (\textit{Dynamic Threaded Sequential Automata}) is a data structure that facilitates good indexing and incremental
+  returning of a subset of answers from a subsuming call to a subsumed call \cite{Rao-96}.
+  
+  This structure orders answers as they are generated, hence it can easily mark which answers were already retrieved, enabling
+  efficient retrieval of the remaining answers.
+  
+  A DTSA is based on a \textit{Sequential Factoring Automaton} (SFA) but has a few more features for dealing with fast indexing
+  and incremental retrieving of answers. SFA were introduced by S. Dawson et all in \cite{Dawnson-95}. 
+  
+  \subsubsection{Basic search: Sequential Factoring Automaton}
+  
+  A SFA solves the problem of retrieving an ordered subset of answers, starting from the oldest to the newest answer. It is an ordered
+  tree-structure automaton and very similar to a trie. It starts with a root as the start state and has edges as transitions
+  that represent unifications. Every leaf represents a distinct term and the transitions on the path from the root to a leaf
+  represent the operations necessary to unify the goal with the term at the leaf.
+  
+  Apart from ordering, SFAs differ from tries in that transitions from a state may not be unique and each transition in a tree
+  denotes match operations, not unify operations.
+  
+  \begin{figure}[ht]
+    \centering
+      \includegraphics[scale=0.6]{sfa.png}
+    \caption{Inserting answer terms in a SFA.}
+    \label{fig:sfa_example}
+  \end{figure}
+  
+  To insert a new term into a SFA, we must start by inserting symbols from the answer term into the root state.
+  In each state we verify if the last transition $s$ matches the current term symbol $t$. If $t$ matches $s$
+  we take the transition and advance to the next state; if not, a new transition for $t$ is created and we advance
+  to the newly created state. When all term symbols $t$ are exhausted, the current state is marked as a leaf,
+  representing a new answer.
+  
+  Figure \ref{fig:sfa_example} represents a SFA for the subgoal \textbf{p(X, Y, Z)} and
+  illustrates a few phases in the lifetime of a SFA:
+  
+  \begin{enumerate}[(a)]
+    \item Answers \textbf{p(a, a, a)}, \textbf{p(b, a, W)} and \textbf{p(a, a, c)} are currently stored.
+    \item Answer \textbf{p(a, b, b)} is inserted.
+    \item New answer: \textbf{p(a, a, d)}.
+  \end{enumerate}
+  
+  When searching new answers for a subsumed subgoal $G$, the structure of $G$ is progressively consumed and its variables
+  are instantiated as new transitions are taken.
+  
+  The process of retrieving all specific answers starts in the root state with an empty \textit{continuation stack}.
+  When a state $s$ is reached, the leftmost \textit{applicable transition} is chosen. Before moving to the next state,
+  we select the next applicable transition and push it on the continuation stack.
+  If no applicable transitions are available at state $s$ or if an answer was found, we pop a transition from
+  the stack and use it to search for more answers. Once no more transitions can be taken and the stack is empty, the
+  search process ends.
+  
+  Using the SFA in Figure \ref{fig:sfa_example} and the subgoal $G$, \textbf{p(a, a, V)}, the search mechanism starts
+  at the root state and is ready to retrieve all answers that unify with $G$.
+  The first applicable transition is $s1$ to $s2$ because it unifies with the first $G$ symbol. The transition
+  $s1$ to $s5$ can not be pushed into the continuation stack because it does not unify, but $s1$ to $s8$ can.
+  In state $s2$ only one transition is available, thus nothing is pushed into the stack.
+  Transition $s2$ to $s3$ unifies with our subgoal and it is taken. In the state $s3$, the variable $V$ can unify with $a$,
+  thus we can take get to state $s4$, arriving at a leaf state and a new answer, \textbf{V = a}.
+  
+  Next, the process must use the continuation stack to retrieve more answers. Transition $s1$ to $s8$ is popped from the stack
+  and the process arrives at state $s8$ with 3 available transitions. Using the same mechanisms, a new answer is retrieved,
+  \textbf{V = c} and the continuation stack contains the transition $s8$ to $s13$.
+  
+  Finally, once states $s8$, $s11$ and $s14$ are visited, the process arrives at a leaf state and a new answer, \textbf{V = d}, is retrieved.
+  The process finishes and every answer that is specific to \textbf{p(a, a, V)} is found.
+  
+  \subsubsection{Indexing: Threaded Sequential Automata}
+  
+  A \textit{Threaded Sequential Automata} extends the SFA with a concept called
+  \textit{equivalent states}. One state $s1$ is equivalent to state $s2$ if when $s1$ is taken, $s2$ is also
+  guaranteed to be visited. For example, in Figure \ref{fig:sfa_example}, whenever states $s2$ and $s8$ are
+  visited, states $s8$ and $s9$ are also guaranteed to be visited, as they denote the same path.
+  
+  A SFA is converted to a TSA by adding \textit{equivalence links} between equivalent states.
+  The SFA in Figure \ref{fig:sfa_example} was transformed into a TSA as seen in Figure \ref{fig:tsa_example}.
+  
+  \begin{figure}[ht]
+    \centering
+      \includegraphics[scale=0.6]{tsa.png}
+    \caption{SFA transformed into a TSA}
+    \label{fig:tsa_example}
+  \end{figure}
+  
+  In the TSA, the concept of applicable transitions is changed. Now it is also possible to push equivalence links
+  into the continuation stack as if they were normal transitions. So, if we were at state $s3$ we use
+  the transition to $s9$ and then to $s13$ instead of going from the start state.
+  
+  Although equivalence links provide an efficient indexing mechanism, they must be used with care. If not,
+  some situations arise where following equivalence links lead to repeated answers and answers in the incorrect order \cite{Rao-96}.
+  The selection of transitions must consider only \textit{safe transitions}, which reach answers that cannot be reached through the pending
+  transitions on the stack.
+  So, if the process is at state $s2$ and the transition $s1$ to $s8$ is already on the
+  stack, we can not use the equivalence link $s2$ to $s8$, as the transition $s1$ to $s8$ already covers the same branch.
+  
+  If we followed only safe transitions, no equivalence links would be used, hence we must check if there is any
+  equivalence link that can be used in the next state that covers the same answers if we pushed the
+  usual transition into the stack. Thus, at state $s2$ we would use the equivalence $s2$ to $s8$, instead of
+  the transition $s1$ to $s8$.
+   
+  \subsubsection{Incremental answer retrieval: Dynamic Threaded Sequential Automata}
+  
   \subsection{Time Stamped Tries} \label{sec:time_stamped_tries}
