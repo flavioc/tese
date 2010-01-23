@@ -865,4 +865,112 @@ The next sections describe two known techniques that implement subsumptive tabli
   This answer list is used when variant goals of the subsumed goal are called, thus instead of using
   the DTSA, can retrieve answers directly by traversing the linked list.
   
-  \subsection{Time Stamped Tries} \label{sec:time_stamped_tries}
+\subsection{Time Stamped Tries} \label{sec:time_stamped_tries}
+
+  \textit{Time Stamped Tries} (TST) is another mechanism that was implemented in XSB
+  to support tabling by call subsumption \cite{Johnson-99}.
+  
+  TST is a relatively simple technique based around the idea of augmenting a trie with information about the relative time
+  its terms were inserted. The time of insertion of each term is called its time stamp and is represented by a
+  positive integer. The time stamps are then used for incremental answer retrieval.
+  
+  \begin{figure}[ht]
+    \centering
+      \includegraphics[scale=0.6]{tst_1.png}
+    \caption{Time Stamped Trie for subgoal \textbf{p(X, Y, Z)}.}
+    \label{fig:tst_1}
+  \end{figure}
+  
+  For each node in a trie, we extend it by including a time stamp. Along the augmented trie, the maximum time stamp
+  $T$ is also stored, thus allowing the insert mechanism to know the next time stamp to use for new trie paths.
+  An example TST for the subgoal \textbf{p(X, Y, Z)} is represented in Figure \ref{fig:tst_1}.
+  By looking at the leaf nodes, the order of answer insertion
+  can be readily known: \textbf{p(a, a, a)}, \textbf{p(b, a, VAR0)}, \textbf{p(a, a, c)}, \textbf{p(a, b, b)} and then
+  \textbf{p(a, a, d)}.
+  
+  \subsubsection{New answers}
+  
+  The process of inserting a new answer into a TST starts by traversing matching nodes as long the stored symbols
+  match the new answer. If the current symbol does not match, the process changes from search to insert mode and
+  new nodes are inserted to represent a new trie path. Once the leaf node is created each node from leaf to root
+  is traversed and its time stamp is updated to $T + 1$.
+  
+  \begin{figure}[ht]
+    \centering
+      \includegraphics[scale=0.6]{tst_2.png}
+    \caption{Time Stamped Trie from Figure \ref{fig:tst_1} after inserting the answer \textbf{p(a, b, c)}.}
+    \label{fig:tst_2}
+  \end{figure}
+  
+  Figure \ref{fig:tst_2} shows the TST from Figure \ref{fig:tst_1} after a new answer \textbf{p(a, b, c)} was inserted.
+  Note that each node from the answer leaf node to root node was updated with the new timestamp (6). Apart from
+  the time stamps, search and insertion in TSTs work exactly like in tries.
+  
+  \subsubsection{Retrieving answers}
+  
+  Retrieving all answers that are specific to a subsumed subgoal $G$ from a TST with answers from subgoal $G'$
+  works by navigating the TST and unifying the variable values that are assigned from $G'$ to $G$.
+  If we wanted to retrieve answers to the subgoal \textbf{p(a, a, X)} from the TST in Figure \ref{fig:tst_2},
+  during the subgoal call we determine the assignments relatively to \textbf{path(X, Y, Z)}: $X = a, Y = a, Z = VAR0$,
+  and store them under the choice point.
+  
+  Like tries, TSTs only store substitutions for variables, thus we must unify
+  the first sub-term $a$, then $a$ again and then the variable, which unifies with any symbol.
+  During the unification process, if a variable appears multiple times, it must unify with
+  any previous sub-term assignment.
+  
+  Time stamps guide the answer unification process by filtering transitions to already explored branches, where
+  answers were already retrieved, thus avoiding repeated answers.
+  
+  The unification process that finds new answers by using a time stamp is separated from the process
+  of unifying the found answers with the subsumed subgoal. This \textit{two-tier mechanism} is key to the space and time
+  efficiency of the design of TSTs \cite{Johnson-99} and allows identification of all relevant answers that have
+  been added since the last time a search operation was done by using the time stamp.
+  
+  \subsubsection{Table Space}
+
+  The table space in this technique extends the variant table space by
+  using TSTs instead of tries for subsuming goals.
+   
+  Each subsumed subgoal in a call trie stores the last search time stamp $t$. The process of
+  incrementally searching for new answers in a TST will use $t$ and update it after the process completes.
+  When a subsumptive subgoal is first called $t$ is set to $0$, thus initially allowing the retrieval of all
+  relevant answers.
+  
+  The subgoal in the call trie also stores an answer return list. Each time new answers are identified, they are appended
+  to this linked list. Each subsumptive consumer node will then consume answers from it. If no
+  new answers can be retrieved from the list, the TST process is employed to identify more answers from the subsuming TST,
+  inserting them into the list.
+  
+  Each trie node maintains a time stamp index which stores all transitions in reverse order.
+  It is not until a subsumed subgoal is first called that all time stamp related structures are created, thus
+  allowing a more efficient use of space.
+  
+  Like DTSAs, the TST indexing mechanism is only used in incomplete subsuming calls, for complete calls
+  the more specific goals all use compiled trie instructions, and unification is performed naturally at
+  the WAM engine level.
+  
+  The biggest advantage of using TSTs instead of DTSA is in terms of space complexity. In TSTs, the maximum table space
+  used is at most twice that of the variant engine. For DTSAs, the space used is at least double, but in the worst
+  case can be quadratic. DTSA is at advantage in terms of speed, because it supports identification of answers and
+  unification in one step, thus answers can share some elementary unifications. In TSTs, identifying answers
+  and doing answer unification is a two step process, thus it takes more time to construct all answers. 
+
+\subsection{Finding subsuming goals}
+
+Both DTSA and TST use a similar method that given a call trie $C$ and a subgoal $G$
+is able to find a subgoal $G'$ that subsumes $G$.
+
+The search is performed by recursively backtracking through the call trie $C$, trying
+to match the node symbols with sub-terms or symbols from $G$.
+
+A non-variable trie symbol can match only with an identical symbol from $G$. If it is
+a variable $X$, on the first occurrence $X$ is bound to the respective $G$ sub-term
+and match succeeds; on the next occurrences of $X$, the current sub-term from $G$ must
+be identical to the term bound to $X$. Through the backtracking process, bound variables are
+always tried first before unbound variables.
+
+Favoring constant values before variables, results in a mechanism that finds \textit{minimally subsuming calls}.
+Also, if there is some variant call $G''$ in $C$, $G''$ is found before any other subgoal. If no variant 
+or no subsuming call are found, it is possible to save the last trie node where the first backtracking occurred
+to insert a new variant call.
