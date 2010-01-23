@@ -726,7 +726,7 @@ The next sections describe two known techniques that implement subsumptive tabli
   A DTSA is based on a \textit{Sequential Factoring Automaton} (SFA) but has a few more features for dealing with fast indexing
   and incremental retrieving of answers. SFA were introduced by S. Dawson et all in \cite{Dawnson-95}. 
   
-  \subsubsection{Basic search: Sequential Factoring Automaton}
+  \subsubsection{Sequential Factoring Automaton: Basic search}
   
   A SFA solves the problem of retrieving an ordered subset of answers, starting from the oldest to the newest answer. It is an ordered
   tree-structure automaton and very similar to a trie. It starts with a root as the start state and has edges as transitions
@@ -783,7 +783,7 @@ The next sections describe two known techniques that implement subsumptive tabli
   Finally, once states $s8$, $s11$ and $s14$ are visited, the process arrives at a leaf state and a new answer, \textbf{V = d}, is retrieved.
   The process finishes and every answer that is specific to \textbf{p(a, a, V)} is found.
   
-  \subsubsection{Indexing: Threaded Sequential Automata}
+  \subsubsection{Threaded Sequential Automata: Indexing}
   
   A \textit{Threaded Sequential Automata} extends the SFA with a concept called
   \textit{equivalent states}. One state $s1$ is equivalent to state $s2$ if when $s1$ is taken, $s2$ is also
@@ -815,7 +815,54 @@ The next sections describe two known techniques that implement subsumptive tabli
   equivalence link that can be used in the next state that covers the same answers if we pushed the
   usual transition into the stack. Thus, at state $s2$ we would use the equivalence $s2$ to $s8$, instead of
   the transition $s1$ to $s8$.
+  
+  \begin{figure}[ht]
+    \centering
+      \includegraphics[scale=0.6]{dtsa.png}
+    \caption{DTSA before and after inserting answer \textbf{p(a, b, c)}}
+    \label{fig:dtsa_example}
+  \end{figure}
    
-  \subsubsection{Incremental answer retrieval: Dynamic Threaded Sequential Automata}
+  \subsubsection{Dynamic Threaded Sequential Automata: Incremental answer retrieval}
+  
+  The previous mechanisms only works if we have the complete set of answers for the subsuming subgoal.
+  A new mechanism that deals with incomplete answer sets must be devised, so that after all current answers
+  are retrieved, the continuation stack can be used to retrieve newly inserted answers.
+  
+  The Dynamic Threaded Sequential Automata extends the TSA with special transitions in states
+  were new transitions can be inserted or in states were no equivalence links exist.
+  Figure \ref{fig:dtsa_example} shows two DTSAs: (a) shows the converted TSA from Figure \ref{fig:tsa_example}, and
+  (b) the resulting DTSA after inserting the answer \textbf{p(a, b, c)}.
+  
+  During answer retrieval, if no answer is found and the top of the continuation stack contains
+  a transition to a special state, the process stops and the continuation stack is saved along the last state
+  visited.
+  Later on, when new answers must be retrieved, the last state is used to transform the stack to account for new states that
+  were introduced during the insertion of new terms. If the new stack contains a valid transition, it
+  can now be used as usual.
+  
+  For example, retrieving answers to subgoal \textbf{p(a, X, c)} from the DTSA (a) in Figure
+  \ref{fig:dtsa_example} results in the answer \textbf{p(a, a, c)} and a continuation formed by the last
+  visited state $s13$ and the stack containing (from bottom to top): $[s1 \rightarrow v1, s8 \rightarrow v8, s13 \rightarrow v13]$.
+  When the new answer \textbf{p(a, b, c)} is inserted into the DTSA in Figure \ref{fig:dtsa_example} and
+  the consumer for the subgoal \textbf{p(a, X, c)} checks if new answers are available, the continuation stack
+  is transformed by using the last visited state $s13$: $[s1 \rightarrow v1, s8 \rightarrow s15]$. Now
+  the answer \textbf{p(a, b, c)} can be easily retrieved using the transition from state $s8$ to $s15$.
+  
+  \subsubsection{Table Space}
+  
+  This new DTSA mechanism was implemented in XSB by extending the variant engine \cite{Rao-96}.
+  
+  First, each subgoal frame for generator nodes now contains both an answer trie and a DTSA.
+  Answer tries are used to check for duplicate answers. DTSA are created lazily, when new subsumed nodes
+  are generated.
+  
+  When a subgoal is marked as complete, the trie is compiled into WAM instructions and the DTSA is deleted.
+  Answers for subsumed goals are then retrieved by using trie instructions through the usual WAM backtracking
+  mechanism.
+  
+  Each subsumed subgoal in the call trie keeps an answer return list that is built using the DTSA technique.
+  This answer list is used when variant goals of the subsumed goal are called, thus instead of using
+  the DTSA, can retrieve answers directly by traversing the linked list.
   
   \subsection{Time Stamped Tries} \label{sec:time_stamped_tries}
