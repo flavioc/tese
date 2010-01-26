@@ -387,7 +387,7 @@ method will be greatly reduced. This new approach will be throughly explored in 
   stream I/O, sockets, modules, exceptions, debugging, a C-interface, dynamic code, internal database, DCGs, saved states, co-routining, arrays and threads.
   It is based on the WAM and follows the Edinburgh tradition. Most of the ISO-Prolog standard is implemented.
   
-  Tabling in Yap is implemented through the YapTab sub-system \cite{Rocha-03c}, a delaying based tabling engine supporting evaluation of
+  Tabling in Yap is implemented through the YapTab sub-system \cite{Rocha-00a}, a delaying based tabling engine supporting evaluation of
   definite programs. YapTab follows the seminal SLG-WAM (Linear resolution with Selection function for General logic programs in WAM)
   design from XSB Prolog,
   but it innovates by proposing a new fix-point check algorithm, and by considering that the control of fix-point detection should be
@@ -427,7 +427,7 @@ method will be greatly reduced. This new approach will be throughly explored in 
   \subsubsection{Tries}
   
   Clearly, the success of tabling is highly dependent on the data structures used.
-  Both Yap \cite{Rocha-03c} and XSB \cite{RamakrishnanIV-95} use a trie-based tabling approach.
+  Both Yap \cite{Rocha-00a} and XSB \cite{RamakrishnanIV-95} use a trie-based tabling approach.
   
   Tries were initially proposed to index dictionaries \cite{Fredkin-62} and have since been generalized to index recursive data structures
   such as terms. The essential idea underlying a tabling trie is to partition a set $T$ of terms based upon their structure,
@@ -579,7 +579,7 @@ method will be greatly reduced. This new approach will be throughly explored in 
   
   In YapTab, it is considered that the control of leader detection and scheduling of unconsumed answers should be
   performed through the data structures corresponding to repeated calls to tabled subgoals, and it associates a new
-  data structure, the \textit{dependency frame}, to consumer nodes \cite{Rocha-03c}.
+  data structure, the \textit{dependency frame}, to consumer nodes \cite{Rocha-00a}.
   
   Dependency frames are used to check for completion points and to move across the consumer nodes with unconsumed answers,
   thus they are linked together, forming the \textit{dependency space}.
@@ -982,6 +982,9 @@ always tried before unbound variables.
 
 Favoring constant values before variables, results in a mechanism that finds \textit{minimally subsuming calls}.
 Also, if there is some variant call $G''$ in $C$, $G''$ is found before any other subgoal. If no variant 
-or no subsuming call are found, it is possible to save the last trie node where the first backtracking occurred
-to insert a new variant call. The new variant path is then used to keep information about the subsumed goal state in
+or no subsuming call are found, it is possible to save the trie node to insert a new variant call.
+This trie node is where the first backtracking occurred or when the first occurrence of
+an already seen $G$ variable that could not be paired to a bound trie variable, and instead
+must be bound to an unbound trie variable for the process to continue.
+The new variant path is then used to keep information about the subsumed goal state in
 the leaf call trie node.
