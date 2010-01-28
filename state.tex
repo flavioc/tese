@@ -253,7 +253,7 @@ Note that we apply to \texttt{path/2} the \texttt{table} directive to use tablin
 
 Tabled evaluation starts by inserting a new entry in the table space and by allocating a generator
 node to represent \texttt{path(X,Z)} (step 1). Like SLD, \texttt{path(X,Z)} is resolved against the first \texttt{path/2} clause (step 2).
-The goal \texttt{edge(X,Y)} is not tabled and is resolved as usual. We use the first \texttt{edge/2} clause with $X = a, Z = b$
+The goal \texttt{edge(X,Y)} is not tabled and is resolved as usual. We use the first \texttt{edge/2} clause with \texttt{X = a, Z = b}
 and these values are carried to \texttt{path(b,Z)} (step 3). This goal is not yet in the table space, hence we add a new entry for it.
 
 Goal \texttt{path(b,Z)} is then resolved against the first clause of \texttt{path/2} (step 4). \texttt{edge(b,Y)}
@@ -268,7 +268,7 @@ node 6 to try the second clause of \texttt{path/2} (step 10). Here \texttt{edge(
 and the solution $Z = b$ is found for the subgoal \texttt{path(a,Z)}. This solution is stored in the table space and forward
 execution, propagating the binding $Z = b$ to \texttt{path(b,Z)} (step 12) and the first solution to this subgoal is found and stored.
 We continue forward execution and the binding is once again propagated, this time to node 3 (step 13) and we find a solution to
-\texttt{path(X,Z)}, $X = a, Z = b$.
+\texttt{path(X,Z)}, \texttt{$X = a, Z = b$}.
 
 \begin{figure}[ht]
   \centering
@@ -285,7 +285,7 @@ thus we backtrack node 3.
 At node 3 the second clause of \texttt{path/2} is tried (step 15): the first clause of \texttt{edge/2} fails (step 16),
 but the second succeeds (step 17), culminating in
 a new answer for \texttt{path(b,Z)}, $Z = a$, which is stored. We propagate variable bindings in step 18, generating a new answer
-to subgoal \texttt{path(X,Z)}, $X = a, Z = a$.
+to subgoal \texttt{path(X,Z)}, \texttt{X = a, Z = a}.
 
 We go back to node 3, where no more clauses are available, but completion can be attempted safely because every consumer in lower
 branches does not depend on any generator node older than 3. Node 3 is called, by definition, a \textit{leader node} and the branch of nodes
@@ -335,7 +335,7 @@ From the described example we can summarize four main operations needed to suppo
   can use the set $S$ without the need to suspend.
 \end{itemize}
 
-\subsection{\textit{Scheduling} Strategies}
+\subsection{Scheduling Strategies}
 
 During evaluation of the previous example it is very clear that at several points we can choose between
 different \textit{scheduling} strategies: continue forward execution, backtrack to interior nodes,
