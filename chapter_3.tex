@@ -101,7 +101,7 @@ are stored.
 \subsection{Subgoal Frames}
 
 A subgoal frame contains general information about the state of a tabled subgoal.
-To access answers, this frames contain a pointer to the root of the answer trie.
+To access answers, this frame contains a pointer to the root of the answer trie.
 
 A chain of answers used by consumers is also kept in the form of head and tail pointers.
 In XSB, a \textit{answer return list} is built and the consumer has a pointer to the last consumed node of the list.
@@ -164,7 +164,7 @@ for the \texttt{edge(X,Y)} predicate is evaluated using Prolog's standard rules 
 In variant tabling the engine would search for a variant subgoal in the table space, thus failing and creating a new generator node,
 meanwhile expanding the execution tree by means of program clause resolution. In subsumptive tabling, the engine searches for a subsuming call,
 and finds \texttt{path(X,Z)}. This subgoal
-is more general than \texttt{path(b,Z)} and contains all the answers need for the subsumed goal.
+is more general than \texttt{path(b,Z)} and contains all the answers needed for the subsumed goal.
 A special type of consumer called a \textit{subsumptive consumer} is created. This consumer knows the subsuming subgoal and can retrieve
 the answers that unify with the subsumed call.
 
@@ -516,7 +516,7 @@ should find the variant subgoal represented by the leaf node $n3$. First, we uni
 because if the same variable appears again it must unify with the same trie variable for a variant path
 to exist. Next, \texttt{2} easily unifies with trie node $n2$ and unification proceeds. In trie node $n3$,
 the current call term is \texttt{X} and we also have a variable in the trie node. As \texttt{X} was already seen before,
-it must unify with \textit{VAR0} again, it does and a variant path is found. Please note that if
+it must unify with \texttt{VAR0} again, it does and a variant path is found. Please note that if
 the trie symbol at node $n3$ was \texttt{VAR1}, the process could proceed but a variant path would be impossible
 to exist, and a subsuming subgoal would be found, as \texttt{p(VAR0,2,VAR1)} subsumes \texttt{path(VAR0,2,VAR0)}.
 In this case, a variant path could created by resuming the trie insert operation at node $n2$ to insert

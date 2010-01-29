@@ -266,7 +266,7 @@ the current evaluation point is \textit{suspended}. Later on, this node can be r
 Next, we backtrack to node 7 and try the second \texttt{edge/2} clause, but resolution fails (step 9). We backtrack again, this time to
 node 6 to try the second clause of \texttt{path/2} (step 10). Here \texttt{edge(a, Z)} is resolved against the first clause of \texttt{edge/2}
 and the solution $Z = b$ is found for the subgoal \texttt{path(a,Z)}. This solution is stored in the table space and forward
-execution, propagating the binding $Z = b$ to \texttt{path(b,Z)} (step 12) and the first solution to this subgoal is found and stored.
+execution is made, propagating the binding $Z = b$ to \texttt{path(b,Z)} (step 12) and the first solution to this subgoal is found and stored.
 We continue forward execution and the binding is once again propagated, this time to node 3 (step 13) and we find a solution to
 \texttt{path(X,Z)}, \texttt{$X = a, Z = b$}.
 
