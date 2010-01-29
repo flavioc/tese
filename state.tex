@@ -1,9 +1,9 @@
 
 The purpose of this chapter is to give an overview of the research areas
 involved in this dissertation. First we explain the fundamental ideas of logic
-programming and Prolog; next, tabling by call variance is described, focusing on
-the execution strategy and data structures; finally, tabling by call subsumption
-and related strategies like \textit{time stamped tries} are explained.
+programming and Prolog; next, the main concepts behind tabling evaluation are described,
+focusing on the execution rules and strategies; finally, we introduce
+the Yap and XSB Prolog systems, concentrating on the tabling engines designed for both systems.
 
 \section{Logic Programming}
 
@@ -421,11 +421,9 @@ method will be greatly reduced. This new approach will be throughly explored in 
   Tabling by call-subsumption was initially implemented by a technique called
   \textit{Dynamic Threaded Sequential Automata} \cite{Rao-96} and is currently
   implemented using \textit{Time Stamped Tries} \cite{Johnson-99}.
-  
-  \subsection{Choice Point and Execution}
 
-  Both YapTab and SLG-WAM introduce the table space,
-  a new set of registers, the \textit{freeze registers}, one per stack (local stack, heap and trail);
+  In terms of design, both YapTab and SLG-WAM introduce the following extensions to the traditional WAM machine:
+  the table space; a new set of registers, the \textit{freeze registers}, one per stack (local stack, heap and trail);
   an extension of the standard trail,
   called the \textit{forward trail}; and the tabling operations: \textit{tabled subgoal call},
   \textit{new answer}, \textit{answer resolution}, and \textit{completion}.
@@ -461,7 +459,6 @@ method will be greatly reduced. This new approach will be throughly explored in 
   completed. Also, each subgoal frame contains a pointer to completion frame.
 
   Consumer and generator choice points are extended to support the suspend and resume mechanism.
-
   The generator choice contains the following extra data: an explicit pointer of the failure continuation to take
   upon backtracking out of the choice point; a cell that records the value of a new global register,
   called the \textbf{RS} (\textit{root subgoal register}) register,

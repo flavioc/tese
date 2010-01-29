@@ -1,6 +1,6 @@
 
 In this chapter, the table space organization for both variant and subsumption tabling engines are described.
-First, the table space used to support call by variance for both SLG-WAM and YapTab is explained. Because
+First, the variant table space for both SLG-WAM and YapTab is explained. Because
 they share a lot of similarities, the description covers the common ground between the two systems.
 Next, we explore two known mechanisms that
 modify the previous table space for call by subsumption. Those two mechanisms have already been implemented in XSB
@@ -326,7 +326,7 @@ some situations arise where following equivalence links lead to repeated answers
 The selection of transitions must consider only \textit{safe transitions}, which reach answers that cannot be reached through the pending
 transitions on the stack.
 So, if the process is at state $s2$ and the transition $s1$ to $s8$ is already on the
-stack, we can not use the equivalence link $s2$ to $s8$, as the transition $s1$ to $s8$ already covers the same branch.
+stack, we can not use the equivalence link $s2 \rightarrow s8$, as the transition $s1$ to $s8$ already covers the same branch.
 
 If we followed only safe transitions, no equivalence links would be used, hence we must check if there is any
 equivalence link that can be used in the next state that covers the same answers if we pushed the
