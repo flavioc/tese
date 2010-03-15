@@ -1,0 +1,313 @@
+In this chapter, we throughly describe the Time Stamped Tries approach
+to implement a subsumptive tabling engine. This mechanism was proposed by
+Ernie Johnson \textit{et al} \cite{Johnson-99} and is currently implemented in XSB.
+It is based on the idea of extending each answer trie node with \textit{timestamp}
+information as a means to identify new answers from old answers.
+
+First, we start by describing the algorithms and data structures associated
+with the detection of subsuming goals. Next, we explain the data structures
+introduced in the answer tries to support subsumption, focusing on answer insertion
+and retrieval for subsumed subgoals. Then, we describe the modifications made in the YapTab
+tabling engine to support subsumptive tabling. Finally, we compare the performance of
+the subsumptive YapTab against XSB, and the variant counterparts.
+
+\section{Finding subsuming goals}
+
+Both DTSA and TSTs use a similar method that given a call trie $C$ and a subgoal $G$
+is able to find a subgoal $G'$ that subsumes $G$.
+
+The search is performed by recursively backtracking through the call trie $C$, trying
+to match the node symbols with sub-terms or symbols from $G$. The process stops
+once a leaf node is reached successfully.
+
+A non-variable symbol from $G$ must only match with an identical symbol from $C$ and
+these types of unifications are always tried first.
+If the current trie symbol is a variable, for example \texttt{X}, on the first occurrence \texttt{X}
+is bound to the respective $G$ sub-term
+and match succeeds; on the next occurrences of \texttt{X}, the current sub-term from $G$ must
+be identical to the term bound to \texttt{X}. Throughout the backtracking process, bound variables are
+always tried before unbound variables.
+
+Favoring constant values before variables, results in a mechanism that finds \textit{minimally subsuming calls}.
+Also, if there is some variant call $G''$ in $C$, $G''$ is found before any other subgoal. If no variant 
+or no subsuming call are found, it is possible to save the trie node to insert a new variant call.
+This trie node is where the first backtracking occurred or when the first occurrence of
+an already seen $G$ variable that could not be paired to a bound trie variable, and instead
+must be bound to an unbound trie variable for the process to continue.
+The new variant path is then used to keep information about the subsumed goal state in
+the leaf call trie node.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{sub_call_search.pdf}
+  \caption{Call trie for predicate \texttt{p/3}.}
+  \label{fig:sub_call_search}
+\end{figure}
+
+For illustration purposes, the Figure \ref{fig:sub_call_search} represents a call trie for the predicate \texttt{p/3}.
+The first subgoal called was \texttt{p(X,2,X)}, followed by \texttt{p(X,f(Y),a(Z))} and finally \texttt{p(X,Y,Z)}.
+
+If the subgoal \texttt{p(X,2,X)} is called once again, the algorithm described above
+should find the variant subgoal represented by the leaf node $n3$. First, we unify the trie variable
+\texttt{VAR0} with \texttt{X} (node $n1$), hence we must also mark the \texttt{X} variable as \textit{seen},
+because if the same variable appears again it must unify with the same trie variable for a variant path
+to exist. Next, \texttt{2} easily unifies with trie node $n2$ and unification proceeds. In trie node $n3$,
+the current call term is \texttt{X} and we also have a variable in the trie node. As \texttt{X} was already seen before,
+it must unify with \texttt{VAR0} again, it does and a variant path is found. Please note that if
+the trie symbol at node $n3$ was \texttt{VAR1}, the process could proceed but a variant path would be impossible
+to exist, and a subsuming subgoal would be found, as \texttt{p(VAR0,2,VAR1)} subsumes \texttt{path(VAR0,2,VAR0)}.
+In this case, a variant path could be created by resuming the insert operation at node $n2$ to insert
+a \texttt{VAR0} node.
+
+For a more complex example, the subgoal \texttt{p(2,f(X),a(2))} is now called for the same call trie. First,
+the algorithm tries to find a trie node with the symbol \texttt{2}, it does not and a variant path
+can not be possibly found in this call trie. Next, the algorithm tries to unify with bound variables, but as the process
+has just started, only unbound variables can be found and \texttt{VAR0} is unified with \texttt{2} (node $n1$).
+The functor term \texttt{f/1} is the next symbol on the subgoal and the first trie node that must be tried is $n4$,
+because it contains a non-variable symbol. The next term is \texttt{X} and it can unify with \texttt{VAR1} (node $n5$).
+Next, the term symbol \texttt{a/1} matches with trie node $n6$ and the process proceeds. Note that if we failed
+at this point, the process would backtrack to node $n2$ and node $n8$ would be tried next, which would
+lead to a more general subgoal. Back to node $n6$, the last term symbol \texttt{2} can match with node $n7$, as it is the only trie
+node available and it is an unbound variable. If the variable was bound, like \texttt{VAR0} for instance,
+the process would check if the current term symbol unifies with the variable binding made before (\texttt{VAR0 = 2}) and
+it would also succeed. As node $n7$ is a leaf node, the process finishes and a subsumptive path is found.
+The following variable bindings were made: \texttt{VAR0 = 2}, \texttt{VAR1 = X}, and \texttt{VAR2 = 2}.
+
+\subsection{Implementation details}
+
+This algorithm uses various data structures: three auxiliary stacks, a call choice point stack,
+a variable bindings vector, and variable enumerator vector. The following summarizes
+each data structure: 
+
+\begin{itemize}
+  \item \textit{variable bindings vector}: saves bindings for each numbered trie variable;
+  \item \textit{variable enumerator vector}: when a never seen term variable appears it must be bound to a position in this enumerator, ensuring that it can be recognized if it appears a second time;
+  \item \textit{term stack}: stores the remaining terms to be unified against trie symbols;
+  \item \textit{term log stack}: stores the already matched terms. Each frame contains the top index and the top element of the term stack during frame's creation;
+  \item \textit{trail stack}: stores bindings that were made during the process. It is used to untrail variables during backtracking;
+  \item \textit{call choice point stack}: used to restore the search process at a certain node to explore alternatives.
+\end{itemize}
+
+During execution, two matching methods are considered: the first tries to match exact trie symbols against the current term;
+the second method uses trie variables instead of exact symbols and is employed when the first method fails.
+When a trie node match succeeds, matching defaults to the first method, which means
+that exact matches are always tried before variables when a new \textit{trie level} is reached and variables are mainly
+used when backtracking. A trie level represents a set of nodes that are linked by \texttt{sibling} links or are at
+the same hash table.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{lookup_subgoal_termstack_start.pdf}
+  \caption{Initial term stack and heap for subgoal \texttt{p(X,f(Y),a(Z))}.}
+  \label{fig:lookup_subgoal_termstack_start}
+\end{figure}
+
+The process starts by pushing the $G$ subgoal arguments, $X1, X2, ...Xn$ into the term stack, so that $X1$ is at the top
+and $Xn$ at the bottom (Figure \ref{fig:lookup_subgoal_termstack_start}).
+Then, the algorithm proceeds in a modified depth-first manner, trying to match the exact nodes first, and then
+the variable trie nodes. The skeleton for this algorithm is presented in Figure \ref{fig:lookup_subsuming_call}.
+
+\begin{figure}[ht]
+\begin{verbatim}
+lookup_subsuming_call(call_trie) {
+  match_mode = MATCH_EXACTLY
+  parent = trie_root(call_trie)
+  node = child(parent)
+  variable_chain = NULL
+
+while_loop:
+  while(termstack is not empty) {
+    subterm = deref(termstack_pop())
+    termstacklog_push(termstack_index(), termstack_top())
+  
+    if(subterm is atom or integer)
+      match_constant(subterm)
+    else if(subterm is functor or list)
+      match_structured_term(subterm)
+    else if(subterm is variable)
+      match_variable(subterm)
+  
+    if(current match failed)
+      if(choice point stack is empty) // no more alternatives
+        return NO_PATH
+      else
+        (alt_node, var_chain) = ccpstack_pop_frame()
+        match_mode = MATCH_TRIE_VARS
+  }
+}
+\end{verbatim}
+\caption{Pseudo\-code for \texttt{lookup\_subsuming\_call}.}
+\label{fig:lookup_subsuming_call}
+\end{figure}
+
+\subsubsection{Call choice point stack}
+
+The call choice point stack (Figure \ref{fig:call_choice_point_stack}) contains alternative
+search paths to use if the process fails somewhere in the trie.
+Each stack frame can restore the search at a given node by restoring all the auxiliary stacks state at the time
+of the call frame creation.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{call_choice_point_stack.pdf}
+  \caption{Call choice point stack organization.}
+  \label{fig:call_choice_point_stack}
+\end{figure}
+
+Each frame contains the next trie node to explore (\texttt{alt\_node}),
+the current variable chain (\texttt{var\_chain}),
+and the following stack indexes during frame creation:
+the top of the term stack (\texttt{termstk\_top\_index}),
+the top of the term log stack (\texttt{log\_top\_index}),
+and the top of the trail stack (\texttt{trail\_top\_index}).
+The function \texttt{ccpstack\_push\_frame} (Figure \ref{fig:ccpstack_push_frame})
+is used to create a new frame from the computation state.
+
+\begin{figure}[ht]
+\begin{verbatim}
+ccpstack_push_frame(alt_node, var_chain) {
+  CCPFrame new_frame = new CPPFrame()
+  new_frame.alt_node = alt_node
+  new_frame.var_chain = var_chain
+  new_frame.termstk_top_index = termstack_top - termstack_base + 1
+  new_frame.log_top_index = termstacklog_top - termstacklog_base - 1
+  new_frame.trail_top_index = trail_top - trail_base
+  ccpstack_push(new_frame)
+}
+\end{verbatim}
+\caption{Pseudo\-code for \texttt{ccpstack\_push\_frame}.}
+\label{fig:ccpstack_push_frame}
+\end{figure}
+
+When popping a frame from the stack, the state of the auxiliary stacks and the other data
+structures is restored. Consider a computational state $S1$ that pushed unto the stack
+the frame $F1$. Given that we are at state $S2$ and we need to backtrack to the previous state, $S1$,
+first we need remove $F1$ from the stack and use the frame's information to restore $S1$.
+
+Any terms that were popped from the term stack from $S1$ to $S2$, which were
+stored in the term log stack must be restored back into the term stack.
+Then, any bindings made from $S1$ to $S2$ must be untrailed, which is
+accomplished by \textit{unwinding} the trail stack. The unwind process untrails
+any trie variables bound to the trie variable bindings vector
+and any term variable which may have been made to point to the variable enumerator. 
+
+Finally the alternative node and
+the variable chain at state $S1$ is also restored. All this is accomplished by the
+function \texttt{ccpstack\_pop\_frame} (Figure \ref{fig:ccpstack_pop_frame}).
+
+\begin{figure}[h]
+\begin{verbatim}
+ccpstack_pop_frame() {
+  CCPFrame top_frame = ccpstack_pop()
+  termstacklog_unwind(top_frame.log_top_index)
+  termstack_set_top_of_stack(top_frame.termstk_top_index)
+  trail_unwind(top_frame.trail_top_index)
+  
+  return (top_frame.alt_node, top_frame.var_chain)
+}
+\end{verbatim}
+\caption{Pseudo\-code for \texttt{ccpstack\_push\_frame}.}
+\label{fig:ccpstack_pop_frame}
+\end{figure}
+
+The node associated with $S2$ and its successors are never visited again and
+the process continues until a leaf node is reached or the call choice point stack
+is exhausted and the entire trie is visited, yielding no results.
+
+\subsubsection{Matching constants}
+
+The \texttt{match\_constant} function is called when the next term from the term stack is a integer or an
+atom. First, the function checks if the match method is to exactly match the subterm constant against a trie symbol, which means
+that this is the first time this trie level is explored. If the current trie level is represented by a simple
+linked list, both \texttt{node} and \texttt{var\_chain} point to the start of the chain, but if the trie level
+is an hash table, \texttt{node} will point to the symbol bucket and \texttt{var\_chain} to the variable
+bucket, which usually is the first bucket.
+
+\begin{figure}[h]
+\begin{verbatim}
+match_constant(constant) {
+  if match_mode == MATCH_EXACTLY
+    (node, var_chain) = set_node_and_var_chain(constant)
+    match_node = find_matching_node(constant, node)
+    if match_node is not NULL
+      conditionally_create_choice_point(var_chain)
+      descend_node(match_node)
+    else // no match found
+      node = var_chain
+      no_variant_found(parent)
+  // no exact match, try bound trie variables
+  match_node = find_bound_trie_var(subterm, node, var_chain)
+  if match_node is not NULL
+    create_choice_point(next(match_node), var_chain)
+    descend_node(match_node)
+  // no bound trie variable found, use unbound trie vars
+  match_node = find_unbound_trie_var(subterm, var_chain)
+  if match_node is not NULL
+    bind_trie_var(match_node, constant)
+    descend_node(match_node)
+}
+\end{verbatim}
+\caption{Pseudo\-code for \texttt{match\_constant}.}
+\label{fig:match_constant}
+\end{figure}
+
+The function \texttt{find\_matching\_node} iterates a linked list and locates a trie node that contains the
+\texttt{constant} symbol. If this node is found we conditionally create a
+new choice point (Figure \ref{fig:conditionally_create_choice_point}), that is
+we try to find a node with a variable that can be used when backtracking. At this point, only
+trie vars can be explored as only one node with the matched symbol exists at this level.
+
+\begin{figure}[ht]
+\begin{verbatim}
+conditionally_create_choice_point(var_chain) {
+  foreach(node in var_chain)
+    if(is_trie_var(node)) {
+      ccpstack_push_frame(node, node)
+      return
+    }
+}
+\end{verbatim}
+\caption{Pseudo\-code for \texttt{conditionally\_create\_choice\_point}.}
+\label{fig:conditionally_create_choice_point}
+\end{figure}
+
+Please note that the found variable node is used as the alternative node in this choice point
+and as the variable chain, which will be used to try bound and unbound trie nodes, when backtracking happens.
+
+To descend into a node when a matching succeeds the function \texttt{descend\_node} (Figure \ref{fig:descend_node})
+is used. It sets the current \texttt{node} and \texttt{parent} information, sets the matching mode for a new trie level
+and changes the program flow to the main \texttt{lookup\_subsuming\_call} while loop.
+
+\begin{figure}[ht]
+\begin{verbatim}
+descend_node(target_node) {
+  parent = target_node
+  node = child(target_node)
+  match_mode = MATCH_EXACTLY
+  goto while_loop
+}
+\end{verbatim}
+\caption{Pseudo\-code for \texttt{descend\_node}.}
+\label{fig:descend_node}
+\end{figure}
+
+
+\subsubsection{Matching structured terms}
+
+\subsubsection{Matching variables}
+
+\subsubsection{Variant continuations}
+
+\section{Answer Templates}
+
+\section{Answer Insertion on TSTs}
+
+\section{Collecting Relevant Answers}
+
+\section{Consuming Answers}
+
+\section{Compiled Tries}
+
+\section{Subsumptive YapTab}
+
+\section{Results}
