@@ -73,8 +73,6 @@ the process would check if the current term symbol unifies with the variable bin
 it would also succeed. As node $n7$ is a leaf node, the process finishes and a subsumptive path is found.
 The following variable bindings were made: \texttt{VAR0 = 2}, \texttt{VAR1 = X}, and \texttt{VAR2 = 2}.
 
-\subsection{Implementation details}
-
 This algorithm uses various data structures: three auxiliary stacks, a call choice point stack,
 a variable bindings vector, and variable enumerator vector. The following summarizes
 each data structure: 
@@ -109,11 +107,12 @@ the variable trie nodes. The skeleton for this algorithm is presented in Figure 
 
 \begin{figure}[ht]
 \begin{Verbatim}[fontsize=\small]
-lookup_subsuming_call(call_trie) {
+lookup_subsuming_call(call_trie, subgoal_call) {
   match_mode = MATCH_EXACTLY
   parent = trie_root(call_trie)
   node = child(parent)
   variable_chain = NULL
+  termstack_push_call(subgoal_call)
 
 while_loop:
   while(termstack is not empty) {
@@ -472,6 +471,90 @@ looking at the enumerator position. If it is a new variable, a new trie variable
 and the call variable is pushed on the trail stack and bound to the corresponding enumerator address. 
 
 \section{Answer Templates}
+
+In a variant engine, an substitution factor
+represents an array of unique variables which exist in the terms of the argument registers.
+These variables are bound to terms when consuming answers from an answer trie.
+Figure \ref{fig:answer_template_generator} shows a substitution factor that is constructed
+on the local stack below the choice point, in this case a generator choice point.
+Note that the substitution factor size (2) is also stored.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{answer_template_generator.pdf}
+  \caption{Answer template for generator \texttt{p(X,f(Y))}.}
+  \label{fig:answer_template_generator}
+\end{figure}
+
+When using call by subsumption, the same factor is used for
+subgoals which do not consume from more general subgoals: \textit{generator subgoals}
+and variant consumers of generator subgoals.
+We call this type of substitution factor a \textit{generator answer template}.
+
+For subgoals with more general subgoals, variants of consumer subgoals and consumers
+which consume from consumer subgoals, the answer template must specialize the generator answer template
+from the most general subgoal, and is called a \textit{consumer answer template}.
+If a generator subgoal \texttt{p(X,f(Y))} exists and the consumer subgoal \texttt{p(a,f(g(2, X)))}
+is called, the answer template illustrated on Figure \ref{fig:answer_template_consumer} is built.
+Consumer answer templates have the exact same size of generator answer templates
+and instead of being composed only of variables, can also be composed with other types of sub-terms.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{answer_template_consumer.pdf}
+  \caption{Answer template for consumer \texttt{p(a,f(g(a,X)))}.}
+  \label{fig:answer_template_consumer}
+\end{figure}
+
+The construction of answer templates is done when trying to find a general goal on the call trie.
+If no subsuming subgoal frame is found, a generator answer template is built. If a subsuming subgoal
+is found, the subgoal frame $S$ can be either:
+
+\begin{enumerate}
+  \item ... a generator: the answer template is constructed by iterating over the trie variable bindings vector (Figure \ref{fig:extract_template_from_lookup});
+  \item ... a consumer: the answer template is reconstructed by using the generator subgoal frame $S'$ from $S$ as we will consume from the generator $S'$ and not $S$. \texttt{reconstruct\_template\_for\_producer} uses another stack, the symbol stack, to push all the trie symbols from the general subgoal path, from leaf to root. The term stack is used to push all the called subgoal arguments that will be matched against the trie symbols. The answer template is then built by matching the new trie variables against the current term on the term stack. Note that when a functor or list symbol appears on the symbol stack the current term is also certainly a functor or list, because the called subgoal specializes the more general subgoal.
+\end{enumerate}
+
+\begin{figure}[ht]
+\begin{Verbatim}[fontsize=\small]
+extract_template_from_lookup(answer_template) {
+  total = 0
+  foreach(binding in trie variable bindings vector)
+    *answer_template-- = binding
+    total++
+  *answer_template = total
+  return answer_template
+}
+\end{Verbatim}
+\caption{Pseudo\-code for \texttt{extract\_template\_from\_lookup}.}
+\label{fig:extract_template_from_lookup}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{Verbatim}[fontsize=\small]
+reconstruct_template_for_producer(subgoal_call, generator_sf_fr, answer_template) {
+  symbol_stack_push_path(leaf_node(generator_sf_fr))
+  
+  termstack_push_call(subgoal_call)
+  
+  total = 0
+  while(termstack is not empty) {
+    subterm = deref(termstack_pop())
+    symbol = symbol_stack_pop()
+    if is_trie_var(symbol) and is_new_variable(symbol)
+      *answer_template-- = subterm
+      total++
+    else if is_functor(symbol) or is_list(symbol)
+      termstack_push_arguments(subterm)
+  }
+  
+  *answer_template = total
+  return answer_template
+}
+\end{Verbatim}
+\caption{Pseudo\-code for \texttt{reconstruct\_template\_for\_producer}.}
+\label{fig:reconstruct_template_for_producer}
+\end{figure}
 
 \section{Answer Insertion on TSTs}
 

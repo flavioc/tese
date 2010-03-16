@@ -268,9 +268,9 @@ representing a new answer.
 Figure \ref{fig:sfa_example} represents a SFA for the subgoal \texttt{p(X,Y,Z)} and
 illustrates insert operations.
 
-When a new subgoal $G$ subsumed by the subgoal $G'$ is first called, we must determine the assignments
+When a new subgoal $G$ subsumed by the subgoal $G'$ is first called, we must determine the \textit{answer template}
 from $G'$ to the sub-terms of $G$, because only variable substitutions are inserted into a SFA.
-The assignments are usually stored under the choice point.
+The answer template is usually stored under the choice point.
 
 For example, if $G'$ is \texttt{p(X,Y,Z)} and $G$ is \texttt{p(a,a,V)}, the variable assignments
 are \texttt{X = a, Y = a, Z = VAR0}. During unification operations, we must unify the first SFA symbol
@@ -426,11 +426,12 @@ the time stamps, search and insertion in TSTs work exactly the same as tries.
 \subsubsection{Retrieving Answers}
 
 Retrieving all answers that are specific to a subsumed subgoal $G$ from a TST with answers from subgoal $G'$
-works by navigating the TST and unifying the variable values that are assigned from $G'$ to $G$.
+works by navigating the TST and unifying the answers against the answer template.
 If we wanted to retrieve answers to the subgoal \texttt{p(a,a,X)} from the TST in Figure \ref{fig:tst_2},
-during the subgoal call we determine the assignments relatively to \texttt{path(X,Y,Z)}: \texttt{X = a, Y = a, Z = VAR0},
-and store them under the choice point. Then, these values $[a, a, VAR0]$ are then unified
-with the trie symbols, thus finding answers that are specific to $G$.
+during the subgoal call we determine the answer template relative to \texttt{path(X,Y,Z)}:
+\texttt{X = a, Y = a, Z = VAR0},
+and store it under the choice point. Then, the terms $[a, a, VAR0]$ are unified
+with the trie symbols, thus locating answers that are specific to $G$.
 
 Like tries, TSTs only store substitutions for variables, thus we must unify
 the first sub-term $a$, then $a$ again and then the variable, which unifies with any symbol.
