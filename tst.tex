@@ -80,7 +80,7 @@ a variable bindings vector, and variable enumerator vector. The following summar
 each data structure: 
 
 \begin{itemize}
-  \item \textit{variable bindings vector}: saves bindings for each numbered trie variable;
+  \item \textit{variable bindings vector}: saves bindings for each numbered trie variable. Starts with each position pointing to itself;
   \item \textit{variable enumerator vector}: when a never seen term variable appears it must be bound to a position in this enumerator, ensuring that it can be recognized if it appears a second time;
   \item \textit{term stack}: stores the remaining terms to be unified against trie symbols;
   \item \textit{term log stack}: stores the already matched terms. Each frame contains the top index and the top element of the term stack during frame's creation;
@@ -262,10 +262,9 @@ trie variables can be explored as only one node with the matched symbol exists a
 \begin{Verbatim}[fontsize=\small]
 conditionally_create_choice_point(var_chain) {
   foreach(node in var_chain)
-    if(is_trie_var(node)) {
+    if(is_trie_var(node))
       ccpstack_push_frame(node, node)
       return
-    }
 }
 \end{Verbatim}
 \caption{Pseudo\-code for \texttt{conditionally\_create\_choice\_point}.}
@@ -377,6 +376,65 @@ the term stack. In step \textbf{(3)}, \texttt{b} matches against \texttt{b}, and
 \end{figure}
 
 \subsubsection{Matching variables}
+
+The last case for matching terms are variables. Because we are trying to find a more general goal,
+a term variable must only be matched or bound against a trie variable and nothing else. More, a
+never seen variable must match only with an unbound trie variable, consider the case of trying to
+match \texttt{p(X,Y)} against \texttt{p(X,X)}, the first call variable could match the first trie variable,
+but the call variable \texttt{Y} must be matched against an unbound variable, thus the next trie variable
+(in this case \texttt{VAR0}) cannot be matched, because it was already bound to another variable.
+Please note that \texttt{p(X,X)} is subsumed by \texttt{p(X,Y)} and not the other way around.
+
+To recognize already seen call variables, we bind them to the variable enumerator array, indexed
+by the corresponding trie variable number and use the trail stack to trail them.
+When such call variable must be matched again with a
+trie variable, we first try to match it with the same trie variable, and if we fail to find such trie
+variable, we use an unbound trie variable, thus, we avoid binding two different call variables to the same
+trie variable.
+
+\begin{figure}[h]
+\begin{Verbatim}[fontsize=\small]
+match_variable(term) { // term represents a variable on the heap
+  if match_mode == MATCH_EXACTLY
+    if node is not NULL and is_hash_table(node)
+      node = var_chain = hash_bucket(node, VARIABLE_BUCKET)
+    else
+      var_chain = node
+    if variable is not marked(term)
+      // variable not seen before
+      // only one new trie variable per level, no choice point needed
+      foreach(test_node in node) {
+        if is_trie_var(test_node) and is_new_variable(test_node)
+          bind_trie_var(test_node, term)
+          mark_prolog_var(term, var_index(test_node))
+          descend_node(test_node)
+      no_variant_found(parent)
+      backtrack
+  // variable has been seen before
+  foreach(test_node in node)
+    if is_trie_var(test_node) and !is_new_variable(test_node)
+      if identical_terms(trie_var_bindings[test_node], term)
+        ccpstack_push_frame(next(test_node), var_chain)
+        descend_node(test_node)
+  // variant path is not possible here
+  no_variant_found(parent)
+  // match against unbound trie variable
+  foreach(test_node in var_chain)
+    // only one new trie variable per level, no choice point needed
+    if is_trie_var(test_node) and is_new_variable(test_node)
+      bind_trie_var(test_node, trie_var_bindings[prolog_var_index(term)])
+      descend_node(test_node)
+}
+\end{Verbatim}
+\caption{Pseudo\-code for \texttt{match\_variable}.}
+\label{fig:match_variable}
+\end{figure}
+
+The pseudo-code to match against a variable is displayed in Figure
+\ref{fig:match_variable}. From it, we can conclude that a variant path
+cannot be found when: (1) a new trie variable cannot be found
+for a new call variable, (2) we cannot match an already seen
+call variable against the same trie variable already bound to it.
 
 \subsubsection{Variant continuations}
 
