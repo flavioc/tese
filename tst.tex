@@ -108,7 +108,7 @@ Then, the algorithm proceeds in a modified depth-first manner, trying to match t
 the variable trie nodes. The skeleton for this algorithm is presented in Figure \ref{fig:lookup_subsuming_call}.
 
 \begin{figure}[ht]
-\begin{verbatim}
+\begin{Verbatim}[fontsize=\small]
 lookup_subsuming_call(call_trie) {
   match_mode = MATCH_EXACTLY
   parent = trie_root(call_trie)
@@ -135,7 +135,7 @@ while_loop:
         match_mode = MATCH_TRIE_VARS
   }
 }
-\end{verbatim}
+\end{Verbatim}
 \caption{Pseudo\-code for \texttt{lookup\_subsuming\_call}.}
 \label{fig:lookup_subsuming_call}
 \end{figure}
@@ -164,7 +164,7 @@ The function \texttt{ccpstack\_push\_frame} (Figure \ref{fig:ccpstack_push_frame
 is used to create a new frame from the computation state.
 
 \begin{figure}[ht]
-\begin{verbatim}
+\begin{Verbatim}[fontsize=\small]
 ccpstack_push_frame(alt_node, var_chain) {
   CCPFrame new_frame = new CPPFrame()
   new_frame.alt_node = alt_node
@@ -174,7 +174,7 @@ ccpstack_push_frame(alt_node, var_chain) {
   new_frame.trail_top_index = trail_top - trail_base
   ccpstack_push(new_frame)
 }
-\end{verbatim}
+\end{Verbatim}
 \caption{Pseudo\-code for \texttt{ccpstack\_push\_frame}.}
 \label{fig:ccpstack_push_frame}
 \end{figure}
@@ -196,7 +196,7 @@ the variable chain at state $S1$ is also restored. All this is accomplished by t
 function \texttt{ccpstack\_pop\_frame} (Figure \ref{fig:ccpstack_pop_frame}).
 
 \begin{figure}[h]
-\begin{verbatim}
+\begin{Verbatim}[fontsize=\small]
 ccpstack_pop_frame() {
   CCPFrame top_frame = ccpstack_pop()
   termstacklog_unwind(top_frame.log_top_index)
@@ -205,7 +205,7 @@ ccpstack_pop_frame() {
   
   return (top_frame.alt_node, top_frame.var_chain)
 }
-\end{verbatim}
+\end{Verbatim}
 \caption{Pseudo\-code for \texttt{ccpstack\_push\_frame}.}
 \label{fig:ccpstack_pop_frame}
 \end{figure}
@@ -217,16 +217,17 @@ is exhausted and the entire trie is visited, yielding no results.
 \subsubsection{Matching constants}
 
 The \texttt{match\_constant} function is called when the next term from the term stack is a integer or an
-atom. First, the function checks if the match method is to exactly match the subterm constant against a trie symbol, which means
+atom. First, in phase \textbf{(1)}, the function checks if the match method is to exactly match the
+subterm constant against a trie symbol, which means
 that this is the first time this trie level is explored. If the current trie level is represented by a simple
 linked list, both \texttt{node} and \texttt{var\_chain} point to the start of the chain, but if the trie level
 is an hash table, \texttt{node} will point to the symbol bucket and \texttt{var\_chain} to the variable
 bucket, which usually is the first bucket.
 
 \begin{figure}[h]
-\begin{verbatim}
+\begin{Verbatim}[fontsize=\small]
 match_constant(constant) {
-  if match_mode == MATCH_EXACTLY
+  if match_mode == MATCH_EXACTLY // (1)
     (node, var_chain) = set_node_and_var_chain(constant)
     match_node = find_matching_node(constant, node)
     if match_node is not NULL
@@ -235,18 +236,18 @@ match_constant(constant) {
     else // no match found
       node = var_chain
       no_variant_found(parent)
-  // no exact match, try bound trie variables
-  match_node = find_bound_trie_var(subterm, node, var_chain)
+  // no exact match, try bound trie variables (2)
+  match_node = find_bound_trie_var(constant, node)
   if match_node is not NULL
-    create_choice_point(next(match_node), var_chain)
+    ccpstack_push_frame(next(match_node), var_chain)
     descend_node(match_node)
-  // no bound trie variable found, use unbound trie vars
-  match_node = find_unbound_trie_var(subterm, var_chain)
+  // no bound trie variable found, use unbound trie variables (3)
+  match_node = find_unbound_trie_var(var_chain)
   if match_node is not NULL
     bind_trie_var(match_node, constant)
     descend_node(match_node)
 }
-\end{verbatim}
+\end{Verbatim}
 \caption{Pseudo\-code for \texttt{match\_constant}.}
 \label{fig:match_constant}
 \end{figure}
@@ -255,10 +256,10 @@ The function \texttt{find\_matching\_node} iterates a linked list and locates a 
 \texttt{constant} symbol. If this node is found we conditionally create a
 new choice point (Figure \ref{fig:conditionally_create_choice_point}), that is
 we try to find a node with a variable that can be used when backtracking. At this point, only
-trie vars can be explored as only one node with the matched symbol exists at this level.
+trie variables can be explored as only one node with the matched symbol exists at this level.
 
 \begin{figure}[ht]
-\begin{verbatim}
+\begin{Verbatim}[fontsize=\small]
 conditionally_create_choice_point(var_chain) {
   foreach(node in var_chain)
     if(is_trie_var(node)) {
@@ -266,7 +267,7 @@ conditionally_create_choice_point(var_chain) {
       return
     }
 }
-\end{verbatim}
+\end{Verbatim}
 \caption{Pseudo\-code for \texttt{conditionally\_create\_choice\_point}.}
 \label{fig:conditionally_create_choice_point}
 \end{figure}
@@ -276,23 +277,104 @@ and as the variable chain, which will be used to try bound and unbound trie node
 
 To descend into a node when a matching succeeds the function \texttt{descend\_node} (Figure \ref{fig:descend_node})
 is used. It sets the current \texttt{node} and \texttt{parent} information, sets the matching mode for a new trie level
-and changes the program flow to the main \texttt{lookup\_subsuming\_call} while loop.
+and changes the program flow to the main \texttt{lookup\_subsuming\_call} while loop. But,
+if an exact match fails, we know that the current path cannot be variant of the called subgoal, and we call
+\texttt{no\_variant\_found} with the parent node as argument.
 
 \begin{figure}[ht]
-\begin{verbatim}
+\begin{Verbatim}[fontsize=\small]
 descend_node(target_node) {
   parent = target_node
   node = child(target_node)
   match_mode = MATCH_EXACTLY
   goto while_loop
 }
-\end{verbatim}
+\end{Verbatim}
 \caption{Pseudo\-code for \texttt{descend\_node}.}
 \label{fig:descend_node}
 \end{figure}
 
+Phase \textbf{(2)} of \texttt{match\_constant} can be reached by a failed exact match or by backtracking
+(remember that the match mode changes to \texttt{MATCH\_TRIE\_VARS} when backtracking). In this step
+we call \texttt{find\_bound\_trie\_var} that will iterate over the \texttt{node} chain to look for
+\textit{bound trie variables}. When inserting new subgoals on the call trie, each new trie variable
+along a path is marked, so it is easy to check for old variables, which have already been bound
+to some term before arriving at the current node. The variable binding can be retrieved by
+checking the trie variable bindings position for this variable number, which points to an heap term.
+Given that we are trying to match a constant symbol, we verify if the bound term matches our symbol.
+In this case, we create a new choice point for the sibling node of the matched trie variable, and use
+the currently set variable chain.
+
+Finally, if phase \textbf{(1)} and \textbf{(2)} fail, we try to match our constant against an unbound trie variable
+(Figure \ref{fig:find_unbound_trie_var}).
+Phase \textbf{(3)} can be also reached by a failed exact and bound trie variable match or by subsequent backtrack
+attempts. If a node is found, we bind the variable position on the trie variable bindings
+vector to point to the new constant. This position is also trailed on the trail stack, so that it can be untrailed
+if backtracking is executed.
+
+\begin{figure}[ht]
+\begin{Verbatim}[fontsize=\small]
+find_unbound_trie_var(var_chain) {
+  foreach(node in var_chain)
+    if(is_variable(node) and is_new_variable(node))
+      return node
+}
+\end{Verbatim}
+\caption{Pseudo\-code for \texttt{find\_unbound\_trie\_var}.}
+\label{fig:find_unbound_trie_var}
+\end{figure}
 
 \subsubsection{Matching structured terms}
+
+When a structured term appears on the term stack, either a functor or a list, the matching process works
+just like constants, except the functor or list arguments must be pushed unto the term stack after an exact
+match is found (Figure \ref{fig:match_structured_term}).
+
+\begin{figure}[h]
+\begin{Verbatim}[fontsize=\small]
+match_structured_term(term) {
+  if match_mode == MATCH_EXACTLY // (1)
+    (node, var_chain) = set_node_and_var_chain(term)
+    match_node = find_matching_node(term, node)
+    if match_node is not NULL
+      termstack_push_arguments(term)
+      conditionally_create_choice_point(var_chain)
+      descend_node(match_node)
+    else // no match found
+      node = var_chain
+      no_variant_found(parent)
+  // no exact match, try bound trie variables (2)
+  match_node = find_bound_trie_var(term, node)
+  if match_node is not NULL
+    ccpstack_push_frame(next(match_node), var_chain)
+    descend_node(match_node)
+  // no bound trie variable found, use unbound trie variables (3)
+  match_node = find_unbound_trie_var(var_chain)
+  if match_node is not NULL
+    bind_trie_var(match_node, term)
+    descend_node(match_node)
+}
+\end{Verbatim}
+\caption{Pseudo\-code for \texttt{match\_structured\_term}.}
+\label{fig:match_structured_term}
+\end{figure}
+
+Figure \ref{fig:match_functor} shows the evolution of the term stack for finding
+a subsuming goal for the subgoal \texttt{p(a,f(b))}. Step \textbf{(1)} shows the initial 
+term stack, followed by a match of the term on top of the stack, \texttt{a}, against \textbf{VAR0}.
+As it is an unbound trie variable, the first position of the variable bindings vector is
+bound to the target term, \texttt{a}.
+In step \textbf{(2)}, we try to match the functor \texttt{f/1} against node \textbf{(b)}, but we fail.
+Node \textbf{(c)} succeeds as it is an exact match and the functor argument, \texttt{b}, is pushed on
+the term stack. In step \textbf{(3)}, \texttt{b} matches against \texttt{b}, and we find a subsuming call:
+\texttt{p(VAR0,f(b))}.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{match_functor.pdf}
+  \caption{Finding a subsuming goal for subgoal \texttt{p(a,f(b))}.}
+  \label{fig:match_functor}
+\end{figure}
 
 \subsubsection{Matching variables}
 
