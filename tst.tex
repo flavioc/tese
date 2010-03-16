@@ -438,6 +438,39 @@ call variable against the same trie variable already bound to it.
 
 \subsubsection{Variant continuations}
 
+The \texttt{lookup\_subsuming\_call} algorithm has the ability to find a
+minimally subsuming call and if a variant path exists, it will be found.
+
+A \textit{variant continuation} is built when the algorithm detects that a variant path of the
+called subgoal cannot be found on the call trie during the search process.
+A variant continuation stores all the needed information to later resume
+the algorithm that creates a variant path starting from the last node where the
+search for a variant path has failed.
+
+In the above pseudo-code we used the function \texttt{no\_variant\_found} to create
+a variant continuation. This function creates a continuation the first time it is called.
+
+The continuation stores the node from where the rest of the variant path is created,
+the term stack at creation's time and all the bindings made to the call variables
+to the variable enumerator vector that were trailed on the trail stack.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{variant_continuation.pdf}
+  \caption{Creation of an variant continuation for subgoal \texttt{p(X,f(Y),b)}.}
+  \label{fig:variant_continuation}
+\end{figure}
+
+Figure \ref{fig:variant_continuation} shows a variant continuation that is built
+after the match process failed at node \texttt{c}. If a variant path
+for subgoal \texttt{p(X,f(Y),b)} needs to be created: the term stack is restored
+with the terms saved on the continuation; the trail stack is initialized with
+the two variable heap addresses and each variable is bound to the saved
+enumerator addresses. The variable enumerator vector is used during the insertion
+of variant paths to detect if a variable was already seen and easily compute its number by
+looking at the enumerator position. If it is a new variable, a new trie variable is generated,
+and the call variable is pushed on the trail stack and bound to the corresponding enumerator address. 
+
 \section{Answer Templates}
 
 \section{Answer Insertion on TSTs}
