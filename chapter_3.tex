@@ -461,7 +461,7 @@ to this linked list. The original subsumptive consumer and its variant subgoals 
 new answers can be retrieved from the list, the TST process is employed to identify more answers from the subsuming TST,
 inserting them into the list.
 
-Each TST node maintains a time stamp index which stores all transitions in reverse order.
+An hashed TST node maintains a time stamp index which stores all transitions in reverse order.
 It is not until a subsumed subgoal is first called that all time stamp related structures are created, thus
 allowing a more efficient use of space.
 
@@ -470,7 +470,7 @@ the more specific goals all use compiled trie instructions, and unification is p
 the WAM engine level.
 
 The biggest advantage of using TSTs instead of DTSAs is in terms of space complexity. In TSTs, the maximum table space
-used is at most twice that of the variant engine, because each node must contain both the time stamp and the time stamp index.
+used is at most twice that of the variant engine, because each node can have both the time stamp and a time stamp index node.
 For DTSAs, the space used is at least double, but in the worst
 case can be quadratic. DTSA is at advantage in terms of speed, because it supports identification of answers and
 unification in one step, thus answers can share some elementary unifications. In TSTs, identifying answers
