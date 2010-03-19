@@ -965,12 +965,12 @@ search_chain_unify_with_constant(chain, constant, ts) {
     if symbol is variable // case (1)
       cpstack_push_frame(alt_chain)
       bind_and_conditionally_trail(symbol, constant)
-      termstacklog_push()
+      termstacklog_push(constant)
       descend_tst(chain)
     else if symbol == constant // case (2)
       // exact match
       cpstack_push_frame(alt_chain)
-      termstacklog_push()
+      termstacklog_push(constant)
       descend_tst(node)
     else
       chain = alt_chain
@@ -1066,6 +1066,147 @@ the answers found (Figure \ref{fig:collect_ex6}), finishing the search.
 \end{figure}
 
 \subsubsection{Unify with structured term}
+
+For structured terms, the unification process is similar to constant unification. The
+current term in the term stack must be a functor or a list. First, we check if the current
+trie node is an hash table and the match and unify chains are computed.
+If the match chain contains a valid trie node, before we descend into the child
+node we must push the functor or list arguments into the term stack, so they can
+be unified with the next trie nodes.
+
+\begin{figure}[H]
+\begin{Verbatim}[fontsize=\small]
+unify_structured_term(term) {
+  if is_hash_table(chain)
+    // retrieve the indexed and variable buckets
+    (chain, alt_chain) = set_match_and_unify_chains(term)
+    if chain != alt_chain
+      search_chain_exact_match_push(chain, term, ts, alt_chain)
+      // exact match failed
+      chain = alt_chain
+    if chain is NULL
+      backtrack
+  search_chain_unify_with_structured_term(chain, term, ts)
+}
+\end{Verbatim}
+\caption{Pseudo\-code for \texttt{unify\_structured\_term}.}
+\label{fig:unify_structured_term}
+\end{figure}
+
+When using the unify chain with \texttt{search\_chain\_unify\_with\_structured\_term}
+\ref{fig:search_chain_unify_with_structured_term},
+we also loop the chain for valid time stamped nodes.
+Four situations may arise:
+
+\begin{enumerate}
+  \item The current term is variable, which is trail and bound to the structured term;
+  \item The trie symbol is a structured term and matches our functor or list.
+  The term arguments are pushed into the term stack for unification;
+  \item We find a trie variable bound to a structured term. The WAM function \texttt{unify} is executed to check for a match and perform additional unifications;
+  \item No match was found, the next alternative node is inspected.
+\end{enumerate}
+
+\begin{figure}[H]
+\begin{Verbatim}[fontsize=\small]
+search_chain_unify_with_structured_term(chain, term, ts) {
+  chain = chain_next_valid_node(chain, ts)
+  while(chain is not null) {
+    alt_chain = chain_next_valid_node(sibling(chain), ts)
+    symbol = trie_deref(symbol(chain))
+    if symbol is variable // case (1)
+      cpstack_push_frame(alt_chain)
+      bind_and_conditionally_trail(symbol, term)
+      termstacklog_push(term)
+      descend_tst(chain)
+    else if symbol is a structured term
+      if original type of symbol is a structured term and symbol == term
+        // case (2)
+        cpstack_push_frame(alt_chain)
+        termstacklog_push(term)
+        termstack_push_arguments(term)
+        descend_tst(chain)
+      else if unify(term, symbol) // case (3)
+        // trie variable bound to an heap structured term
+        cpstack_push_frame(alt_chain)
+        termstacklog_push(term)
+        descend_tst(node)
+    else
+      chain = alt_chain
+  }
+  // case (4)
+}
+\end{Verbatim}
+\caption{Pseudo\-code for \texttt{search\_chain\_unify\_with\_structured\_term}.}
+\label{fig:search_chain_unify_with_structured_term}
+\end{figure}
+
+Let's consider the time stamped trie in Figure \ref{fig:collect_functor}
+and the following answer template: $\{$\texttt{STR 3, STR 6, STR 9}$\}$.
+The target time stamp is 1.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{collect_functor.pdf}
+  \caption{Example time stamped trie and heap with terms referenced in the answer template.}
+  \label{fig:collect_functor}
+\end{figure}
+
+At node (a) the term stack contains the full answer template and the variable bindings vector
+is empty \ref{fig:collect_functor1}. Only node (b) satisfies the time stamp requirements,
+as $2 > 1$.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{collect_functor1.pdf}
+  \caption{Term stack and variable bindings vector at node (a).}
+  \label{fig:collect_functor1}
+\end{figure}
+
+Node (b) contains a trie variable and the current term is \texttt{STR 3} or \texttt{f(VAR)}.
+In this situation, the variable bindings position for \textbf{VAR0} is trailed and bound to \texttt{STR 3}. The data structures configuration is presented in Figure \ref{fig:collect_functor2}.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{collect_functor2.pdf}
+  \caption{Term stack and variable bindings vector at node (b).}
+  \label{fig:collect_functor2}
+\end{figure}
+
+Node (d) contains the symbol \texttt{g/1} and the current term is \texttt{STR 6}
+or \texttt{g(b)}, which matches. The argument \texttt{b} of \texttt{g(b)}
+is pushed into the term stack to be processed in the next node (Figure \ref{fig:collect_functor3}).
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{collect_functor3.pdf}
+  \caption{Term stack and variable bindings vector at node (d).}
+  \label{fig:collect_functor3}
+\end{figure}
+
+Node (e) has the symbol \texttt{b} which matches with \texttt{b} from the term stack and
+execution proceeds to node (f) (Figure \ref{fig:collect_functor4}).
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{collect_functor4.pdf}
+  \caption{Term stack and variable bindings vector at node (e).}
+  \label{fig:collect_functor4}
+\end{figure}
+
+At (f) we find a trie variable, which, after being dereferenced, contains the
+functor \texttt{f(VAR)}. The current term to be unified is \texttt{f(3)}.
+In this situation we call \texttt{unify}, which will try to unify both terms.
+The unification has the side effect of setting the heap variable cell 4 to \texttt{3}
+(Figure \ref{fig:collect_functor5}).
+This variable is conditional because it is positioned before the register \texttt{HB},
+which given the algorithm design must be greater than 10.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{collect_functor5.pdf}
+  \caption{Term stack, variable bindings vector and heap at node (f).}
+  \label{fig:collect_functor5}
+\end{figure}
 
 \subsubsection{Unify with variable}
 
