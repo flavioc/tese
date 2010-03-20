@@ -140,7 +140,7 @@ while_loop:
     return (SUBSUMPTIVE_PATH, parent)
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{lookup\_subsuming\_call}.}
+\caption{Pseudo-code for \texttt{lookup\_subsuming\_call}.}
 \label{fig:lookup_subsuming_call}
 \end{figure}
 
@@ -179,7 +179,7 @@ ccpstack_push_frame(alt_node, var_chain) {
   ccpstack_push(new_frame)
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{ccpstack\_push\_frame}.}
+\caption{Pseudo-code for \texttt{ccpstack\_push\_frame}.}
 \label{fig:ccpstack_push_frame}
 \end{figure}
 
@@ -210,7 +210,7 @@ ccpstack_pop_frame() {
   return (top_frame.alt_node, top_frame.var_chain)
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{ccpstack\_push\_frame}.}
+\caption{Pseudo-code for \texttt{ccpstack\_push\_frame}.}
 \label{fig:ccpstack_pop_frame}
 \end{figure}
 
@@ -252,7 +252,7 @@ match_constant(constant) {
     descend_node(match_node)
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{match\_constant}.}
+\caption{Pseudo-code for \texttt{match\_constant}.}
 \label{fig:match_constant}
 \end{figure}
 
@@ -271,7 +271,7 @@ conditionally_create_choice_point(var_chain) {
       return
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{conditionally\_create\_choice\_point}.}
+\caption{Pseudo-code for \texttt{conditionally\_create\_choice\_point}.}
 \label{fig:conditionally_create_choice_point}
 \end{figure}
 
@@ -293,7 +293,7 @@ descend_node(target_node) {
   goto while_loop
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{descend\_node}.}
+\caption{Pseudo-code for \texttt{descend\_node}.}
 \label{fig:descend_node}
 \end{figure}
 
@@ -323,7 +323,7 @@ find_unbound_trie_var(var_chain) {
       return node
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{find\_unbound\_trie\_var}.}
+\caption{Pseudo-code for \texttt{find\_unbound\_trie\_var}.}
 \label{fig:find_unbound_trie_var}
 \end{figure}
 
@@ -358,7 +358,7 @@ match_structured_term(term) {
     descend_node(match_node)
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{match\_structured\_term}.}
+\caption{Pseudo-code for \texttt{match\_structured\_term}.}
 \label{fig:match_structured_term}
 \end{figure}
 
@@ -430,7 +430,7 @@ match_variable(term) { // term represents a variable on the heap
       descend_node(test_node)
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{match\_variable}.}
+\caption{Pseudo-code for \texttt{match\_variable}.}
 \label{fig:match_variable}
 \end{figure}
 
@@ -531,7 +531,7 @@ extract_template_from_lookup(answer_template) {
   return answer_template
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{extract\_template\_from\_lookup}.}
+\caption{Pseudo-code for \texttt{extract\_template\_from\_lookup}.}
 \label{fig:extract_template_from_lookup}
 \end{figure}
 
@@ -557,7 +557,7 @@ reconstruct_template_for_producer(subgoal_call, generator_sf_fr, answer_template
   return answer_template
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{reconstruct\_template\_for\_producer}.}
+\caption{Pseudo-code for \texttt{reconstruct\_template\_for\_producer}.}
 \label{fig:reconstruct_template_for_producer}
 \end{figure}
 
@@ -590,7 +590,7 @@ subsumptive_answer_search(trie_root, ans_vector, maintain_tsi)
   return leaf
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{subsumptive\_answer\_search}.}
+\caption{Pseudo-code for \texttt{subsumptive\_answer\_search}.}
 \label{fig:subsumptive_answer_search}
 \end{figure}
 
@@ -645,7 +645,7 @@ tst_insert(trie_root, node, maintain_tsi) {
   return node
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{tst\_insert}.}
+\caption{Pseudo-code for \texttt{tst\_insert}.}
 \label{fig:tst_insert}
 \end{figure}
 
@@ -713,7 +713,7 @@ update_timestamps(leaf, root, maintain_tsi) {
   timestamp(root) = new_timestamp
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{update\_timestamps}.}
+\caption{Pseudo-code for \texttt{update\_timestamps}.}
 \label{fig:update_timestamps}
 \end{figure}
 
@@ -842,7 +842,7 @@ while_loop:
   goto while_loop
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{tst\_collect\_relevant\_answers}.}
+\caption{Pseudo-code for \texttt{tst\_collect\_relevant\_answers}.}
 \label{fig:tst_collect_relevant_answers}
 \end{figure}
 
@@ -875,7 +875,7 @@ cpstack_push_frame(alt_node) {
   cpstack_push(frame)
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{cpstack\_push\_frame}.}
+\caption{Pseudo-code for \texttt{cpstack\_push\_frame}.}
 \label{fig:cpstack_push_frame}
 \end{figure}
 
@@ -903,7 +903,7 @@ cpstack_pop_frame() {
   HB = top_frame.saved_HB
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{cpstack\_pop\_frame}.}
+\caption{Pseudo-code for \texttt{cpstack\_pop\_frame}.}
 \label{fig:cpstack_pop_frame}
 \end{figure}
 
@@ -927,7 +927,7 @@ unify_constant(constant) {
   search_chain_unify_with_constant(chain, constant, ts)
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{unify\_constant}.}
+\caption{Pseudo-code for \texttt{unify\_constant}.}
 \label{fig:unify_constant}
 \end{figure}
 
@@ -948,7 +948,7 @@ search_chain_exact_match(chain, term, ts, alt_chain) {
   return NULL
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{search\_chain\_exact\_match}.}
+\caption{Pseudo-code for \texttt{search\_chain\_exact\_match}.}
 \label{fig:search_chain_exact_match}
 \end{figure}
 
@@ -978,7 +978,7 @@ search_chain_unify_with_constant(chain, constant, ts) {
   // case (3)
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{search\_chain\_unify\_with\_constant}.}
+\caption{Pseudo-code for \texttt{search\_chain\_unify\_with\_constant}.}
 \label{fig:search_chain_unify_with_constant}
 \end{figure}
 
@@ -1089,7 +1089,7 @@ unify_structured_term(term) {
   search_chain_unify_with_structured_term(chain, term, ts)
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{unify\_structured\_term}.}
+\caption{Pseudo-code for \texttt{unify\_structured\_term}.}
 \label{fig:unify_structured_term}
 \end{figure}
 
@@ -1136,7 +1136,7 @@ search_chain_unify_with_structured_term(chain, term, ts) {
   // case (4)
 }
 \end{Verbatim}
-\caption{Pseudo\-code for \texttt{search\_chain\_unify\_with\_structured\_term}.}
+\caption{Pseudo-code for \texttt{search\_chain\_unify\_with\_structured\_term}.}
 \label{fig:search_chain_unify_with_structured_term}
 \end{figure}
 
@@ -1209,6 +1209,143 @@ which given the algorithm design must be greater than 10.
 \end{figure}
 
 \subsubsection{Unify with variable}
+
+Because variables unify with anything, when the top of the term
+stack is a variable, the next trie branches only need to be pruned using the time stamp.
+
+Figure \ref{fig:unify_variable} presents the function
+\texttt{unify\_variable}. Here, we have three cases:
+
+\begin{enumerate}
+  \item The current chain link is an hash table. In this situation we can select the next transitions by using the time stamped index, which can easily prune based on the time stamp;
+  \item The current node is inside an hash table, thus is on the time stamped index. The node is matched against the variable and the alternative node is selected by following the index chain links;
+  \item Current node is a simple sibling chain. Both the chain and the alternative chain are set by iterating over the node chain, looking for valid time stamps.
+\end{enumerate}
+
+Once chains are set, we create a new choice point, run the variable unification algorithm
+and proceed into the next trie node.
+
+\begin{figure}[H]
+\begin{Verbatim}[fontsize=\small]
+unify_variable(var) {
+  if is_hash_table(chain) // case (1)
+    index = index_head(chain)
+    if timestamp(index) > ts
+      chain = node(index)
+      alt_chain = next_valid_index(index, ts)
+    else backtrack
+  else if is_hashed_node(chain) // case (2)
+    // can only be here via backtracking
+    alt_chain = next_valid_index(get_index(chain), ts)
+  else // case (3)
+    // simple chain of siblings
+    chain = chain_next_valid_node(chain, ts)
+    if chain is NULL backtrack
+    alt_chain = sibling(chain)
+  
+  cpstack_push_frame(alt_chain)
+  termstacklog_push(var)
+  symbol = trie_deref(symbol(chain))
+  unifiy_with_variable(var, symbol, chain)
+  descend_tst(chain)
+}
+\end{Verbatim}
+\caption{Pseudo-code for \texttt{unify\_variable}.}
+\label{fig:unify_variable}
+\end{figure}
+
+From the pseudo-code in Figure \ref{fig:unify_with_variable}, variable unification
+must consider the following situations:
+
+\begin{itemize}
+  \item symbol is a constant: the term variable is bound to the symbol and conditionally trailed.
+  \item symbol is a structured term: if the symbol was a trie variable bound to a term then we bind the variable to the heap location; else, we create a new structure (functor or list) on the heap and bind the variable to it, resulting in a term with various heap variables as arguments, which will be pushed into the term stack and will be bound in the next iterations of the algorithm.
+  \item symbol is a variable: if the variable is a trie variable, we bind and trail it; if it is an heap variable that was dereferenced from a trie variable using \texttt{trie\_deref}, \texttt{unify} chooses the binding direction, resulting in one of the variables being trailed.
+\end{itemize}
+
+\begin{figure}[H]
+\begin{Verbatim}[fontsize=\small]
+unify_with_variable(var, symbol, node) {
+  if symbol is a constant
+    bind_and_conditionally_trail(var, symbol)
+  else if symbol is a structured term
+    if node symbol is a structured term
+      bind_and_conditionally_trail(var, H)
+      create_heap_structure(symbol)
+      termstack_push_arguments(deref(var))
+    else
+      // trie variable bound to an heap structure
+      bind_and_conditionally_trail(var, symbol)
+  else if symbol is a variable
+    if symbol is a trie variable
+      bind_and_trail(symbol, var)
+    else
+      // two heap variables
+      unify(symbol, var)
+  else
+    backtrack
+}
+\end{Verbatim}
+\caption{Pseudo-code for \texttt{unify\_with\_variable}.}
+\label{fig:unify_with_variable}
+\end{figure}
+
+As an example, consider the trie and heap in Figure \ref{fig:collect_variable}.
+The input answer template is $\{$\texttt{REF2,REF2,b}$\}$ and the start time stamp is 2.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{collect_variable.pdf}
+  \caption{Example time stamped trie and heap.}
+  \label{fig:collect_variable}
+\end{figure}
+
+Starting on root node (a), we have the following data structure configuration:
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{collect_variable1.pdf}
+  \caption{At node (a).}
+  \label{fig:collect_variable1}
+\end{figure}
+
+Node (b) is the only valid transition, with time stamp 3.
+The functor \texttt{f/1} is unified against the variable \texttt{REF 2},
+which results in the functor \texttt{f/1} being created on the heap
+and its argument (\texttt{REF 5}) being pushed into the term stack
+(Figure \ref{fig:collect_variable2}).
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{collect_variable2.pdf}
+  \caption{After unifying with node (b).}
+  \label{fig:collect_variable2}
+\end{figure}
+
+The yet unbound functor argument matches atom \texttt{a} in node (d),
+resulting in the update of the heap cell 5 (Figure \ref{fig:collect_variable3}).
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{collect_variable3.pdf}
+  \caption{After unifying with node (d).}
+  \label{fig:collect_variable3}
+\end{figure}
+
+Now on the term stack we have \texttt{REF 2}, which dereferences to
+a structure on cell 4. On node (e) we have the unbound trie variable
+\texttt{VAR0}, which gets bound to \texttt{STR 4} (Figure \ref{fig:collect_variable4}).
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{collect_variable4.pdf}
+  \caption{After unifying with node (e).}
+  \label{fig:collect_variable4}
+\end{figure}
+
+Finally, the last term on the term stack is \texttt{b}, which
+can not be matched against \texttt{a} on node (f), hence no
+relevant answers are found on this trie.
 
 \section{Consuming Answers}
 
