@@ -1349,6 +1349,41 @@ relevant answers are found on this trie.
 
 \section{Consuming Answers}
 
+Each consumer subgoal frame stores a linked list with answers that are collected
+during evaluation. This list is built incrementally as new answers are generated
+for the generator subgoal, which updates the generator time stamp.
+Whenever a consumer choice point exhausts the answer list, the retrieval
+of relevant answers is attempted so the subgoal frame answer list can be extended.
+
+While the collection of specific answers is done by searching the answer trie
+and pruning branches by time stamp and unification failure, it is all done in one
+phase. The consumption of a set of answers $S$ is done by consuming one answer $A \in S$
+at a time and is completely separated from the collection phase.
+
+Assume we have a trie path from the leaf node $L$ representative of $A$ and
+the trie root $R$. Consuming $A$ amounts to unify the symbols on the trie path from $R$ to $L$
+to the answer template $AT$ that is built for the consumer choice point. In the end, the variables
+on $AT$ are updated so the WAM evaluation branch can proceed with new bindings.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{consume_answer.pdf}
+  \caption{Data structures related to answer consumption.}
+  \label{fig:consume_answer}
+\end{figure}
+
+As we are certain that $A$ unifies with $AT$, consumption can be reduced to locating a relevant
+answer in a trie with only the answer $A$, no time stamp pruning or backtracking is done.
+Implementation wise, we use the term stack that is initially pushed with $AT$
+and a symbol stack containing symbols from $R$ to $L$. Then, we proceed by
+iteratively popping one term from the term stack and one symbol from the symbol stack
+and unifying one against the other.
+
+In Figure \ref{fig:consume_answer} we present the data structures involved in consuming
+a subsumptive answer. The subsumptive subgoal is \texttt{p(X,Y,Z)} and the
+subsumed subgoal is \texttt{p(d,p(X),3)}. The answer to consume is \texttt{p(d,f(a),3)}.
+After the answer is consumed, the subsumed subgoal gets a new answer: \texttt{X = a}.
+
 \section{Compiled Tries}
 
 \section{Subsumptive YapTab}
