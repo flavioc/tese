@@ -750,7 +750,7 @@ When a subgoal completes, the time stamp indexes, which are only used
 during collection of relevant answers
 for consumer subgoals, are thrown away to save space.
 
-\section{Collecting Relevant Answers}
+\section{Collecting Relevant Answers}\label{sec:collect}
 
 The process of collecting relevant answers for a consumer subgoal $G$ from an answer trie $T$
 of the generator subgoal $G'$, involves searching $T$ for a set $S$ of answers that unify
@@ -1385,6 +1385,67 @@ subsumed subgoal is \texttt{p(d,p(X),3)}. The answer to consume is \texttt{p(d,f
 After the answer is consumed, the subsumed subgoal gets a new answer: \texttt{X = a}.
 
 \section{Compiled Tries}
+
+After an answer trie is completed, it is very common to "compile" the trie,
+annotating each trie node with a \textit{trie instruction}. This optimization technique
+is called \textit{compiled tries} \cite{RamakrishnanIV-99}.
+
+Compiled tries are based around the observation that all common prefixes of the terms in a trie
+are shared during execution of trie instructions. Thus, when backtracking
+through the terms of a trie, each transition is taken only once.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{compiled_trie.pdf}
+  \caption{A compiled trie for subgoal \texttt{p(X,Y,Z)}.}
+  \label{fig:compiled_trie}
+\end{figure}
+
+In Figure \ref{fig:compiled_trie} we represent a compiled answer trie for the subgoal
+\texttt{p(X,Y,Z)}. Note that each node is extended with an instruction field.
+The instruction set follows the standard WAM instruction style with \textit{try},
+\textit{retry} and \textit{trust}.
+On a sibling chain the leftmost nodes are marked with \textit{try} instructions and middle
+nodes with \textit{retry} instructions. Right-most nodes use the \textit{trust} instruction,
+while single nodes use the \textit{do} instruction.
+
+A \textit{try} instruction creates a new WAM choice point pointing to the sibling node,
+while \textit{retry} instructions change the previous choice point to point to the next sibling node,
+thus enabling us to navigate to new trie branches while backtracking. The \textit{trust}
+instruction removes the choice point as no more siblings are available. Finally, \textit{do}
+instructions do not create choice points as no backtracking options are available.
+
+In a variant tabling engine, each trie instruction just binds each variable on the substitution factor to a term. On structured terms, like functors or lists, the term is first built on the heap and then
+bound to the current variable, while the unbound arguments are then passed unto the next trie levels
+to be instantiated.
+
+In XSB, time stamped tries are used to evaluate subsumed subgoals while the subsuming subgoal
+is incomplete, thus providing incremental retrieving of answers.
+When a subgoal $G$ completes, the engine uses the compiled answer trie from $G$
+to evaluate a subsumed subgoal $G'$, instead of loading each individual answer.
+Using the compiled trie to evaluate $G'$ is thus more efficient, because
+each trie path is traversed at most only once. Note that certain paths are pruned when they
+are not relevant to $G'$.
+
+Some modifications are thus required to use compiled tries in subsumptive tabling. First,
+instead of using the substitution factor when running compiled code, we use the answer template built
+on the local stack. Next, each instruction must now do unifications instead of simple bind operations,
+because in addition to unbound variables, these instructions can also receive instantiated terms.
+Finally, while each instruction succeeds when running with the substitution factor of the generator
+subgoal, for subsumed subgoals some instructions can fail, because not every answer will be relevant,
+hence will not unify with the answer template. The unification operations done on each trie node
+are similar to the unifications done while collecting relevant answers in time stamped tries
+(Section \ref{sec:collect}).
+
+Variant engines like YapTab collapse each hash table into a chain of nodes before compiling
+the trie. While this technique makes sense for a variant engine, in subsumptive engines
+having hash tables helps the unification process by enabling fast search of instantiated terms.
+Thus, instead of removing hash tables, they are kept and also extended with a new instruction,
+\textit{do\_hash}. When the next term to unify is instantiated we first lookup the bucket for this
+term and execute the code of the bucket chain, and optionally we store a choice point that will
+execute code from the variable bucket, because variables can unify with any term. If we had
+a very long sibling chain, locating a specific term would have a linear time complexity, while
+hash tables provide $O(1)$ search complexity.
 
 \section{Subsumptive YapTab}
 
