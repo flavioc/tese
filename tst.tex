@@ -1437,15 +1437,28 @@ hence will not unify with the answer template. The unification operations done o
 are similar to the unifications done while collecting relevant answers in time stamped tries
 (Section \ref{sec:collect}).
 
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{compiled_hash.pdf}
+  \caption{Compiled hash table.}
+  \label{fig:compiled_hash}
+\end{figure}
+
 Variant engines like YapTab collapse each hash table into a chain of nodes before compiling
 the trie. While this technique makes sense for a variant engine, in subsumptive engines
 having hash tables helps the unification process by enabling fast search of instantiated terms.
 Thus, instead of removing hash tables, they are kept and also extended with a new instruction,
-\textit{do\_hash}. When the next term to unify is instantiated we first lookup the bucket for this
+\textit{do\_hash} (Figure \ref{fig:compiled_hash}).
+
+When the next term to unify is instantiated we first lookup the bucket for this
 term and execute the code of the bucket chain, and optionally we store a choice point that will
 execute code from the variable bucket, because variables can unify with any term. If we had
 a very long sibling chain, locating a specific term would have a linear time complexity, while
 hash tables provide $O(1)$ search complexity.
+
+If the term is a variable, we must visit every trie node in the hash table. This can be done
+by storing a choice point where the next hash bucket to execute is stored. If no more
+buckets are available, this choice point is removed and the computation fails.
 
 \section{Subsumptive YapTab}
 
