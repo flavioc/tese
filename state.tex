@@ -335,6 +335,51 @@ From the described example we can summarize four main operations needed to suppo
   can use the set $S$ without the need to suspend.
 \end{itemize}
 
+\subsection{Tabling Instructions}
+
+Tabling engines extend the WAM instruction set with \textit{tabling instructions} to support the four
+main tabling operations. Usually, each tabled predicate is compiled by using
+variants of the following instructions:
+\texttt{table\_try}, \texttt{table\_retry} and \texttt{table\_trust}. These instructions
+are very similar to \texttt{try\_me}, \texttt{retry\_me} and
+\texttt{trust\_me}, which the WAM natively implements. 
+
+For tabled predicates with multiple clauses, \texttt{table\_try} is used on the first clause,
+\texttt{table\_retry} for the middle clauses and \texttt{table\_trust} for the last clause.
+Predicates with a single clause use a special instruction: \texttt{table\_try\_single}.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+path/2_1:
+  table_try_me path/2_2
+  % WAM code for path(X,Z) :- edge(X,Y), path(Y,Z).
+  new_answer
+path/2_2:
+  table_trust_me
+  % WAM code for path(X,Z) :- edge(X,Z).
+  new_answer
+\end{Verbatim}
+\caption{Compiled code for the tabled predicate \texttt{path/2}.}
+\label{fig:compiled_tabled_path}
+\end{figure}
+
+The \texttt{table\_try} instruction implements the tabled subgoal call operation. If the subgoal is called
+for the first time, the data structures associated with this subgoal and a new generator node are created.
+Execution then proceeds by executing each predicate clause. This is performed by
+\texttt{table\_retry}, which alters the next instruction of the generator choice point to the next clause
+of the predicate.
+On the other hand, if the subgoal is repeated,
+a consumer choice point is allocated and set to execute the \texttt{answer\_resolution}
+instruction, which consumes answers and implements the answer resolution operation.
+
+The instruction \texttt{table\_trust} is executed by generator nodes and sets the next
+instruction to execute upon backtracking to
+\texttt{completion}, which runs the completion operation.
+
+Finally, at the end of each clause, the instruction \texttt{new\_answer} is appended to implement
+the new answer operation. This instruction has access to the arguments of a tabled subgoal call,
+thus by dereferencing them we obtain a new solution, which can be added unto the table space.    
+
 \subsection{Scheduling Strategies}
 
 During evaluation of the previous example it is very clear that at several points we can choose between

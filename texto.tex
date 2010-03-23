@@ -1,58 +1,59 @@
-\documentclass[11pt]{report}
+\documentclass[12pt,a4paper]{report}
+\usepackage{fcthesis} 
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 %\usepackage{citesort} % sorts citation numbers appropriately
-\usepackage[]{graphicx} % use this when importing ps- and eps-files
+\usepackage[]{graphicx}
 \usepackage{url}
 \usepackage{listings}
-\usepackage[boxed,linesnumbered]{algorithm2e}
-\usepackage{fix-cm}
+%\usepackage[boxed,linesnumbered]{algorithm2e}
+%\usepackage{fix-cm}
 \usepackage{cite}
-\usepackage{verbatim}
+%\usepackage{verbatim}
 \usepackage{enumerate}
 \usepackage{fancyvrb}
 \usepackage{float}
+\usepackage[section]{placeins}
+%\usepackage{fancyhdr} % para cabeçalhos mais elaborados
 
-\usepackage{setspace}
-\doublespacing
+\fvset{fontsize=\footnotesize}
 
-% \usepackage[pdftex]{graphicx} % use this when importing PDF files
-
-% horizontal margins: 1.0 + 6.5 + 1.0 = 8.5
-\setlength{\oddsidemargin}{0.0in}
-\setlength{\textwidth}{6.5in}
-% vertical margins: 1.0 + 9.0 + 1.0 = 11.0
-\setlength{\topmargin}{0.0in}
-\setlength{\headheight}{12pt}
-\setlength{\headsep}{13pt}
-\setlength{\textheight}{625pt}
-\setlength{\footskip}{24pt}
-
-\pagestyle{myheadings}
-
-\title{\fontsize{20}{30}\bfseries This is a title}
-\author{Flávio Manuel Fernandes Cruz \\}
-\date{\today}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.95}
+\renewcommand{\floatpagefraction}{0.15}
+\setcounter{totalnumber}{5}
 
 \begin{document}
+
+\title{Call Subsumption Mechanisms for Tabled Logic Programs}
+\submitionplace{Dissertação submetida a Faculdade de Engenharia da \\
+    Universidade do Porto como parte dos requisitos para a obtenção do grau de \\
+    Mestre em Engenharia Informática e de Computação}
+\department{Departamento de Engenharia Informática \\ Faculdade de
+Engenharia da Universidade do Porto}
+\author{Flávio Manuel Fernandes Cruz}
+\submitdate{\today}
+\supervisor{Ricardo Rocha}
+\beforepreface
+
+%\begin{titlepage}
+
+%\begin{center}
   
-\begin{titlepage}
+%\textsc{\large Flávio Manuel Fernandes Cruz}\\[1.5cm]
 
-\begin{center}
+%\textsc{\LARGE Call Subsumption Mechanisms for Tabled Logic Programs}
+%\begin{figure}[ht]
+%  \centering
+%  \includegraphics[scale=1.0]{feup.pdf}
+%\end{figure}
+
+
+%\textsc{\large Faculdade de Engenharia da Universidade do Porto\\ \small Rua Dr. Roberto Frias, s/n \\ 4200-465 Porto PORTUGAL}\\[1.5cm]
   
-\textsc{\large Flávio Manuel Fernandes Cruz}\\[1.5cm]
-
-\textsc{\LARGE Call Subsumption Mechanisms for Tabled Logic Programs}
-\begin{figure}[ht]
-  \centering
-  \includegraphics[scale=1.0]{feup.pdf}
-\end{figure}
-
-
-\textsc{\large Faculdade de Engenharia da Universidade do Porto\\ \small Rua Dr. Roberto Frias, s/n \\ 4200-465 Porto PORTUGAL}\\[1.5cm]
-  
-\end{center}
-\end{titlepage}
+%\end{center}
+%\end{titlepage}
 
 \addcontentsline{toc}{chapter}{Contents}
 \tableofcontents
@@ -74,7 +75,9 @@
 \input{tst}
 
 \chapter{Implementation Details}
+
 \chapter{Experimental Results}
+
 \chapter{Conclusions and further work}
   
 \renewcommand{\bibname}{References}

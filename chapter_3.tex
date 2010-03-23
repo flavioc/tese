@@ -110,10 +110,9 @@ the last consumed answer leaf. The last consumed answer pointer is an \textit{an
 a consumer needs to verify or consume the next available answer, it uses the continuation to retrieve the next
 answer, following the chain of answers. To load an answer, the trie nodes are traversed in bottom-up order and the answer is reconstructed.
 
-To facilitate memory management, both systems link subgoal frames by storing \textbf{next} and \textbf{previous} pointers in each subgoal frame,
-forming a double linked list.
-
-Information about the current evaluation state of the subgoal is usually kept. Yap has the following states:
+To facilitate memory management, both systems link subgoal frames by storing
+\textbf{next} and \textbf{previous} pointers in each subgoal frame, forming a double linked list.
+The evaluation state of the subgoal is also stored. For example, Yap has the following states:
 \textit{ready}, \textit{evaluating}, \textit{complete} and \textit{incomplete}.
 
 \section{Tabling by Call Subsumption} \label{sec:subsumption}
