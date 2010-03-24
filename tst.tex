@@ -1381,7 +1381,7 @@ a subsumptive answer. The subsumptive subgoal is \texttt{p(X,Y,Z)} and the
 subsumed subgoal is \texttt{p(d,p(X),3)}. The answer to consume is \texttt{p(d,f(a),3)}.
 After the answer is consumed, the subsumed subgoal gets a new answer: \texttt{X = a}.
 
-\section{Compiled Tries}
+\section{Compiled Tries}\label{sec:compiled_tries}
 
 After an answer trie is completed, it is very common to "compile" the trie,
 annotating each trie node with a \textit{trie instruction}. This optimization technique
@@ -1840,5 +1840,27 @@ subsumptive producer subgoal frames.
 \end{figure}
 
 \subsection{Compiled Tries}
+
+YapTab also implements the compiled tries optimization, but as described in Section \ref{sec:compiled_tries}
+we needed to change each trie instruction to do unification instead of simple variable binding.
+
+Another important modification was the hash instructions. Two new instructions were
+implemented: \texttt{trie\_do\_hash} and \texttt{trie\_retry\_hash}.
+The instruction \texttt{trie\_do\_hash} is executed once an hash table node is reached.
+If the next term to unify is a variable (case 2) each hash bucket will be executed, if it is an instantiated term (case 2)
+the indexed bucket will be executed first, followed by the variable bucket.
+
+We use an hash choice point (\texttt{hash\_choice\_pt}) to execute each bucket.
+For instantiated terms, the hash choice point is only allocated when both variable and indexed bucket
+exist and are different. For variables, the choice point is always stored. The instruction
+set to execute upon backtracking is \texttt{trie\_retry\_hash}.
+
+An hash choice point is an WAM choice point extended with two new fields:
+\texttt{last\_bucket} and \texttt{final\_bucket}.
+The field \texttt{last\_bucket} points to the last executed bucket on case 1 or the
+variable bucket for case 2.
+The second field, \texttt{final\_bucket}, helps differentiate between
+case 1 and 2, as in case 2 its value is NULL. In case 1 points to the final hash table bucket,
+hence it is easy to know when to remove the choice point.
 
 \section{Results}
