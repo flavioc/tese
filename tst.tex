@@ -1552,8 +1552,7 @@ generator node is a leader.
 \begin{figure}[ht]
 \begin{Verbatim}
 tabled_subgoal_call(table_entry, arguments) {
-  results = subgoal_search(call_trie(table_entry), arguments)
-  subgoal_frame = sg_fr(results)
+  subgoal_frame = subgoal_search(call_trie(table_entry), arguments)
   
   if state(subgoal_frame) == ready
     // new generator
@@ -1601,37 +1600,33 @@ to create a consumer subgoal frame.
 \begin{figure}[ht]
 \begin{Verbatim}
 subsumptive_subgoal_search(table_entry, arguments) {
-  results = new Results()
-  
   (path, leaf) = lookup_subsuming_call(call_trie(table_entry), arguments)
   
   if path == NO_PATH
-    variant_found(results) = FALSE
-    leaf(results) = insert_with_variant_continuation(call_trie)
-    // create a variant answer template
-    answer_template(results) = extract_template_from_insertion(local_stack)
-    sg_fr(results) = create_producer_subgoal_frame(leaf(results))
+    leaf = insert_with_variant_continuation(call_trie)
+    local_stack = extract_template_from_insertion(local_stack)
+    return create_producer_subgoal_frame(leaf)
   else
-    // new consumer
-    subsumer = subgoal_frame(leaf)
+    found = subgoal_frame(leaf)
     
-    if type(subsumer) == producer
-      answer_template(results) = extract_template_from_lookup(local_stack)
+    if type(found) == producer
+      subsumer = found
+      local_stack = extract_template_from_lookup(local_stack)
     else
-      subsumer = producer(subsumer)
-      answer_template(results) = reconstruct_template_for_producer(subsumer, local_stack)
+      subsumer = producer(found)
+      local_stack = reconstruct_template_for_producer(subsumer, local_stack)
     
-    variant_found(results) = (path_type == VARIANT_PATH)
+    if path_type == VARIANT_PATH
+      return found
     
-    if path_type != VARIANT_PATH && state(subsumer) == evaluating
+    // subsumptive path
+    if state(subsumer) == evaluating
       // create variant path
-      leaf(results) = insert_with_variant_continuation(call_trie)
-      sg_fr(results) = create_new_consumer_subgoal(leaf(results), subsumer)
-      copy_answer_template_to_heap(answer_template(results))
+      leaf = insert_with_variant_continuation(call_trie)
+      copy_answer_template_to_heap(local_stack)
+      return create_new_consumer_subgoal(leaf, subsumer)
     else
-      sg_fr(results) = subsumer
-  
-  return results
+      return subsumer
 }
 \end{Verbatim}
 \caption{Pseudo-code for \texttt{subsumptive\_subgoal\_search}.}
@@ -1662,13 +1657,12 @@ within the environment of the subsumed call.
 \begin{figure}[ht]
 \begin{Verbatim}
 tabled_subgoal_call(table_entry, arguments) {
-  results = subgoal_search(call_trie(table_entry), arguments)
-  subgoal_frame = sg_fr(results)
+  subgoal_frame = subgoal_search(call_trie(table_entry), arguments)
   
-  if is_new_generator_call(results)
+  if is_new_generator_call(subgoal_frame)
     store_generator_node(table_entry, arguments, subgoal_frame)
     jump_to_predicate_code()
-  else if is_new_consumer_call(results)
+  else if is_new_consumer_call(subgoal_frame)
     dependency = find_dependency_node(subgoal_frame)
     leader = find_leader_node(subgoal_frame, dependency)
     store_consumer_node(table_entry, subgoal_frame, leader)
@@ -1689,12 +1683,11 @@ tabled_subgoal_call(table_entry, arguments) {
 
 Other modifications were applied in order to abstract some details about
 variant and subsumptive tabling (Figure \ref{fig:tabled_subgoal_call_new}).
-The function \texttt{is\_new\_generator\_call} inspects the return value
-of \texttt{subgoal\_search} in order to tell if a new generator node must be allocated.
-For call subsumption, a new generator is called whenever a variant subgoal is not found
+The function \texttt{is\_new\_generator\_call} inspects the found
+subgoal frame in order to tell if a new generator node must be allocated.
+For call subsumption, a new generator is allocated whenever a variant subgoal is not found
 on the trie and the resulting subgoal frame is a producer.
-The function \texttt{is\_new\_consumer\_call} knows a new consumer node must be
-allocated when:
+The function \texttt{is\_new\_consumer\_call} knows returns \texttt{TRUE} when:
 
 \begin{enumerate}
   \item The subgoal frame is variant or producer and is currently being evaluated;
