@@ -1,0 +1,129 @@
+\chapter{Benchmark Programs}
+
+This appendix describes the programs used to benchmark the tabling engines
+explored in this thesis. The program rules will be fully presented here and
+the facts will be shortly described, because these are too big to fit here.
+The author of this thesis may be contacted for the full benchmark set.
+
+\section{Programs}
+
+\subsubsection*{path\_left\_first}
+
+\begin{Verbatim}
+:- table path/2.
+
+path(X, Z) :- path(X, Y), edge(Y, Z).
+path(X, Z) :- edge(X, Z).
+\end{Verbatim}
+
+\subsubsection*{path\_left\_last}
+
+\begin{Verbatim}
+:- table path/2.
+
+path(X, Z) :- edge(X, Z).
+path(X, Z) :- path(X, Y), edge(Y, Z).
+\end{Verbatim}
+
+\subsubsection*{path\_right\_first}
+
+\begin{Verbatim}
+:- table path/2.
+
+path(X, Z) :- edge(X, Y), path(Y, Z).
+path(X, Z) :- edge(X, Z).
+\end{Verbatim}
+
+\subsubsection*{path\_right\_last}
+
+\begin{Verbatim}
+:- table path/2.
+
+path(X, Z) :- edge(X, Z).
+path(X, Z) :- edge(X, Y), path(Y, Z).
+\end{Verbatim}
+
+\subsubsection*{path\_double\_last}
+
+\begin{Verbatim}
+:- table path/2.
+
+path(X, Z) :- edge(X, Z).
+path(X, Z) :- path(X, Y), path(Y, Z).
+\end{Verbatim}
+
+\subsubsection*{same\_gen}
+
+\begin{Verbatim}
+:- table same_gen/2.
+
+same_gen(X,X).
+same_gen(X,Y) :- edge(W, X), same_gen(W,Z), edge(Z, Y).
+\end{Verbatim}
+
+\subsubsection*{genome}
+
+\begin{Verbatim}
+:- table genome/1.
+:- table path/2.
+
+path(X, Z) :- edge(X, Z).
+path(X, Z) :- path(X, Y), edge(Y, Z).
+
+genome(X) :- path(1, X), path(2, X).
+\end{Verbatim}
+
+\section{Facts}
+
+\subsubsection*{chain}
+
+A set of graph nodes in a chain configuration.
+
+An example with 4 nodes:
+
+\begin{Verbatim}
+edge(1, 2).
+edge(2, 3).
+edge(3, 4).
+\end{Verbatim}
+
+\subsubsection*{cycle}
+
+A set of graph nodes in a chain configuration, but the last node connects to the first node.
+
+An example with four nodes:
+
+\begin{Verbatim}
+edge(1, 2).
+edge(2, 3).
+edge(3, 4).
+edge(4, 1).
+\end{Verbatim}
+
+\subsubsection*{pyramid}
+
+A set of graph nodes forming a pyramid configuration.
+
+An example with four nodes (depth 2):
+
+\begin{Verbatim}
+edge(1,2).
+edge(1,3).
+edge(2,4).
+edge(3,4).
+\end{Verbatim}
+
+\subsubsection*{tree}
+
+A set of graph nodes forming a binary tree configuration.
+
+An example with seven nodes (depth 3):
+
+\begin{Verbatim}
+edge(1,2).
+edge(1,3).
+edge(2,4).
+edge(2,5).
+edge(3,6).
+edge(3,7).
+\end{Verbatim}
