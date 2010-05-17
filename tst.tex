@@ -1,39 +1,38 @@
 In this chapter, we throughly describe the Time Stamped Tries approach
 to implement a subsumptive tabling engine. This mechanism was proposed by
-Ernie Johnson \textit{et al} \cite{Johnson-99} and is currently implemented in XSB.
+Ernie Johnson \textit{et al}. \cite{Johnson-99} and is currently implemented in XSB.
 It is based on the idea of extending each answer trie node with \textit{time stamp}
 information as a means to distinguish between new answers and old answers.
 
 First, we start by describing the algorithms and data structures associated
 with the detection of subsuming goals. Next, we explain the data structures
 introduced in the answer tries to support subsumption, focusing on answer insertion
-and retrieval for subsumed subgoals. Then, we describe the modifications made in the YapTab
-tabling engine to support subsumptive tabling, particularly on the tabling operations and the table space.
-Finally, we compare the performance of
-the subsumptive YapTab against XSB, and the variant counterparts.
+and retrieval for subsumed subgoals. Finally, we describe the modifications made to the YapTab
+tabling engine in order to support subsumptive tabling, focusing on the tabling operations and the table space.
 
 \section{Finding General Subgoals}\label{sec:lookup_subsuming}
 
-The problem of finding on a call trie $C$ a subgoal $G'$ that subsumes $G'$ 
-is an important part of a subsumptive engine, as it makes possible to create
-a relation of subsumption between $G'$ and $G$.  
+The problem of finding on a call trie $C$ a subgoal $G'$ that subsumes $G$ 
+is an important part of a subsumptive engine, as it makes possible to identify
+a subsumptive relation between $G'$ and $G$.
 
-In SLG-WAM, the search is performed by recursively backtracking through the call trie $C$, trying
+In the SLG-WAM, the search is performed by recursively backtracking through the call trie $C$, trying
 to match the node symbols with subterms from $G$. The process stops once a leaf node is reached.
 
 The matching process gives priority to match non-variable terms from $G$
 with an identical symbol from $C$.
-If the current trie symbol is a variable, for example \texttt{VAR0}, on the first occurrence \texttt{VAR0}
-is bound to the respective $G$ subterm
-and match succeeds; on the next occurrences of \texttt{VAR0}, the current subterm from $G$ must
-be identical to the term bound to \texttt{VAR0}. Throughout the backtracking process, bound variables are
+If the current trie symbol is a variable, for example \texttt{VAR0}, on its first occurrence, \texttt{VAR0}
+is bound to the respective $G$ sub-term
+and match succeeds; on the next occurrences, the current sub-term from $G$ must
+be identical to the term bound to \texttt{VAR0}. Throughout the search process, bound variables are
 matched before unbound variables.
 
-Favoring constant values before variables, results in a mechanism that finds \textit{minimally subsuming calls}.
-Also, if there is a variant trie path of $G$ called $G''$, $G''$ is found before any other subgoal.
-If no variant path is found, it is possible to speedup the process of inserting a variant path of $G$
-by saving a trie node where the following conditions occurred: the first constant match failure or an already seen
-$G$ variable paired to a trie variable could not be paired to the same trie variable.
+Favoring non-variable terms, results in a mechanism that finds \textit{minimally subsuming calls}.
+In particular, if there is a variant trie path of $G$ called $G''$, $G''$ is found before any other subgoal.
+If no variant path exits, it is possible to speedup the process of inserting a variant path of $G$
+by recording a trie node where one of the following conditions was met: (1) the first constant match
+failure occurred or (2) an already seen $G$ variable paired to a trie variable could
+not be paired to the same trie variable.
 
 \begin{figure}[ht]
   \centering
@@ -42,42 +41,44 @@ $G$ variable paired to a trie variable could not be paired to the same trie vari
   \label{fig:sub_call_search}
 \end{figure}
 
-For illustration purposes, the Figure \ref{fig:sub_call_search} represents a call trie for the predicate \texttt{p/3}.
+For illustration purposes, Figure \ref{fig:sub_call_search} shows a call trie for a table predicate \texttt{p/3}.
 The first subgoal called was \texttt{p(X,2,X)}, followed by \texttt{p(X,f(Y),a(Z))} and finally \texttt{p(X,Y,Z)}.
 
-If the subgoal \texttt{p(X,2,X)} is called once again, the algorithm described above
+If the subgoal \texttt{p(X,2,X)} is called again, the algorithm described above
 should find the variant subgoal represented by the leaf node $n3$. First, we unify the trie variable
 \texttt{VAR0} with \texttt{X} (node $n1$), hence we must mark the \texttt{X} variable as \textit{seen},
 because if the same variable appears again it must unify with the same trie variable for a variant path
 to exist. Next, \texttt{2} easily unifies with trie node $n2$ and unification proceeds. In trie node $n3$,
 the current call term is \texttt{X} and we also have a variable in the trie node. As \texttt{X} was already seen before,
-it must unify with \texttt{VAR0} again, it does and a variant path is found. Please note that if
+it must unify with \texttt{VAR0}, it does and thus a variant path is found. Please note that if
 the trie symbol at node $n3$ was \texttt{VAR1}, the process could proceed but a variant path would be impossible
 to exist, and a subsuming subgoal would be found, as \texttt{p(VAR0,2,VAR1)} subsumes \texttt{path(VAR0,2,VAR0)}.
 In this case, a variant path could be created by resuming the insert operation at node $n2$ to insert
 a \texttt{VAR0} node.
 
 For a more complex example, let the subgoal \texttt{p(2,f(X),a(2))} now be called for the same call trie. First,
-the algorithm tries to find a trie node with the symbol \texttt{2}, it does not find one and a variant path
-can not be found in this call trie. Next, the algorithm tries to unify with bound variables, but as the process
-has just started, only unbound variables are to be found, thus \texttt{VAR0} is unified with \texttt{2} (node $n1$).
-The functor term \texttt{f/1} is the next term on the subgoal and node $n4$ matches with a constant symbol.
+the algorithm searches for a trie node with the symbol \texttt{2}, and as it does not find one, no variant path
+exists in this call trie. Next, the algorithm tries to unify with bound variables, but as the process
+has just started, only unbound variables are found, and \texttt{VAR0} (node $n1$) is unified with \texttt{2}.
+The functor term \texttt{f/1} is the next term on the subgoal and node $n4$ matches with it.
 The next term is \texttt{X} and it can unify with \texttt{VAR1} (node $n5$).
-Next, the term symbol \texttt{a/1} matches with trie node $n6$ and the process proceeds. Note that if we failed
-at this point, the process would backtrack to node $n2$ and node $n8$ would be tried next, which would
-lead to a more general subgoal. Back to node $n6$, the last term symbol \texttt{2} can match with node $n7$, as it is the only trie
-node available and it is an unbound variable. If the variable was bound, like \texttt{VAR0} for instance,
-the process would check if the current term symbol unifies with the variable binding made before (\texttt{VAR0 = 2}) and
-it would also succeed. As node $n7$ is a leaf node, the process finishes and a subsumptive path is found.
-The following variable bindings were made: \texttt{VAR0=2}, \texttt{VAR1=X}, and \texttt{VAR2=2}.
+Note that if we failed at this point, the process would backtrack to node $n1$ and node $n8$
+would be tried next, which would lead to a more general subgoal.
+Next, the functor term \texttt{a/1} matches with trie node $n6$ and the process proceeds.
+The last term symbol \texttt{2} can match with node $n7$, as it is an unbound variable
+and the only node available.
+If the variable was bound, like \texttt{VAR0} for instance,
+the process would check if the current term symbol unifies with the variable binding made before (\texttt{VAR0=2}) and
+it would also succeed. As node $n7$ is a leaf node, the process finishes with a subsumptive path found and
+the following variable bindings made: \texttt{VAR0=2}, \texttt{VAR1=X}, and \texttt{VAR2=2}.
 
 Implementation wise, this algorithm uses the following data structures:
 
 \begin{itemize}
   \item \textit{variable bindings vector}: saves bindings for each numbered trie variable. Starts with each position pointing to itself;
-  \item \textit{variable enumerator vector}: when a never seen term variable appears it must be bound to a position in this enumerator, ensuring that it can be recognized if it appears a second time;
-  \item \textit{term stack}: stores the remaining terms to be unified against trie symbols;
-  \item \textit{term log stack}: stores already matched terms. Each frame contains the top index and the top element of the term stack during the creation of a frame;
+  \item \textit{variable enumerator vector}: when a never seen term variable appears it must be bound to a position in this enumerator, ensuring that it can be recognized if the same variable appears a second time;
+  \item \textit{term stack}: stores the remaining terms to be unified against the trie symbols;
+  \item \textit{term log stack}: stores already matched terms taken from the term stack. Each frame contains the top index and the top element of the term stack during the creation of a frame;
   \item \textit{trail stack}: stores bindings that were made during the process. It is used to untrail variables during backtracking;
   \item \textit{call choice point stack}: used to restore the search process at a certain node to explore alternatives.
 \end{itemize}
@@ -86,8 +87,13 @@ During execution, two matching methods are considered: the first tries to match 
 the second method uses trie variables instead of exact symbols and is employed when the first method fails.
 When a trie node match succeeds, matching defaults to the first method, which means
 that exact matches are always tried before variables when a new \textit{trie level} is reached and variables are usually attempted
-when backtracking. A trie level represents a set of nodes that are linked by \texttt{sibling} links or are
+when backtracking. A trie level represents a set of nodes that are linked by \texttt{sibling} links or that are
 in the same hash table.
+
+The process starts by pushing the $G$ subgoal arguments, $X1, X2, ...Xn$ into the term stack, so that $X1$ is at the top
+and $Xn$ at the bottom (Figure \ref{fig:lookup_subgoal_termstack_start}).
+Then, the algorithm proceeds in a modified depth-first manner, trying to match the exact nodes first, and then
+the variable trie nodes. The skeleton for this algorithm is presented in Figure \ref{fig:lookup_subsuming_call}.
 
 \begin{figure}[ht]
   \centering
@@ -96,10 +102,12 @@ in the same hash table.
   \label{fig:lookup_subgoal_termstack_start}
 \end{figure}
 
-The process starts by pushing the $G$ subgoal arguments, $X1, X2, ...Xn$ into the term stack, so that $X1$ is at the top
-and $Xn$ at the bottom (Figure \ref{fig:lookup_subgoal_termstack_start}).
-Then, the algorithm proceeds in a modified depth-first manner, trying to match the exact nodes first, and then
-the variable trie nodes. The skeleton for this algorithm is presented in Figure \ref{fig:lookup_subsuming_call}.
+The basic idea of this algorithm is to match the current term from the term stack against a node in the current
+trie level and store the next alternative node on this level on the call choice point stack. If no node
+is found, we try alternatives on the choice point stack, else we use the matched node to descend into the trie.
+Two modes of matching exist: (1) \textbf{MATCH\_EXACTLY}, which is used when a new trie level is reached for the
+first time in order to do exact matches; (2) \textbf{MATCH\_TRIE\_VARS}, used when the current trie node is reached
+by backtracking, forcing variable matching.
 
 \begin{figure}[ht]
 \begin{Verbatim}
@@ -107,36 +115,41 @@ lookup_subsuming_call(call_trie, subgoal_call) {
   match_mode = MATCH_EXACTLY
   parent = trie_root(call_trie)
   node = child(parent)
+  variant_path = TRUE
   variable_chain = NULL
-  termstack_push_call(subgoal_call)
+  push_terms(term_stack, subgoal_call)
 
 while_loop:
-  while(termstack is not empty) {
-    subterm = deref(termstack_pop())
-    termstacklog_push(termstack_index(), termstack_top())
+  while (!empty(term_stack))
+    subterm = deref(pop(term_stack))
+    push(term_log_stack, subterm)
   
-    if(subterm is atom or integer)
-      match_constant(subterm)
-    else if(subterm is functor or list)
-      match_structured_term(subterm)
-    else if(subterm is variable)
-      match_variable(subterm)
+    if (is_atom(subterm) or is_integer(subterm))
+      match = match_constant(subterm, match_mode, node, var_chain)
+    else if (is_functor(subterm) or is_list(subterm))
+      match = match_structured_term(subterm, match_mode, node, var_chain)
+    else if (is_variable(subterm))
+      match = match_variable(subterm, match_mode, node, var_chain)
   
-    if(current match failed)
-      if(choice point stack is empty) // no more alternatives
+    if (match == FAIL)
+      if (empty(call_choice_point_stack)) // no more alternatives
         return NO_PATH
       else
-        (alt_node, var_chain) = ccpstack_pop_frame()
-        match_mode = MATCH_TRIE_VARS
-  }
+        (alt_node, var_chain) = pop_choice_point_frame(call_choice_point_stack)
+        match_mode = MATCH_TRIE_VARS // backtrack mode
+    else // valid match, descend into node
+      parent = match
+      node = child(match)
+      match_mode = MATCH_EXACTLY
+      goto while_loop
   
-  if variant path found
+  if (variant_path == TRUE)
     return (VARIANT_PATH, parent)
   else
     return (SUBSUMPTIVE_PATH, parent)
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{lookup\_subsuming\_call}.}
+\caption{Pseudo-code for procedure \texttt{lookup\_subsuming\_call}.}
 \label{fig:lookup_subsuming_call}
 \end{figure}
 
@@ -157,69 +170,33 @@ of the call frame creation.
 Each frame contains the next trie node to explore (\texttt{alt\_node}),
 the current variable chain (\texttt{var\_chain}),
 and the following stack indexes during frame creation:
-the top of the term stack (\texttt{termstk\_top\_index}),
-the top of the term log stack (\texttt{log\_top\_index}),
-and the top of the trail stack (\texttt{trail\_top\_index}).
-The function \texttt{ccpstack\_push\_frame} (Figure \ref{fig:ccpstack_push_frame})
-is used to create a new frame from the computation state.
-
-\begin{figure}[ht]
-\begin{Verbatim}
-ccpstack_push_frame(alt_node, var_chain) {
-  CCPFrame new_frame = new CPPFrame()
-  new_frame.alt_node = alt_node
-  new_frame.var_chain = var_chain
-  new_frame.termstk_top_index = termstack_top - termstack_base + 1
-  new_frame.log_top_index = termstacklog_top - termstacklog_base - 1
-  new_frame.trail_top_index = trail_top - trail_base
-  ccpstack_push(new_frame)
-}
-\end{Verbatim}
-\caption{Pseudo-code for \texttt{ccpstack\_push\_frame}.}
-\label{fig:ccpstack_push_frame}
-\end{figure}
+the top of the term stack (\texttt{term\_stack\_top}),
+the top of the term log stack (\texttt{term\_log\_stack\_top}),
+and the top of the trail stack (\texttt{trail\_stack\_top}).
 
 When popping a frame from the stack, the state of the auxiliary stacks and the other data
-structures is restored. Consider a computational state $S1$ that pushed unto the stack
+structures is restored. Consider a computational state $S1$ that pushed into the stack
 the frame $F1$. Given that we are at state $S2$ and we need to backtrack to the previous state, $S1$,
-first we need remove $F1$ from the stack and use the frame's information to restore $S1$.
+first we need remove $F1$ from the stack and use the frame's information to restore $S1$,
+which includes the alternative node, variable chain and the auxiliary stacks.
 
 Any terms that were popped from the term stack from $S1$ to $S2$, which were
 stored in the term log stack must be restored back into the term stack.
 Then, any bindings made from $S1$ to $S2$ must be untrailed, which is
 accomplished by \textit{unwinding} the trail stack. The unwind process untrails
 any trie variables bound to the trie variable bindings vector
-and any term variable which may have been made to point to the variable enumerator. 
+and any term variable which may have been made to point to the variable enumerator.
 
-Finally, the alternative node and
-the variable chain at state $S1$ is also restored. All this is accomplished by the
-function \texttt{ccpstack\_pop\_frame} (Figure \ref{fig:ccpstack_pop_frame}).
-
-\begin{figure}[ht]
-\begin{Verbatim}
-ccpstack_pop_frame() {
-  CCPFrame top_frame = ccpstack_pop()
-  termstacklog_unwind(top_frame.log_top_index)
-  termstack_set_top_of_stack(top_frame.termstk_top_index)
-  trail_unwind(top_frame.trail_top_index)
-  
-  return (top_frame.alt_node, top_frame.var_chain)
-}
-\end{Verbatim}
-\caption{Pseudo-code for \texttt{ccpstack\_push\_frame}.}
-\label{fig:ccpstack_pop_frame}
-\end{figure}
-
-The node associated with $S2$ and its successors are never visited again and
+The node associated with state $S2$ and its successors are never visited again and
 the process continues until a leaf node is reached or the call choice point stack
 is exhausted, yielding no results.
 
 \subsection{Matching Constants}
 
-The \texttt{match\_constant} function (Figure \ref{fig:match_constant}) is called whenever the
+The \texttt{match\_constant} procedure (Figure \ref{fig:match_constant}) is called whenever the
 next term from the term stack is a integer or an atom.
-First, in phase \textbf{(1)}, the function checks if the match method is to exactly match the
-subterm constant against a trie symbol, which means
+First, in phase \textbf{(1)}, the procedure checks if the match method is to exactly match the
+sub-term constant against a trie symbol, which means
 that this is the first time this trie level is explored. If the current trie level is represented by a simple
 linked list, both \texttt{node} and \texttt{var\_chain} point to the start of the chain, but if the trie level
 is an hash table, \texttt{node} will point to the indexed bucket and \texttt{var\_chain} to the variable
@@ -227,69 +204,40 @@ bucket, which is the first bucket.
 
 \begin{figure}[ht]
 \begin{Verbatim}
-match_constant(constant) {
-  if match_mode == MATCH_EXACTLY // (1)
+match_constant(constant, match_mode, node, var_chain) {
+  if (match_mode == MATCH_EXACTLY) // (1)
     (node, var_chain) = set_node_and_var_chain(constant)
     match_node = find_matching_node(constant, node)
-    if match_node is not NULL
+    if (match_node != NULL)
       conditionally_create_choice_point(var_chain)
-      descend_node(match_node)
+      return match_node
     else // no match found
       node = var_chain
       no_variant_found(parent)
   // no exact match, try bound trie variables (2)
   match_node = find_bound_trie_var(constant, node)
-  if match_node is not NULL
-    ccpstack_push_frame(next(match_node), var_chain)
-    descend_node(match_node)
+  if (match_node != NULL)
+    push_call_choice_frame(call_choice_point_stack, next(match_node), var_chain)
+    return match_mode
   // no bound trie variable found, use unbound trie variables (3)
   match_node = find_unbound_trie_var(var_chain)
-  if match_node is not NULL
+  if (match_node != NULL)
     bind_trie_var(match_node, constant)
-    descend_node(match_node)
+    return match_node
+  return FAIL
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{match\_constant}.}
+\caption{Pseudo-code for procedure \texttt{match\_constant}.}
 \label{fig:match_constant}
 \end{figure}
 
-The function \texttt{find\_matching\_node} iterates over a linked list and locates a trie node that contains the
-\texttt{constant} symbol. If this node is found we create
-new choice point (Figure \ref{fig:conditionally_create_choice_point}) if a node
-with a variable can be found on the variable chain, so it can be used when backtracking. Note that only
-trie variables can be explored next as there at most one node with the previously matched symbol.
+The procedure \texttt{find\_matching\_node} iterates over a linked list and locates a trie node that matches the
+\texttt{constant} symbol. When successful, we push a new call choice frame on the stack
+with a variable node from the variable chain, so it can be used as an alternative during backtracking.
+Note that only trie variables can be explored next as there is at most one node with the previously matched symbol.
 
-\begin{figure}[ht]
-\begin{Verbatim}
-conditionally_create_choice_point(var_chain) {
-  foreach(node in var_chain)
-    if(is_trie_var(node))
-      ccpstack_push_frame(node, node)
-      return
-}
-\end{Verbatim}
-\caption{Pseudo-code for \texttt{conditionally\_create\_choice\_point}.}
-\label{fig:conditionally_create_choice_point}
-\end{figure}
-
-To descend into a node when a matching succeeds, the function \texttt{descend\_node} (Figure \ref{fig:descend_node})
-is used. It sets the current \texttt{node} and \texttt{parent} information, sets the matching mode for a new trie level
-and changes the program flow to the main \texttt{lookup\_subsuming\_call} while loop. But,
-if an exact match fails, we know that the current path cannot be variant of the called subgoal, and we call
-\texttt{no\_variant\_found} with the parent node as argument.
-
-\begin{figure}[ht]
-\begin{Verbatim}
-descend_node(target_node) {
-  parent = target_node
-  node = child(target_node)
-  match_mode = MATCH_EXACTLY
-  goto while_loop
-}
-\end{Verbatim}
-\caption{Pseudo-code for \texttt{descend\_node}.}
-\label{fig:descend_node}
-\end{figure}
+If an exact match fails, we know that the current path cannot be variant of the called subgoal, and we call
+\texttt{no\_variant\_found} with the parent node as argument, which will record the node.
 
 Phase \textbf{(2)} of \texttt{match\_constant} can be reached by a failed exact match or by backtracking
 (remember that the match mode changes to \texttt{MATCH\_TRIE\_VARS} when backtracking). In this step
@@ -303,60 +251,49 @@ In this case, we create a new choice point for the sibling node of the matched t
 the currently set variable chain.
 
 Finally, if phase \textbf{(1)} and \textbf{(2)} fail, we try to match our constant against an unbound trie variable
-(Figure \ref{fig:find_unbound_trie_var}).
+(procedure \texttt{find\_unbound\_trie\_var}).
 Phase \textbf{(3)} can be also reached by a failed exact and bound trie variable match or by subsequent backtrack
 attempts. If a node is found, we trail the variable and bind it to a position on the variable bindings
 vector to point to the new constant.
 
-\begin{figure}[ht]
-\begin{Verbatim}
-find_unbound_trie_var(var_chain) {
-  foreach(node in var_chain)
-    if(is_variable(node) and is_new_variable(node))
-      return node
-}
-\end{Verbatim}
-\caption{Pseudo-code for \texttt{find\_unbound\_trie\_var}.}
-\label{fig:find_unbound_trie_var}
-\end{figure}
-
 \subsection{Matching Structured Terms}
 
 When a structured term appears on the term stack, either a functor or a list, the matching process works
-just like constants, except the functor or list arguments must be pushed unto the term stack after an exact
+just like constants, except the functor or list arguments must be pushed into the term stack after an exact
 match is found (Figure \ref{fig:match_structured_term}).
 
 \begin{figure}[ht]
 \begin{Verbatim}
-match_structured_term(term) {
-  if match_mode == MATCH_EXACTLY // (1)
+match_structured_term(term, match_mode, node, var_chain) {
+  if (match_mode == MATCH_EXACTLY) // (1)
     (node, var_chain) = set_node_and_var_chain(term)
     match_node = find_matching_node(term, node)
-    if match_node is not NULL
-      termstack_push_arguments(term)
+    if (match_node != NULL)
+      push_arguments(term_stack, term)
       conditionally_create_choice_point(var_chain)
-      descend_node(match_node)
+      return match_node
     else // no match found
       node = var_chain
       no_variant_found(parent)
   // no exact match, try bound trie variables (2)
   match_node = find_bound_trie_var(term, node)
-  if match_node is not NULL
-    ccpstack_push_frame(next(match_node), var_chain)
-    descend_node(match_node)
+  if (match_node != NULL)
+    push_call_choice_frame(call_choice_point_stack, next(match_node), var_chain)
+    return match_node
   // no bound trie variable found, use unbound trie variables (3)
   match_node = find_unbound_trie_var(var_chain)
-  if match_node is not NULL
+  if (match_node != NULL)
     bind_trie_var(match_node, term)
-    descend_node(match_node)
+    return match_node
+  return FAIL
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{match\_structured\_term}.}
+\caption{Pseudo-code for procedure \texttt{match\_structured\_term}.}
 \label{fig:match_structured_term}
 \end{figure}
 
 Figure \ref{fig:match_functor} shows the evolution of the term stack for finding
-a subsuming goal for the subgoal \texttt{p(a,f(b))}. Step \textbf{(1)} shows the initial 
+a subsuming goal for subgoal \texttt{p(a,f(b))}. Step \textbf{(1)} shows the initial 
 term stack, followed by a match of the term on top of the stack, \texttt{a}, against \textbf{VAR0}.
 Being an unbound trie variable, the first position of the variable bindings vector is
 bound to \texttt{a}.
@@ -378,8 +315,8 @@ The last case for matching terms are variables. Because we are trying to find a 
 a term variable must only be matched or bound against a trie variable and a
 never seen variable must match only with an unbound trie variable.
 
-Consider the case of trying to match \texttt{p(X,Y)} against \texttt{p(X,X)},
-the first call variable could match the first trie variable,
+Consider the case of trying to match \texttt{p(X,Y)} against \texttt{p(X,X)}.
+The first call variable could match the first trie variable,
 but the call variable \texttt{Y} must be matched against an unbound variable, thus the next trie variable
 (in this case \texttt{VAR0}) cannot be matched, because it was already bound to another variable.
 Please note that \texttt{p(X,X)} is subsumed by \texttt{p(X,Y)} and not the other way around.
@@ -387,52 +324,53 @@ Please note that \texttt{p(X,X)} is subsumed by \texttt{p(X,Y)} and not the othe
 To recognize already seen call variables, we bind them to the variable enumerator vector, indexed
 by the corresponding trie variable number. The trail stack is used to trail those variables.
 When a marked variable must be matched again, first we try to pair it with the same trie variable,
-and if we such trie variable can not be found, we use an unbound trie variable, thus,
+and if such trie variable can not be found, we use an unbound trie variable, thus,
 we avoid binding two different call variables to the same trie variable.
 
-\begin{figure}[ht]
-\begin{Verbatim}
-match_variable(term) { // term represents a variable on the heap
-  if match_mode == MATCH_EXACTLY
-    if node is not NULL and is_hash_table(node)
-      node = var_chain = hash_bucket(node, VARIABLE_BUCKET)
-    else
-      var_chain = node
-    if variable is not marked(term)
-      // variable not seen before
-      // only one new trie variable per level, no choice point needed
-      foreach(test_node in node) {
-        if is_trie_var(test_node) and is_new_variable(test_node)
-          bind_trie_var(test_node, term)
-          mark_prolog_var(term, var_index(test_node))
-          descend_node(test_node)
-      no_variant_found(parent)
-      backtrack
-  // variable has been seen before
-  foreach(test_node in node)
-    if is_trie_var(test_node) and !is_new_variable(test_node)
-      if identical_terms(trie_var_bindings[test_node], term)
-        ccpstack_push_frame(next(test_node), var_chain)
-        descend_node(test_node)
-  // variant path is not possible here
-  no_variant_found(parent)
-  // match against unbound trie variable
-  foreach(test_node in var_chain)
-    // only one new trie variable per level, no choice point needed
-    if is_trie_var(test_node) and is_new_variable(test_node)
-      bind_trie_var(test_node, trie_var_bindings[prolog_var_index(term)])
-      descend_node(test_node)
-}
-\end{Verbatim}
-\caption{Pseudo-code for \texttt{match\_variable}.}
-\label{fig:match_variable}
-\end{figure}
-
-The pseudo-code to match against a variable is displayed in Figure
+The pseudo-code to match against a variable is shown in Figure
 \ref{fig:match_variable}. From it, we can conclude that a variant path
 cannot be found when: (1) a new trie variable cannot be found
 for a new call variable, (2) we cannot match an already seen
 call variable against the same trie variable already bound to it.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+match_variable(term, match_mode, node, var_chain) { // term represents a variable on the heap
+  if (match_mode == MATCH_EXACTLY)
+    if (node != NULL and is_hash_table(node))
+      node = var_chain = hash_bucket(node, VARIABLE_BUCKET)
+    else
+      var_chain = node
+    if (!marked_variable(term))
+      // variable not seen before
+      // only one new trie variable per level, no choice point needed
+      foreach (test_node in node)
+        if (is_trie_var(test_node) and is_new_variable(test_node))
+          bind_trie_var(test_node, term)
+          mark_prolog_var(term, var_index(test_node))
+          return test_node
+      no_variant_found(parent)
+      return FAIL
+  // variable has been seen before
+  foreach (test_node in node)
+    if (is_trie_var(test_node) and !is_new_variable(test_node))
+      if (identical_terms(trie_var_bindings[test_node], term))
+        push_call_choice_frame(call_choice_point_stack, next(test_node), var_chain)
+        return test_node
+  // variant path is not possible here
+  no_variant_found(parent)
+  // match against unbound trie variable
+  foreach (test_node in var_chain)
+    // only one new trie variable per level, no choice point needed
+    if (is_trie_var(test_node) and is_new_variable(test_node))
+      bind_trie_var(test_node, trie_var_bindings[prolog_var_index(term)])
+      return test_node
+  return FAIL
+}
+\end{Verbatim}
+\caption{Pseudo-code for procedure \texttt{match\_variable}.}
+\label{fig:match_variable}
+\end{figure}
 
 \subsection{Variant Continuations}
 
@@ -442,12 +380,22 @@ A variant continuation stores all the needed information to later resume
 the algorithm that creates a variant path starting from the parent of the first node where the
 search for a variant path has failed.
 
-In the above pseudo-code we used the function \texttt{no\_variant\_found} to create
-a variant continuation. This function creates a continuation in the first time it is called.
+In previous pseudo-code listings we used the procedure \texttt{no\_variant\_found} to create
+a variant continuation. This procedure creates a continuation the first time it is called.
 
 The continuation stores the node from where the rest of the variant path is created,
 the term stack and all the bindings made to the call variables
 that were trailed on the trail stack.
+
+Figure \ref{fig:variant_continuation} shows a variant continuation that is built
+after the match process failed at node \texttt{c}. If a variant path
+for subgoal \texttt{p(X,f(Y),b)} needs to be created, the following must be done:
+(1) the term stack is restored with the terms saved on the continuation;
+(2) the trail stack is initialized with
+the two variable heap addresses and each variable is bound to the saved
+enumerator addresses. The variable enumerator vector is used during the insertion
+of variant paths to detect if a variable was already seen and easily compute its number by
+looking at the enumerator position.
 
 \begin{figure}[ht]
   \centering
@@ -455,15 +403,6 @@ that were trailed on the trail stack.
   \caption{Creation of an variant continuation for subgoal \texttt{p(X,f(Y),b)}.}
   \label{fig:variant_continuation}
 \end{figure}
-
-Figure \ref{fig:variant_continuation} shows a variant continuation that is built
-after the match process failed at node \texttt{c}. If a variant path
-for subgoal \texttt{p(X,f(Y),b)} needs to be created the following must be done:
-the term stack is restored with the terms saved on the continuation; the trail stack is initialized with
-the two variable heap addresses and each variable is bound to the saved
-enumerator addresses. The variable enumerator vector is used during the insertion
-of variant paths to detect if a variable was already seen and easily compute its number by
-looking at the enumerator position. 
 
 \section{Answer Templates}
 
@@ -489,10 +428,13 @@ We call this type of substitution factor a \textit{generator answer template}.
 For subgoals with more general subgoals, variants of consumer subgoals and consumers
 which consume from consumer subgoals, the answer template must specialize the generator answer template
 from the most general subgoal, and is called a \textit{consumer answer template}.
-If a generator subgoal \texttt{p(X,f(Y))} exists and the consumer subgoal \texttt{p(a,f(g(2, X)))}
-is called, the answer template illustrated on Figure \ref{fig:answer_template_consumer} is built.
 Consumer answer templates have the exact same size of generator answer templates
 and instead of being composed only of variables, can also be composed with other types of subterms.
+
+If a generator subgoal \texttt{p(X,f(Y))} exists and the consumer subgoal \texttt{p(a,f(g(2, X)))}
+is called, the corresponding answer template is illustrated on Figure \ref{fig:answer_template_consumer}.
+The result \texttt{[a,~g(2,X)]} is derived by instantiating the generator variables,
+\texttt{X} and \texttt{Y}, using the consumer subgoal.
 
 \begin{figure}[ht]
   \centering
@@ -501,60 +443,68 @@ and instead of being composed only of variables, can also be composed with other
   \label{fig:answer_template_consumer}
 \end{figure}
 
-The construction of answer templates is done when trying to find a general goal on the call trie.
+The construction of answer templates is done when searching a more general goal $S$ on the call trie.
 If no subsuming subgoal frame is found, a generator answer template is built. If a subsuming subgoal
-is found, the subgoal frame $S$ can be either:
+exists, the found subgoal frame $S$ can be either:
 
 \begin{enumerate}
-  \item ... a generator: the answer template is constructed by iterating over the trie variable bindings vector (Figure \ref{fig:extract_template_from_lookup});
-  \item ... a consumer: the answer template is reconstructed by using the generator subgoal frame $S'$ from $S$ as we will consume from the generator $S'$ and not $S$. \texttt{reconstruct\_template\_for\_producer} uses another stack, the symbol stack, to push all the trie symbols from the general subgoal path, from leaf to root. The term stack is used to push all the called subgoal arguments that will be matched against the trie symbols. The answer template is then built by matching the new trie variables against the current term on the term stack. Note that when a functor or list symbol appears on the symbol stack the current term is also certainly a functor or list, because the called subgoal specializes the more general subgoal.
+  \item a generator: the answer template is constructed by iterating over the trie variable bindings vector. This is done
+  by the procedure \texttt{extract\_template\_from\_lookup} (Figure \ref{fig:extract_template_from_lookup});
+  \item a consumer: the answer template is reconstructed by using the generator subgoal frame of $S$
+  as we consume only from proper generators. 
+  The procedure \texttt{reconstruct\_template\_for\_producer} builds this answer template by
+  matching new trie variables against terms from the specific subgoal. It
+  uses another stack, the \textit{symbol stack}, to push the trie
+  symbols from the general subgoal path. The term stack is used to push the called subgoal arguments that
+  will be matched against the trie symbols. Note that when a functor or list symbol appears
+  on the symbol stack the current term is also certainly a functor or list, because the called subgoal
+  specializes the more general subgoal.
 \end{enumerate}
 
 \begin{figure}[ht]
 \begin{Verbatim}
 extract_template_from_lookup(answer_template) {
   total = 0
-  foreach(binding in trie variable bindings vector)
+  foreach (binding in trie variable bindings vector)
     *answer_template-- = binding
     total++
   *answer_template = total
   return answer_template
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{extract\_template\_from\_lookup}.}
+\caption{Pseudo-code for procedure \texttt{extract\_template\_from\_lookup}.}
 \label{fig:extract_template_from_lookup}
 \end{figure}
 
 \begin{figure}[ht]
 \begin{Verbatim}
 reconstruct_template_for_producer(subgoal_call, generator_sf_fr, answer_template) {
-  symbol_stack_push_path(leaf_node(generator_sf_fr))
+  push_trie_path(symbol_stack, leaf_node(generator_sf_fr))
   
-  termstack_push_call(subgoal_call)
+  push_terms(term_stack, subgoal_call)
   
   total = 0
-  while(termstack is not empty) {
-    subterm = deref(termstack_pop())
-    symbol = symbol_stack_pop()
-    if is_trie_var(symbol) and is_new_variable(symbol)
+  while (!empty(term_stack))
+    subterm = deref(pop(term_stack))
+    symbol = pop(symbol_stack)
+    if (is_trie_var(symbol) and is_new_variable(symbol))
       *answer_template-- = subterm
       total++
-    else if is_functor(symbol) or is_list(symbol)
-      termstack_push_arguments(subterm)
-  }
+    else if (is_functor(symbol) or is_list(symbol))
+      push_arguments(term_stack, subterm)
   
   *answer_template = total
   return answer_template
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{reconstruct\_template\_for\_producer}.}
+\caption{Pseudo-code for procedure \texttt{reconstruct\_template\_for\_producer}.}
 \label{fig:reconstruct_template_for_producer}
 \end{figure}
 
 \section{Time Stamped Tries}
 
-A time stamped node extends an answer trie node with time stamp information, thus
-each node contains the following fields: \texttt{symbol}, \texttt{child}, \texttt{parent}, \texttt{sibling}
+A time stamped node extends an answer trie node with time stamp information.
+Each node contains the following fields: \texttt{symbol}, \texttt{child}, \texttt{parent}, \texttt{sibling}
 and \texttt{timestamp}. For implementation and algorithmic purposes, each node also needs a bit field,
 \texttt{status}, that defines some node properties that will be described shortly.
 
@@ -568,30 +518,30 @@ Insertion of an answer $S$ into a TST can be divided into two phases:
 Step (1) uses the algorithm described in Section \ref{sec:lookup_subsuming} to discover a more general answer, or,
 to find a \textit{repeated answer}, which is a variant of $S$.
 Step (2) is executed when (1) fails and uses the variant continuation to resume the insertion of the answer
-on the last node the variant answer could be found during the search for $S'$.
+on the last node where the variant answer could not be found during step (1).
 
 \begin{figure}[ht]
 \begin{Verbatim}
 subsumptive_answer_search(trie_root, ans_vector, maintain_tsi)
   (path, leaf) = lookup_subsuming_call(trie_root, ans_vector) // step 1
-  if path == NO_PATH
+  if (path == NO_PATH)
     // step 2
     leaf = tst_insert(trie_root, restore_variant_continuation(), maintain_tsi)
   return leaf
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{subsumptive\_answer\_search}.}
+\caption{Pseudo-code for procedure \texttt{subsumptive\_answer\_search}.}
 \label{fig:subsumptive_answer_search}
 \end{figure}
 
-The function \texttt{subsumptive\_answer\_search} (Figure \ref{fig:subsumptive_answer_search})
+The procedure \texttt{subsumptive\_answer\_search} (Figure \ref{fig:subsumptive_answer_search})
 implements the two phase process and needs three arguments: the root of the answer trie \texttt{trie\_root},
 the answer as a vector of terms \texttt{ans\_vector}, and a boolean argument, \texttt{maintain\_tsi}.
 
 When a chain of sibling nodes becomes larger than a threshold value, we dynamically index the nodes through an hash table to provide direct node access and therefore optimize the search. Given that an hash table
 can have a large number of answer nodes, we maintain a double linked list of answer nodes that we keep on the hash
 table, in a decreasing order of the time stamp values. This linked list is called a \textit{time stamped index}.
-Besides the usual double linked list pointers, each index node contains a pointer to the answer node
+Besides the double linked list pointers, each index node contains a pointer to the answer node
 and the time stamp for the answer node. Each answer node indexed in the hash table has a different use
 for the \texttt{timestamp} field: instead of containing a positive integer, contains a pointer to the respective index node. Figure \ref{fig:hash_table_tst} illustrates an hash table and its time stamp index.
 
@@ -603,7 +553,7 @@ for the \texttt{timestamp} field: instead of containing a positive integer, cont
 \end{figure}
 
 The argument \texttt{maintain\_tsi} on \texttt{subsumptive\_answer\_search} indicates whether
-time stamp indexes exist on the trie and if they need to be maintained.
+time stamp indexes exist on the trie and need to be maintained.
 
 \subsection{Inserting New Answers}
 
@@ -613,54 +563,56 @@ The first symbol will be inserted either into: (1) a childless parent (i.e., the
 we must append the new node in the sibling chain list; (3) into an hashed node, where the symbol must go be indexed.
 Every other symbol will be inserted on a childless parent.
 
+Procedure \texttt{tst\_insert} (Figure \ref{fig:tst_insert}) does the job of inserting
+all the terms contained in a stack of terms into the trie, starting from \texttt{node}.
+The difference between procedures \texttt{tst\_add\_symbol} and \texttt{tst\_insert\_symbol}
+is that the former inserts symbols on childless nodes and the later on nodes with children.
+
 \begin{figure}[ht]
 \begin{Verbatim}
 tst_insert(trie_root, node, maintain_tsi) {
-  symbol = process_term_stack()
-  if child(node) == null
+  symbol = process_term_stack(term_stack)
+  if (child(node) == NULL)
     // inserting on the root
     node = tst_add_symbol(node, symbol)
-  else if is_hash_table(node)
+  else if (is_hash_table(node))
     node = tst_hash_table_add_symbol(node, symbol, maintain_tsi)
   else
     node = tst_insert_symbol(node, symbol, maintain_tsi)
   
   // at this point, just add nodes on childless parents
-  while(termstack is not empty) {
-    symbol = process_term_stack()
+  while (!empty(term_stack))
+    symbol = process_term_stack(term_stack)
     node = tst_add_symbol(node, symbol)
-  }
   
   update_timestamps(node, trie_root, maintain_tsi)
   return node
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{tst\_insert}.}
+\caption{Pseudo-code for procedure \texttt{tst\_insert}.}
 \label{fig:tst_insert}
 \end{figure}
 
-Function \texttt{tst\_insert} (Figure \ref{fig:tst_insert}) does the job of inserting
-all the terms contained in a stack of terms into the trie, starting from \texttt{node}.
-The difference between functions \texttt{tst\_add\_symbol} and \texttt{tst\_insert\_symbol}
-is that the former inserts symbols on childless nodes and the later on nodes with children.
-
-The function \texttt{process\_term\_stack} pops a term from the term stack and converts the term
+The procedure \texttt{process\_term\_stack} pops a term from the term stack and converts the term
 to a trie representation, which is usually called a \textit{symbol}. If the term is a functor or a list,
-the arguments are pushed into the stack of terms, to be processed next.
+the arguments are pushed into the stack of terms to be processed.
+
+While appending a new node in a sibling list does not involve any
+time stamp index (see Figure \ref{fig:tst_chain_insert}), indexing a new node into an hash table does,
+because hash tables index nodes by time stamp.
 
 \begin{figure}[ht]
   \centering
     \includegraphics[scale=0.45]{tst_insert.pdf}
-  \caption{Inserting answer $\{$\textit{VAR0, a, VAR0}$\}$.}
+  \caption{Inserting answer $\{$\texttt{VAR0,a,VAR0}$\}$.}
   \label{fig:tst_chain_insert}
 \end{figure}
 
-While appending a new node in a sibling list does not involve any
-time stamp index (see Figure \ref{fig:tst_chain_insert}), indexing a new node into an hash table does,
-because hash tables can index nodes by the time stamp. Figure \ref{fig:hash_table_insert}
-illustrates the indexing and insertion of a symbol (\texttt{25}) and the creation of the respective
+Figure \ref{fig:hash_table_insert}
+illustrates the insertion of a symbol (\texttt{25}) and the creation of the respective
 index node. Note that the \texttt{index head} field was changed to point to the new index node, which
 is the node with the greatest time stamp.
+
 
 \begin{figure}[ht]
   \centering
@@ -671,40 +623,37 @@ is the node with the greatest time stamp.
 
 \subsection{Updating Time Stamps}
 
-Once an answer path is inserted, the time stamps must be updated.
+Once an answer is inserted, the time stamps must be updated.
 The new time stamp is calculated by inspecting the time stamp of the trie root node.
-Next, each path node is navigated using the \texttt{parent} field until reaching the root node.
+Next, we update the time stamp by traversing each nodes from the answer leaf to the root are using the \texttt{parent} field.
 
 If the current node is an hashed node and the time stamp indexes
 must be maintained, its index node is relocated from its position to the head of
 the index's double linked list. We can test whether an answer node is indexed by
 an hash table by inspecting its \texttt{status} field.
-
-Figure \ref{fig:update_timestamps} contains the pseudo-code for the function \texttt{update\_timestamps}.
+Figure \ref{fig:update_timestamps} contains the pseudo-code for procedure \texttt{update\_timestamps}.
 
 \begin{figure}[ht]
 \begin{Verbatim}
 update_timestamps(leaf, root, maintain_tsi) {
   new_timestamp = timestamp(root) + 1
   
-  if(maintain_tsi)
-    do {
-      if is_hashed_node(leaf)
+  if (maintain_tsi)
+    while (leaf != root)
+      if (is_hashed_node(leaf))
         // relocate index node
         promote_entry(leaf, new_timestamp)
       else
         timestamp(leaf) = new_timestamp
       leaf = parent(leaf)
-    } while leaf != root
   else
-    do {
+   while (leaf != root)
       timestamp(leaf) = new_timestamp
       leaf = parent(leaf)
-    } while leaf != root
   timestamp(root) = new_timestamp
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{update\_timestamps}.}
+\caption{Pseudo-code for procedure \texttt{update\_timestamps}.}
 \label{fig:update_timestamps}
 \end{figure}
 
@@ -714,8 +663,8 @@ the field \texttt{index tail} must be updated to the \texttt{previous} field of 
 Previous pointers of the \texttt{next} node of $N$ and the next pointer of
 the \texttt{previous} node of $N$ must
 also be modified to keep the chain consistent.
-Figure \ref{fig:hash_table_promote} illustrates the relocation of an index node, during
-the time stamp update to 7.
+Figure \ref{fig:hash_table_promote} illustrates the relocation of an index node, after
+the time stamp is updated to 7.
 
 \begin{figure}[ht]
   \centering
@@ -737,9 +686,9 @@ as the sibling node of the root answer trie node.
 Creating the index for an hash table amounts to iterating over the hashed nodes
 and orderly inserting new index nodes on the index chain, as it is being created.
 
-When a subgoal completes, the time stamp indexes, which are only used
-during collection of relevant answers
-for consumer subgoals, are thrown away to save space.
+When a subgoal completes the time stamp indexes are thrown away to save space,
+because they are only used during collection of relevant answers
+for consumer subgoals.
 
 \section{Collecting Relevant Answers}\label{sec:collect}
 
@@ -747,7 +696,7 @@ The process of collecting relevant answers for a consumer subgoal $G$ from an an
 of the generator subgoal $G'$, involves searching $T$ for a set $S$ of answers that unify
 with the consumer answer template $AT$ and are newer than time stamp
 $TS$ stored in the consumer subgoal frame.
-When the process ends, $TS$ is updated to the
+After collection, $TS$ is updated to the
 time stamp of the root node of $T$, thus avoiding repeated answers in future iterations
 of the algorithm. Collected answers are also appended into the list of answers of the consumer
 subgoal frame, so they can be reused in future calls of $G$.
@@ -755,93 +704,101 @@ subgoal frame, so they can be reused in future calls of $G$.
 Various data structures are used for this algorithm, namely:
 
 \begin{itemize}
-  \item \textbf{WAM data structures}: the push down list (PDL),
+  \item \textit{WAM data structures}: the push down list (PDL),
   heap, trail, and associated registers. The heap is used to build structured terms, in which the
   answer template or trie variables are bound. Whenever a variable is bound, we trail it using the WAM trail. The \textit{unify} operation provided by the WAM is used to check for term equality in structured terms;
   
-  \item \textbf{term stack}: used to store the next terms to be processed as we navigate through the time stamped;
+  \item term stack: used to store the next terms to be processed as we navigate through the time stamped;
   
-  \item \textbf{term log stack}: when an unification fails, there is a need to backtrack to inspect other branch alternatives.
+  \item term log stack: when an unification fails, there is a need to backtrack to inspect other branch alternatives.
   This stack is used to store already processed terms of the term stack, so they can be restored back during backtracking;
   
-  \item \textbf{variable bindings vector}: stores binds for trie variables;
+  \item variable bindings vector: stores binds for trie variables;
   
   \item \textit{choice point stack}: stores choice point frames, where each frame contains
   information needed to restore the computation in order to search alternative nodes.
 \end{itemize}
 
 The pseudo-code for the algorithm is presented in Figure \ref{fig:tst_collect_relevant_answers}.
-It starts by pushing the answer template on the term stack, so that the first component to be unified is at the top. Next, we determine the base trail value by comparing TR against the trail freeze register TR\_FZ, this value can then be used to unbind variables before exiting. The trail register is set to the next free position of the WAM trail, thus avoiding writing on frozen segments. Registers HB, H and TR are saved as they will be manipulated and need to be restored to avoid any interference with the normal WAM execution. Answers gathered during execution are maintained in a linked list of trie leafs and are returned once search is over.
-
-The whole algorithm can be summarized into seven steps:
+The whole algorithm can be summarized into eight steps:
 
 \begin{enumerate}
+  \item Setup phase: setup term stack and WAM machinery.
   \item Fetch a term $T$ from the term stack;
   \item Search for a node $N$ at the current trie level that: (1) has a valid time stamp (2) unifies with $T$;
   \item Search for the next valid node to be pushed on the choice point stack;
   \item Unify $T$ with the trie symbol of $N$;
   \item Proceed into the child of $N$ or, if step 4 fails, backtrack by popping a frame from the choice point stack and use the alternative node to unify;
-  \item Once a leaf is reached, mark a new answer and possibly backtrack to retrieve more answers and go to step (1).
+  \item Once a leaf is reached, mark a new answer and possibly backtrack to retrieve more answers and go to step (2).
   \item If no more choice point frames exist, return the marked answers.
 \end{enumerate}
+
+The setup step pushes the answer template into the term stack and backups the WAM registers.
+The trail register is set to the next free position
+of the WAM trail, thus avoiding writing on frozen segments. Registers HB, H and TR are
+saved as they will be manipulated and need to be restored to avoid any interference with
+the normal WAM execution.
 
 \begin{figure}[ht]
 \begin{Verbatim}
 tst_collect_relevant_answers(trie_root, ts, answer_template)
 {
-  answers = new List()
-  
-  termstack_push_template(answer_template)
+  answers = NULL
+  push_terms(term_stack, answer_template)
   
   // save WAM registers
   trail_base = TR > TR_FZ ? TR : TR_FZ
   saved_HB = HB
   saved_H = HB = H
   saved_TR = TR
-  TR = TR > TR_FZ ? TR : TR_FZ
-  
+  TR = trail_base
+ 
   parent = trie_root
   chain = child(parent)
   
 while_loop:
-  while(termstack is not empty) {
-    subterm = deref(termstack_pop())
+  while (!empty(term_stack))
+    subterm = deref(pop(term_stack))
     
-    if(subterm is atom or integer)
-      unify_constant(subterm)
-    else if(subterm is functor or list)
-      unify_structured_term(subterm)
-    else if(subterm is variable)
-      unify_variable(subterm)
+    if (is_atom(subterm) or is_integer(subterm))
+      unify_node = unify_constant(subterm, chain, ts)
+    else if (is_functor(subterm) or is_list(subterm))
+      unify_node = unify_structured_term(subterm, chain, ts)
+    else if (is_variable(subterm))
+      unify_node = unify_variable(subterm, chain, ts)
       
-    if choice point stack is empty
+   if (unify_node != NULL)
+      descend_tst(unify)
+      
+    if (empty(choice_point_stack))
       unwind_trail(trail_base)
       restore_wam_registers()
       return answers
     
-    choice_point_backtrack()
-  }
+    choice_point_backtrack(choice_point_stack)
   
-  // new relevant answer found
-  list_insert_answer(answers, parent)
-  
-  // no more choice points?
-  if choice point stack is empty
+  list_insert_answer(answers, parent) // new relevant answer found
+  if (empty(choice_point_stack) // no more choice points?
     unwind_trail(trail_base)
     restore_wam_registers()
-    return answers
-    
-  choice_point_backtrack()
+    return answers  
+  choice_point_backtrack(choice_point_stack)
   goto while_loop
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{tst\_collect\_relevant\_answers}.}
+\caption{Pseudo-code for procedure \texttt{tst\_collect\_relevant\_answers}.}
 \label{fig:tst_collect_relevant_answers}
 \end{figure}
 
 \subsection{Choice Point Stack}
 
-Each choice point frame (Figure \ref{fig:choice_point_stack}) stores the alternative node to explore, the top of the term stack, the top of the term log stack, the current trail position, and the register HB. The HB register serves the same purpose as a WAM choice point H saved register, it is used to store the value of the H register during the choice point creation, so it can restored when backtracking. Figure \ref{fig:cpstack_push_frame} presents pseudo-code for the function \texttt{cpstack\_push\_frame}, which creates a new choice point frame.
+The choice point stack stores alternative search branches to use upon backtracking.
+Each stack frame (see Figure \ref{fig:choice_point_stack}) stores the following fields:
+\texttt{alt\_node}, the alternative node to explore;
+\texttt{term\_stack\_top}, the top of the term stack;
+\texttt{term\_log\_stack\_top}, the top of the term log stack;
+\texttt{trail\_top}, the current trail position;
+and \texttt{saved\_HB}, the register HB.
 
 \begin{figure}[H]
   \centering
@@ -850,28 +807,14 @@ Each choice point frame (Figure \ref{fig:choice_point_stack}) stores the alterna
   \label{fig:choice_point_stack}
 \end{figure}
 
-During execution, the value of the WAM's HB register is compared against the value H to determine if a variable is \textit{conditional}, that is, to determine if a variable needs to be trailed, so that when execution backtracks to a previous choice point we can reset variable bindings. In our case, instead of executing WAM code, we unify a time stamped node, thus the meaning of a conditional variable is extended to include trie variables in the variable bindings vector.
+The HB register serves the same purpose as the HB register in a WAM choice point. During execution, the value
+of the WAM's HB register is compared against the value H to determine if a variable is \textit{conditional},
+that is, to determine if a variable needs to be trailed, so that when execution backtracks to a previous choice
+point we can reset variable bindings. In our case, instead of executing WAM code, we unify a time stamped node,
+thus the meaning of a conditional variable is extended to include trie variables in the variable bindings vector.
 
-\begin{figure}[h]
-\begin{Verbatim}
-cpstack_push_frame(alt_node) {
-  if alt_node is NULL
-    return
-  CPFrame frame = new Frame()
-  frame.alt_node = alt_node
-  frame.termstk_top_index = termstack_top() - termstack_base() + 1
-  frame.log_top_index = termstacklog_top() - termstacklog_base()
-  frame.trail_top = TR
-  frame.saved_HB = H
-  cpstack_push(frame)
-}
-\end{Verbatim}
-\caption{Pseudo-code for \texttt{cpstack\_push\_frame}.}
-\label{fig:cpstack_push_frame}
-\end{figure}
-
-When a choice point frame is popped from the stack (Figure \ref{fig:cpstack_pop_frame}),
-the state of the computation is resumed:
+When a choice point frame is popped from the stack, the state of the computation is resumed
+by executing the following actions:
 
 \begin{itemize}
   \item the current node and parent node are reset;
@@ -880,23 +823,6 @@ the state of the computation is resumed:
   \item registers H and HB are also reseted to previous values.
 \end{itemize}
 
-\begin{figure}[h]
-\begin{Verbatim}
-cpstack_pop_frame() {
-  Frame top_frame = cpstack_pop()
-  chain = top_frame.alt_node
-  parent = parent(chain)
-  termstacklog_unwind(top_frame.log_top_index)
-  termstack_set_top_of_stack(top_frame.termstk_top_index)
-  trail_unwind(top_frame.trail_top)
-  H = HB
-  HB = top_frame.saved_HB
-}
-\end{Verbatim}
-\caption{Pseudo-code for \texttt{cpstack\_pop\_frame}.}
-\label{fig:cpstack_pop_frame}
-\end{figure}
-
 \subsection{Constant Unification}
 
 Once a trie node $N$ is reached we must select the next trie node $N'$ that unifies with our term and has a valid time stamp. Node $N$ can lead either to a simple node chain or an hash table.
@@ -904,41 +830,46 @@ With constant terms we can index the hash table to prune the search space (\text
 
 \begin{figure}[ht]
 \begin{Verbatim}
-unify_constant(constant) {
-  if is_hash_table(chain)
+unify_constant(constant, chain, ts) {
+  if (is_hash_table(chain))
     // retrieve the indexed and variable buckets
     (chain, alt_chain) = set_match_and_unify_chains(constant)
-    if chain != alt_chain
-      search_chain_exact_match(chain, constant, ts, alt_chain)
+    if (chain != alt_chain)
+      chain = search_chain_exact_match(chain, constant, ts, alt_chain)
+      if (chain != NULL)
+         return chain
       // exact match failed
       chain = alt_chain
-    if chain is NULL
-      backtrack
-  search_chain_unify_with_constant(chain, constant, ts)
+    if (chain == NULL)
+      return NULL
+  return search_chain_unify_with_constant(chain, constant, ts)
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{unify\_constant}.}
+\caption{Pseudo-code for procedure \texttt{unify\_constant}.}
 \label{fig:unify_constant}
 \end{figure}
 
-Because variables can unify with the constant term, there is a need to retrieve the variable chain (from the variable bucket), which will be used as the alternative chain to push on the choice point stack. We call it the \textit{unify chain}. If the constant is found on the match chain, the unify chain is used as alternative, but if no match was found, the variable chain will be attempted next and, depending on the remaining nodes, also be used as the backtracking alternative.
+Because variables can unify with the constant term, there is a need to retrieve the variable chain
+(from the variable bucket), which will be used as the alternative chain to push on the choice point stack.
+We call this chain the \textit{unify chain}. If the constant is found on the match chain,
+the unify chain is used as alternative, but if no match was found, the variable chain will be attempted
+next and, depending on the remaining nodes, also be used as the backtracking alternative.
 
 \begin{figure}[ht]
 \begin{Verbatim}
 search_chain_exact_match(chain, term, ts, alt_chain) {
-  foreach(node in chain) {
-    if(term == symbol(node))
-      if(valid_timestamp(timestamp(node), ts))
-        cpstack_push_frame(chain_next_valid_node(alt_chain, ts))
-        termstacklog_push(termstack_index(), termstack_top())
-        descend_tst(node)
+  foreach (node in chain)
+    if (term == symbol(node))
+      if (valid_timestamp(timestamp(node), ts))
+        push_frame(choice_point_stack, chain_next_valid_node(alt_chain, ts))
+        push(term_log_stack, term)
+        return node
       else
         return NULL
-  }
   return NULL
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{search\_chain\_exact\_match}.}
+\caption{Pseudo-code for procedure \texttt{search\_chain\_exact\_match}.}
 \label{fig:search_chain_exact_match}
 \end{figure}
 
@@ -949,26 +880,27 @@ Finally, if no match is found we set \texttt{chain} to \texttt{alt\_chain} (the 
 \begin{Verbatim}
 search_chain_unify_with_constant(chain, constant, ts) {
   chain = chain_next_valid_node(chain, ts)
-  while(chain is not null) {
+  while (chain != NULL)
     alt_chain = chain_next_valid_node(sibling(chain), ts)
     symbol = trie_deref(symbol(chain))
-    if symbol is variable // case (1)
-      cpstack_push_frame(alt_chain)
+    if (is_variable(symbol)) // case (1)
+      push_frame(choice_point_stack, alt_chain)
       bind_and_conditionally_trail(symbol, constant)
-      termstacklog_push(constant)
-      descend_tst(chain)
-    else if symbol == constant // case (2)
+      push(term_log_stack, constant)
+      return chain
+    else if (symbol == constant) // case (2)
       // exact match
-      cpstack_push_frame(alt_chain)
-      termstacklog_push(constant)
-      descend_tst(node)
+      push_frame(choice_point_stack, alt_chain)
+      push(term_log_stack, constant)
+      return node
     else
       chain = alt_chain
   }
   // case (3)
+  return NULL
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{search\_chain\_unify\_with\_constant}.}
+\caption{Pseudo-code for procedure \texttt{search\_chain\_unify\_with\_constant}.}
 \label{fig:search_chain_unify_with_constant}
 \end{figure}
 
@@ -977,16 +909,20 @@ with the time stamp greater than our target time stamp. Next we "dereference" th
 \texttt{trie\_deref}, which returns a position on the variable bindings vector if the node symbol
 is a trie variable, hence allowing trie variables to be used as "normal" variables.
 
-Please note that the function \texttt{bind\_and\_conditionally\_trail} tests if the variable (first argument) is a conditional variable and then trails it using the WAM trail.
+Please note that the procedure \texttt{bind\_and\_conditionally\_trail} tests if the variable (first argument)
+is a conditional variable and then trails it using the WAM trail.
 
-In case (1), a variable was found, which can be a position on the variable bindings vector or a prolog variable that was bound to a trie variable; either way, we bind the variable to the constant term, push a new choice point frame with the next valid node, and descend into the child node of \texttt{chain}.
+In case (1), a variable was found, which can be a position on the variable bindings vector or a prolog
+variable that was bound to a trie variable; either way, we bind the variable to the constant term,
+push a new choice point frame with the next valid node, and return \texttt{chain} to be explored next.
 
 In case (2) the node symbol matches our constant and we simply push a new choice point frame and advance into the next node.
 
-If we could not found a valid trie node in the unify chain, in get into case (3), and the next choice point
-is popped from the choice point stack and the alternative is tried. If the stack is empty, the algorithm finally ends.
+If we could not found a valid trie node in the unify chain, in get into case (3), and the choice point
+stack must be used to try alternatives. If the stack is empty, the algorithm finally ends.
 
-As an example, let's consider the time stamped trie in Figure \ref{fig:collect_example_1}. The input answer template is $\{$\texttt{a,b,b}$\}$ and the target time stamp is 3.
+As an example, let's consider the time stamped trie in
+Figure \ref{fig:collect_example_1}. The input answer template is $\{$\texttt{a,b,b}$\}$ and the target time stamp is 3.
 
 \begin{figure}[H]
   \centering
@@ -1007,7 +943,7 @@ Node (c) has a valid time stamp and its symbol matches \texttt{a}.
 \end{figure}
 
 On node (c), our first alternative, node (d), has a valid time stamp and, after doing
-\texttt{trie\_deref} we find an unbound variable, \textbf{VAR0}, which is represented
+\texttt{trie\_deref} we find an unbound variable, \texttt{VAR0}, which is represented
 by the first position of the variable bindings vector.
 This variable is trailed and bound to \texttt{b},
 resulting in what is presented in Figure \ref{fig:collect_ex2}.
@@ -1019,7 +955,7 @@ resulting in what is presented in Figure \ref{fig:collect_ex2}.
   \label{fig:collect_ex2}
 \end{figure}
 
-On node (d), the unify chain is composed by nodes (e) and (f). Both have valid time stamps (> 3).
+On node (d), the unify chain is composed by nodes (e) and (f). Both have valid time stamps ($> 3$).
 Node (e) is attempted first and easily unifies, because it is an unbound trie variable.
 Leaf node (e) is our first answer (Figure \ref{fig:collect_ex3}).
 
@@ -1069,33 +1005,36 @@ be unified with the next trie nodes.
 
 \begin{figure}[ht]
 \begin{Verbatim}
-unify_structured_term(term) {
-  if is_hash_table(chain)
+unify_structured_term(term, chain, ts) {
+  if (is_hash_table(chain))
     // retrieve the indexed and variable buckets
     (chain, alt_chain) = set_match_and_unify_chains(term)
-    if chain != alt_chain
-      search_chain_exact_match_push(chain, term, ts, alt_chain)
+    if (chain != alt_chain)
+      chain = search_chain_exact_match_push(chain, term, ts, alt_chain)
+      if (chain != NULL)
+         return chain
       // exact match failed
       chain = alt_chain
     if chain is NULL
-      backtrack
-  search_chain_unify_with_structured_term(chain, term, ts)
+      return NULL
+  return search_chain_unify_with_structured_term(chain, term, ts)
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{unify\_structured\_term}.}
+\caption{Pseudo-code for procedure \texttt{unify\_structured\_term}.}
 \label{fig:unify_structured_term}
 \end{figure}
 
-When using the unify chain with \texttt{search\_chain\_unify\_with\_structured\_term}
-\ref{fig:search_chain_unify_with_structured_term},
+When using the unify chain with the procedure \texttt{search\_chain\_unify\_with\_structured\_term}
+(represented in Figure \ref{fig:search_chain_unify_with_structured_term}),
 we also loop the chain for valid time stamped nodes.
-Four situations may arise:
+Here, four situations may arise:
 
 \begin{enumerate}
-  \item The current term is variable, which is trail and bound to the structured term;
+  \item The current term is variable, which is trailed and bound to the structured term;
   \item The trie symbol is a structured term and matches our functor or list.
   The term arguments are pushed into the term stack for unification;
-  \item We find a trie variable bound to a structured term. The WAM function \texttt{unify} is executed to check for a match and perform additional unifications;
+  \item We find a trie variable bound to a structured term. The WAM function \texttt{unify}
+  is executed to check for a match and perform additional unifications;
   \item No match was found, the next alternative node is inspected.
 \end{enumerate}
 
@@ -1103,14 +1042,14 @@ Four situations may arise:
 \begin{Verbatim}
 search_chain_unify_with_structured_term(chain, term, ts) {
   chain = chain_next_valid_node(chain, ts)
-  while(chain is not null) {
+  while (chain is not null)
     alt_chain = chain_next_valid_node(sibling(chain), ts)
     symbol = trie_deref(symbol(chain))
-    if symbol is variable // case (1)
-      cpstack_push_frame(alt_chain)
+    if (is_variable(symbol)) // case (1)
+      push_frame(choice_point_stack, alt_chain)
       bind_and_conditionally_trail(symbol, term)
-      termstacklog_push(term)
-      descend_tst(chain)
+      push(term_log_stack, term)
+      return chain
     else if symbol is a structured term
       if original type of symbol is a structured term and symbol == term
         // case (2)
@@ -1376,7 +1315,7 @@ and unifying one against the other.
 In Figure \ref{fig:consume_answer} we present the data structures involved in consuming
 a subsumptive answer. The subsumptive subgoal is \texttt{p(X,Y,Z)} and the
 subsumed subgoal is \texttt{p(d,p(X),3)}. The answer to consume is \texttt{p(d,f(a),3)}.
-After consumption, the subsumed subgoal gets a new answer: \texttt{X = a}.
+After consumption, the subsumed subgoal gets a new answer: \texttt{\{X~=~a\}}.
 
 \section{Compiled Tries}\label{sec:compiled_tries}
 
@@ -1411,7 +1350,7 @@ instructions do not create choice points as no backtracking options are availabl
 
 In a variant tabling engine, each trie instruction just binds each variable on the substitution factor to a term.
 On structured terms, like functors or lists, the term is first built on the heap and then
-bound to the current variable, while the unbound arguments are then passed unto the next trie levels
+bound to the current variable, while the unbound arguments are then passed into the next trie levels
 to be instantiated.
 
 In XSB, time stamped tries are used to evaluate subsumed subgoals while the subsuming subgoal
@@ -1769,7 +1708,7 @@ any, we return the next answer from this list and consume it. If the list has no
 we inspect if the consumer time stamp is equal to the producer time stamp, which means
 that no new answers were generated for the general subgoal. In the other hand, if new
 answers are available, we run \texttt{tst\_collect\_relevant\_answers} to collect any
-relevant answers for this consumer that can be appended unto the answer return list
+relevant answers for this consumer that can be appended into the answer return list
 and returned for consumption.
 In any case, the time stamp of the consumer is thus updated to avoid collecting
 repeated answers in future iterations. Remember that once a single consumer node
@@ -1853,181 +1792,3 @@ variable bucket for case 2.
 The second field, \texttt{final\_bucket}, helps differentiate between
 case 1 and 2, as in case 2 its value is NULL. In case 1 points to the final hash table bucket,
 hence it is easy to know when to remove the choice point.
-
-\section{Results}
-
-\begin{table}[ht]
-\scriptsize{
-\begin{tabular}{c|c|c|c|c|c|c|c|c}
-   \hline
-   \multirow{2}{*}{Program} & \multicolumn{2}{c|}{\multirow{2}{*}{Data}} & \multicolumn{3}{c|}{SLG-WAM} & \multicolumn{3}{c}{YapTab} \\ \cline{4-6} \cline{7-9}
-   & \multicolumn{2}{c|}{} & Variant & Subsumptive & Speedup & Variant & Subsumptive & Speedup \\ \hline
-   
-   \multirow{20}{*}{path\_left\_first} &  \multirow{6}{*}{tree} &  1024 &  10 & 0 &  $\infty$  & 0 & 0 &  $\infty$ \\
-   &  &  2048 &  0 & 10 &  0.000  & 10 & 0 &  $\infty$ \\
-   &  &  4096 &  10 & 20 &  0.500  & 10 & 10 &  1.000 \\
-   &  &  8192 &  30 & 20 &  1.500  & 30 & 30 &  1.000 \\
-   &  &  16384 &  70 & 80 &  0.875  & 70 & 90 &  0.778 \\
-   &  &  32768 &  140 & 170 &  0.824  & 150 & 170 &  0.882 \\
-   \cline{2-9}
-   &  \multirow{4}{*}{pyramid} &  512 &  140 & 180 &  0.778  & 160 & 190 &  0.842 \\
-   &  &  1024 &  620 & 720 &  0.861  & 750 & 800 &  0.938 \\
-   &  &  2048 &  2580 & 3190 &  0.809  & 3140 & 3300 &  0.952 \\
-   &  &  4096 &  10400 & 15330 &  0.678  & 14040 & 14620 &  0.960 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{grid} &  16 &  40 & 50 &  0.800  & 30 & 40 &  0.750 \\
-   &  &  32 &  840 & 930 &  0.903  & 670 & 800 &  0.838 \\
-   &  &  64 &  14630 & 16760 &  0.873  & 11270 & 13970 &  0.807 \\
-   \cline{2-9}
-   &  \multirow{4}{*}{chain} &  1024 &  180 & 230 &  0.783  & 190 & 220 &  0.864 \\
-   &  &  2048 &  770 & 1010 &  0.762  & 770 & 760 &  1.013 \\
-   &  &  4096 &  3100 & 4300 &  0.721  & 3090 & 3130 &  0.987 \\
-   &  &  8192 &  13860 & 29850 &  0.464  & 13240 & 14490 &  0.914 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{cycle} &  1024 &  340 & 490 &  0.694  & 400 & 420 &  0.952 \\
-   &  &  2048 &  1520 & 2020 &  0.752  & 1730 & 1670 &  1.036 \\
-   &  &  4096 &  6470 & 12010 &  0.539  & 7530 & 7390 &  1.019 \\
-   \cline{2-9}
-   \hline
-   \multirow{19}{*}{path\_right\_first} &  \multirow{6}{*}{tree} &  1024 &  10 & 0 &  $\infty$  & 10 & 0 &  $\infty$ \\
-   &  &  2048 &  10 & 10 &  1.000  & 10 & 10 &  1.000 \\
-   &  &  4096 &  20 & 20 &  1.000  & 20 & 20 &  1.000 \\
-   &  &  8192 &  30 & 30 &  1.000  & 50 & 70 &  0.714 \\
-   &  &  16384 &  90 & 90 &  1.000  & 100 & 180 &  0.556 \\
-   &  &  32768 &  190 & 200 &  0.950  & 210 & 360 &  0.583 \\
-   \cline{2-9}
-   &  \multirow{4}{*}{pyramid} &  512 &  180 & 150 &  1.200  & 150 & 280 &  0.536 \\
-   &  &  1024 &  700 & 670 &  1.045  & 790 & 1130 &  0.699 \\
-   &  &  2048 &  2970 & 2590 &  1.147  & 3230 & 4400 &  0.734 \\
-   &  &  4096 &  11500 & CRASHED &  -  & 13590 & 17740 &  0.766 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{grid} &  16 &  70 & 70 &  1.000  & 60 & 70 &  0.857 \\
-   &  &  32 &  1280 & 1050 &  1.219  & 1050 & 1300 &  0.808 \\
-   &  &  64 &  20250 & 17300 &  1.171  & 18800 & 20570 &  0.914 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{chain} &  1024 &  210 & 180 &  1.167  & 240 & 340 &  0.706 \\
-   &  &  2048 &  780 & 790 &  0.987  & 980 & 1250 &  0.784 \\
-   &  &  4096 &  3170 & 3160 &  1.003  & 3970 & 5400 &  0.735 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{cycle} &  1024 &  440 & 520 &  0.846  & 480 & 670 &  0.716 \\
-   &  &  2048 &  1720 & 2000 &  0.860  & 2090 & 2700 &  0.774 \\
-   &  &  4096 &  6790 & 7980 &  0.851  & 8600 & 10600 &  0.811 \\
-   \cline{2-9}
-   \hline
-\end{tabular}
-}
-\end{table}
-
-\begin{table}
-\scriptsize{
-\begin{tabular}{c|c|c|c|c|c|c|c|c}
-   \hline
-   \multirow{2}{*}{Program} & \multicolumn{2}{c|}{\multirow{2}{*}{Data}} & \multicolumn{3}{c|}{SLG-WAM} & \multicolumn{3}{c}{YapTab} \\ \cline{4-6} \cline{7-9}
-   & \multicolumn{2}{c|}{} & Variant & Subsumptive & Speedup & Variant & Subsumptive & Speedup \\ \hline
-   \multirow{10}{*}{path\_double\_last} &  \multirow{6}{*}{tree} &  2048 &  30 & 30 &  1.000  & 30 & 40 &  0.750 \\
-   &  &  4096 &  70 & 70 &  1.000  & 50 & 100 &  0.500 \\
-   &  &  8192 &  150 & 170 &  0.882  & 130 & 240 &  0.542 \\
-   &  &  16384 &  370 & 450 &  0.822  & 310 & 520 &  0.596 \\
-   &  &  32768 &  920 & 1110 &  0.829  & 820 & 1410 &  0.582 \\
-   &  &  65536 &  1960 & 2930 &  0.669  & 1970 & 4260 &  0.462 \\
-   \cline{2-9}
-   &  \multirow{4}{*}{chain} &  128 &  80 & 60 &  1.333  & 60 & 60 &  1.000 \\
-   &  &  256 &  740 & 470 &  1.574  & 480 & 460 &  1.043 \\
-   &  &  512 &  5890 & 3829 &  1.538  & 4310 & 3560 &  1.211 \\
-   &  &  1024 &  47470 & 31400 &  1.512  & 44450 & 28380 &  1.566 \\
-   \cline{2-9}
-   \hline
-   \multirow{20}{*}{path\_left\_last} &  \multirow{6}{*}{tree} &  1024 &  0 & 0 &  $\infty$  & 0 & 0 &  $\infty$ \\
-   &  &  2048 &  0 & 0 &  $\infty$  & 0 & 10 &  0.000 \\
-   &  &  4096 &  10 & 20 &  0.500  & 10 & 10 &  1.000 \\
-   &  &  8192 &  30 & 40 &  0.750  & 40 & 30 &  1.333 \\
-   &  &  16384 &  60 & 100 &  0.600  & 60 & 90 &  0.667 \\
-   &  &  32768 &  150 & 180 &  0.833  & 140 & 200 &  0.700 \\
-   \cline{2-9}
-   &  \multirow{4}{*}{pyramid} &  512 &  150 & 190 &  0.789  & 180 & 200 &  0.900 \\
-   &  &  1024 &  640 & 760 &  0.842  & 760 & 780 &  0.974 \\
-   &  &  2048 &  2530 & 3130 &  0.808  & 3250 & 3300 &  0.985 \\
-   &  &  4096 &  10240 & 15440 &  0.663  & 13980 & 14930 &  0.936 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{grid} &  16 &  30 & 50 &  0.600  & 30 & 50 &  0.600 \\
-   &  &  32 &  840 & 960 &  0.875  & 630 & 810 &  0.778 \\
-   &  &  64 &  14310 & 16760 &  0.854  & 11850 & 13670 &  0.867 \\
-   \cline{2-9}
-   &  \multirow{4}{*}{chain} &  1024 &  180 & 220 &  0.818  & 190 & 200 &  0.950 \\
-   &  &  2048 &  790 & 990 &  0.798  & 760 & 770 &  0.987 \\
-   &  &  4096 &  3160 & 4180 &  0.756  & 3060 & 3200 &  0.956 \\
-   &  &  8192 &  13190 & 30100 &  0.438  & 13180 & 14480 &  0.910 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{cycle} &  1024 &  370 & 510 &  0.725  & 400 & 430 &  0.930 \\
-   &  &  2048 &  1480 & 2040 &  0.725  & 1750 & 1690 &  1.036 \\
-   &  &  4096 &  6310 & 11970 &  0.527  & 7590 & 7690 &  0.987 \\
-   \cline{2-9}
-   \hline
-\end{tabular}
-}
-\end{table}
-
-\begin{table}
-\scriptsize{
-\begin{tabular}{c|c|c|c|c|c|c|c|c}
-   \hline
-   \multirow{2}{*}{Program} & \multicolumn{2}{c|}{\multirow{2}{*}{Data}} & \multicolumn{3}{c|}{SLG-WAM} & \multicolumn{3}{c}{YapTab} \\ \cline{4-6} \cline{7-9}
-   & \multicolumn{2}{c|}{} & Variant & Subsumptive & Speedup & Variant & Subsumptive & Speedup \\ \hline
-   
-   \multirow{11}{*}{sg} &  \multirow{4}{*}{tree} &  1024 &  130 & 150 &  0.867  & 100 & 160 &  0.625 \\
-   &  &  2048 &  510 & 610 &  0.836  & 350 & 590 &  0.593 \\
-   &  &  4096 &  1970 & 2480 &  0.794  & 1350 & 2520 &  0.536 \\
-   &  &  8192 &  8089 & 9590 &  0.843  & 5490 & 9710 &  0.565 \\
-   \cline{2-9}
-   &  \multirow{7}{*}{chain} &  1024 &  30 & 10 &  3.000  & 0 & 0 &  $\infty$ \\
-   &  &  2048 &  110 & 0 &  $\infty$  & 0 & 0 &  $\infty$ \\
-   &  &  4096 &  410 & 0 &  $\infty$  & 0 & 0 &  $\infty$ \\
-   &  &  8192 &  1620 & 0 &  $\infty$  & 10 & 10 &  1.000 \\
-   &  &  16384 &  6450 & 20 &  322.500  & 20 & 40 &  0.500 \\
-   &  &  32768 &  25790 & 30 &  859.667  & 50 & 80 &  0.625 \\
-   &  &  65536 &  CRASHED & 0 &  -  & 0 & 0 &  $\infty$ \\
-   \cline{2-9}
-   \hline
-   \multirow{10}{*}{genome} &  \multirow{5}{*}{tree} &  2048 &  170 & 0 &  $\infty$  & 190 & 0 &  $\infty$ \\
-   &  &  4096 &  690 & 10 &  69.000  & 710 & 0 &  $\infty$ \\
-   &  &  8192 &  2770 & 10 &  277.000  & 3000 & 10 &  300.000 \\
-   &  &  16384 &  11530 & 10 &  1153.000  & 12760 & 30 &  425.333 \\
-   &  &  32768 &  44460 & 30 &  1482.000  & 50450 & 60 &  840.833 \\
-   \cline{2-9}
-   &  \multirow{5}{*}{chain} &  1024 &  40 & 0 &  $\infty$  & 80 & 0 &  $\infty$ \\
-   &  &  2048 &  180 & 10 &  18.000  & 290 & 0 &  $\infty$ \\
-   &  &  4096 &  700 & 0 &  $\infty$  & 1190 & 0 &  $\infty$ \\
-   &  &  8192 &  2900 & 10 &  290.000  & 5430 & 10 &  543.000 \\
-   &  &  16384 &  11220 & 10 &  1122.000  & 21960 & 20 &  1098.000 \\
-   \cline{2-9}
-   \hline
-   \multirow{19}{*}{path\_right\_last} &  \multirow{6}{*}{tree} &  2048 &  10 & 10 &  1.000  & 0 & 10 &  0.000 \\
-   &  &  4096 &  20 & 20 &  1.000  & 20 & 30 &  0.667 \\
-   &  &  8192 &  20 & 50 &  0.400  & 50 & 70 &  0.714 \\
-   &  &  16384 &  80 & 130 &  0.615  & 100 & 240 &  0.417 \\
-   &  &  32768 &  190 & 410 &  0.463  & 250 & 590 &  0.424 \\
-   &  &  65536 &  410 & 1350 &  0.304  & 470 & 1740 &  0.270 \\
-   \cline{2-9}
-   &  \multirow{4}{*}{pyramid} &  512 &  190 & 170 &  1.118  & 210 & 290 &  0.724 \\
-   &  &  1024 &  780 & 650 &  1.200  & 780 & 1150 &  0.678 \\
-   &  &  2048 &  3010 & 2800 &  1.075  & 3330 & 4530 &  0.735 \\
-   &  &  4096 &  12010 & 10740 &  1.118  & 15540 & 17920 &  0.867 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{grid} &  16 &  80 & 50 &  1.600  & 60 & 70 &  0.857 \\
-   &  &  32 &  1240 & 930 &  1.333  & 1120 & 1140 &  0.982 \\
-   &  &  64 &  20390 & 14790 &  1.379  & 21890 & 17890 &  1.224 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{chain} &  1024 &  190 & 160 &  1.188  & 240 & 350 &  0.686 \\
-   &  &  2048 &  840 & 730 &  1.151  & 1010 & 1300 &  0.777 \\
-   &  &  4096 &  3260 & 3160 &  1.032  & 4530 & 5380 &  0.842 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{cycle} &  1024 &  460 & 500 &  0.920  & 490 & 650 &  0.754 \\
-   &  &  2048 &  1760 & 1990 &  0.884  & 2210 & 2710 &  0.815 \\
-   &  &  4096 &  6960 & 8190 &  0.850  & 9450 & 10750 &  0.879 \\
-   \cline{2-9}
-   \hline
-\end{tabular}
-}
-\end{table}
-
-Text goes here...

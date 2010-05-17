@@ -3,7 +3,7 @@ The purpose of this chapter is to give an overview of the research areas
 involved in this dissertation. First we explain the fundamental ideas of logic
 programming and Prolog; next, the main concepts behind tabling evaluation are described,
 focusing on the execution rules and strategies; finally, we introduce
-the Yap and XSB Prolog systems, concentrating on the tabling engines designed for both systems.
+the Yap and XSB Prolog systems, focusing on the tabling engines designed for both systems.
 
 \section{Logic Programming}
 
@@ -121,16 +121,17 @@ factorial(N,R) :-
 \label{fig:factorial_prolog}
 \end{figure}
 
-For illustration purposes, we defined the \texttt{factorial} predicate (Figure \ref{fig:factorial_prolog}) that computes the factorial of
-a given number. This predicate has arity of 2, where the first argument is an \textit{input} argument and the second argument
-an \textit{output} argument.
+For illustration purposes, in Figure \ref{fig:factorial_prolog} we define the predicate \texttt{factorial/2} that
+computes the factorial of a given number. This predicate has arity of 2, where the first argument is an
+\textit{input} argument and the second argument an \textit{output} argument.
 Factorial is composed of two clauses, the first represents the factorial base case (factorial of 0 is 1) and
 the second represents the recursive relation. The second clause first checks if the input number
 is positive, to discard non-positive numbers, then computes $N - 1$ and recursively
 calls factorial to compute the value of $factorial(N-1)$. Finally, the output argument $R$ is then unified
-to $N * factorial(N-1)$. The first clause uses the \textit{cut} operator (\texttt{!}) that tells the Prolog engine to not explore alternative
-clauses, i.e., the factorial of 0 is not to be computed with the recursive relation declared on the second clause.
-Once Prolog finds the first solution (Figure \ref{fig:factorial_tree}), the cut control operator disables further
+to $N * factorial(N-1)$. The first clause uses the \textit{cut} operator (\texttt{!})
+that tells the Prolog engine to not explore alternative clauses, i.e., the factorial of 0 is not to be
+computed using the recursive call defined on the second clause.
+Once Prolog finds the first answer (Figure \ref{fig:factorial_tree}), the cut control operator disables further
 alternatives, completing the depth first search in the tree.
 
 \begin{figure}[ht]
@@ -153,18 +154,21 @@ These special operators make programming more practical and useful in real world
 
 \subsubsection{WAM}
 
-The WAM is an abstract machine based on a stack-based architecture with various data areas, registers, and low level instructions
-that can be efficiently executed, manipulated and optimized.
-The WAM uses the following execution stacks:
+The \textit{Warren Abstract Machine} (WAM) is a stack-based architecture
+with various data areas, registers, and low level instructions that can be efficiently executed, manipulated and optimized.
+A simplified layout is presented in Figure \ref{fig:wam}.
+
+In terms of execution stacks, the WAM defines the following:
 
 \begin{itemize}
-  \item \textbf{Code Area}: Contains the compiled instructions.
-  \item \textbf{PDL}: A push down list used by the unification process.
-  \item \textbf{Trail}: Stores the addresses of the variables that must be reset when backtracking.
-  \item \textbf{Stack}: Stores \textit{environment} and \textit{choice point} frames. Environments track the flow control in a program
-  and choice points store open alternatives, which are used to restore the state of the computation when backtracking.
-  \item \textbf{Heap}: Array of data cells used to store variables and compound terms that cannot
-  be stored in the stack.
+  \item \textbf{PDL}: a push down list used by the unification process.
+  \item \textbf{Trail}: stores the addresses of the variables that must be reset when backtracking.
+  \item \textbf{Stack}: stores \textit{environment} and \textit{choice point} frames.
+         Environments track the flow control in a program and choice points store open alternatives,
+         which are used to restore the state of the computation when backtracking.
+  \item \textbf{Heap}: array of data cells used to store variables and compound terms that cannot
+         be stored in the stack.
+  \item \textbf{Code Area}: contains the compiled instructions.
 \end{itemize}
 
 \begin{figure}[ht]
@@ -177,26 +181,24 @@ The WAM uses the following execution stacks:
 For the registers, WAM defines the following:
 
 \begin{itemize}
-  \item \textbf{P}: points to current WAM instruction.
+  \item \textbf{P}: points to the current WAM instruction.
   \item \textbf{CP}: stores the value of \textbf{P} before the current invoked call and it is used to restore the execution point.
   \item \textbf{TR}: points to the top of the trail stack.
   \item \textbf{E}: points to the current active environment.
   \item \textbf{B}: the active choice point.
   \item \textbf{B0}: the choice point to return to upon backtracking over a cut.
   \item \textbf{H}: points to the top of the heap stack
-  \item \textbf{HB}: it is set to contain the value of the register \textbf{H} at the time of latest choice point. This is used to
+  \item \textbf{HB}: marks the value of the register \textbf{H} at the time of the latest choice point. It is used to
   determine \textit{conditional} variable bindings that affect variables existing before the creation of the choice point.
   \item \textbf{S}: used during the unification of compound terms.
 \end{itemize}
-
-The data space, registers, environment and choice point structure are illustrated in Figure \ref{fig:wam}.
 
 WAM instructions can be grouped into four main groups: choice point instructions to manipulate choice points; control
 instructions to manage environments and control the execution flow; unification instructions that implement
 specialized versions of the unification algorithm; and indexing instructions to efficiently determine which clauses
 unify with a given subgoal call.
 
-The WAM being a complex topic has complete books dedicated in explaining its intricacies.
+The WAM being a complex topic has complete books dedicated to explaining its intricacies.
 An example is the \textit{Warren's Abstract Machine -- A Tutorial Reconstruction} written by H. A\"{\i}t-Kaci \cite{Aitkaci-91}. 
 
 \section{Tabling}
@@ -204,7 +206,7 @@ An example is the \textit{Warren's Abstract Machine -- A Tutorial Reconstruction
 Despite Prolog's declarativeness and expressiveness, the past few years have seen wide efforts at
 solving shortcomings that arise when using SLD resolution.
 One proposal that has gained popularity is \textit{tabling} or \textit{tabulation} \cite{Chen-96}.
-In comparison to the traditional resolution method, tabling can reduce the search space to cut redundant computations,
+In comparison to the traditional SLD resolution method, tabling can reduce the search space to cut redundant computations,
 avoids looping and has better termination properties \cite{Tamaki-86}.
 
 In a nutshell, tabling is a refinement of the SLD resolution that consists in storing intermediate answers for
@@ -225,11 +227,12 @@ edge(b,a).
 \label{fig:prolog_path}
 \end{figure}
 
-One classical example that is used to demonstrate the need of tabling is presented in Figure \ref{fig:prolog_path}.
-This program describes the predicate \texttt{path/2} that can compute reachability between two nodes on a directed graph.
+One classical example that is used to demonstrate the advantages of using tabling is presented in Figure \ref{fig:prolog_path}.
+This program describes the predicate \texttt{path/2} that computes reachability between two nodes on a directed graph.
 Connections are established as facts using the \texttt{edge/2} predicate.
-If we tried to evaluate the query goal \texttt{path(X,Z)}, traditional Prolog would enter an infinite loop (Figure \ref{fig:infinite_loop})
-because the first clause of \texttt{path/2} is right recursive, leading to a repeated call.
+If we tried to evaluate the query goal \texttt{path(X,Z)}, traditional Prolog would enter an infinite
+loop (Figure \ref{fig:infinite_loop}) because \texttt{edge/2} facts define a cyclic graph and the first
+clause of \texttt{path/2} is right recursive, leading to a repeated call.
 
 \begin{figure}[ht]
   \centering
@@ -240,35 +243,39 @@ because the first clause of \texttt{path/2} is right recursive, leading to a rep
 
 \subsection{Tabled Evaluation}
 
-In this new method of evaluation when a tabled subgoal is first called, a new entry is allocated on the \textit{table space}. Table
+In this new method of evaluation, when a tabled subgoal is first called, a new entry is allocated on the \textit{table space}. Table
 entries are used to store subgoal calls but they also store answers found during evaluation. Each time a tabled subgoal is called, we
-know if it is a repeated call by inspecting the table space. Nodes in the search space can be classified as:
+know if it is a repeated call by inspecting the table space. Nodes in the search space can thus be classified as:
 \textit{generator nodes}, if they are being called for the first time; \textit{consumer nodes} if they are repeated calls;
 or \textit{interior nodes} if they are non-tabled subgoals. Generator nodes are matched against the predicate clauses as usual but
 consumer nodes are not, instead they consume answers stored in the table space from the respective subgoal.
 
-In Figure \ref{fig:tabling_path} we depict the tabled evaluation of \texttt{path(X,Z)}.
+In Figure \ref{fig:tabling_path} we depict the tabled evaluation of the query goal \texttt{path(X,Z)}.
 Generator nodes are represented by rectangles with double lines and consumer nodes by simple rectangles.
-Note that we apply to \texttt{path/2} the \texttt{table} directive to use tabling resolution.
+Note that we need to declare \texttt{path/2} as tabled using the \texttt{table} directive.
 
 Tabled evaluation starts by inserting a new entry in the table space and by allocating a generator
-node to represent \texttt{path(X,Z)} (step 1). Like SLD, \texttt{path(X,Z)} is resolved against the first \texttt{path/2} clause (step 2).
-The goal \texttt{edge(X,Y)} is not tabled and is resolved as usual. We use the first \texttt{edge/2} clause with \texttt{X = a, Z = b}
-and these values are carried to \texttt{path(b,Z)} (step 3). This goal is not yet in the table space, hence we add a new entry for it.
+node to represent \texttt{path(X,Z)} (step 1). Like SLD resolution, \texttt{path(X,Z)} is then resolved
+against the first \texttt{path/2} clause (step 2). The goal \texttt{edge(X,Y)} is not tabled and is
+resolved as usual. We use the first \texttt{edge/2} clause with \texttt{\{X~=~a,~Y~=~b\}} and these values
+are carried to \texttt{path(b,Z)} (step 3). This goal is not yet in the table space, hence we add a new entry for it.
 
-Goal \texttt{path(b,Z)} is then resolved against the first clause of \texttt{path/2} (step 4). \texttt{edge(b,Y)}
-fails against the first clause but succeeds
-with $Y = a$. A new tabled subgoal \texttt{path(a,Z)} is registered in the tabled space (step 6) and resolved against the first clause
-of \texttt{path/2} (step 7). This time the \texttt{edge/2} subgoal matches with the first clause ($Y = b$). A repeated tabled subgoal
-\texttt{path(b,Z)} is called and the first consumer node is allocated (step 8). As we have no answers for \texttt{path(b,Z)} to consume,
-the current evaluation point is \textit{suspended}. Later on, this node can be resumed to consume new answers.
+Goal \texttt{path(b,Z)} is then resolved against the first clause of \texttt{path/2} (step 4).
+Ñext, \texttt{edge(b,Y)} fails against the first clause but succeeds with \texttt{\{Y~=~a\}} for
+the second clause. A new tabled subgoal \texttt{path(a,Z)} is registered in the tabled space (step 6)
+and resolved against the first clause of \texttt{path/2} (step 7). This time the \texttt{edge/2}
+subgoal matches with the first clause with \texttt{\{Y = b\}}. This originates a repeated tabled subgoal
+call to \texttt{path(b,Z)} and the first consumer node is allocated (step 8). As we have no answers for \texttt{path(b,Z)}
+in the table space, the current evaluation point is \textit{suspended}. Later on, this node can be resumed to
+consume new answers.
 
 Next, we backtrack to node 7 and try the second \texttt{edge/2} clause, but resolution fails (step 9). We backtrack again, this time to
-node 6 to try the second clause of \texttt{path/2} (step 10). Here \texttt{edge(a, Z)} is resolved against the first clause of \texttt{edge/2}
-and the solution $Z = b$ is found for the subgoal \texttt{path(a,Z)}. This solution is stored in the table space and forward
-execution is made, propagating the binding $Z = b$ to \texttt{path(b,Z)} (step 12) and the first solution to this subgoal is found and stored.
-We continue forward execution and the binding is once again propagated, this time to node 3 (step 13) and we find a solution to
-\texttt{path(X,Z)}, \texttt{$X = a, Z = b$}.
+node 6 to try the second clause of \texttt{path/2} (step 10). Here \texttt{edge(a, Z)} is resolved against the
+first clause of \texttt{edge/2} and the answer \texttt{\{Z~=~b\}} is found for the subgoal \texttt{path(a,Z)} (step 11).
+This answer is stored in the table space and forward execution is made, propagating the binding \texttt{\{Z~=~b\}} to
+\texttt{path(b,Z)}, and a first answer to this subgoal is also found and stored in the table space (step 12).
+We continue forward execution and the binding is once again propagated, this time to node 3 finding an answer to
+\texttt{path(X,Z)} and to the query subgoal, \texttt{\{X~=~a,~Z~=~b\}} (step 13).
 
 \begin{figure}[ht]
   \centering
@@ -277,39 +284,43 @@ We continue forward execution and the binding is once again propagated, this tim
   \label{fig:tabling_path}
 \end{figure}
 
-We return to node 10 to try the second clause of \texttt{edge/2}, but we fail (step 14). The process backtracks
-to node 6 and at this node there are no more clauses left to try. We can not attempt completion
-of \texttt{path(a, Z)} because the consumer under it depends on generator 3,
-thus we backtrack node 3.
+If the user asks for more answers, the computation returns to node 10 to try the second clause of
+\texttt{edge/2}, but it fails (step 14). The process backtracks to node 6 but at this node there
+are no more clauses left to try. Moreover, we can not complete the subgoal \texttt{path(a,Z)} because
+it depends on a older subgoal (node 3 is the generator node for the consumer node 8 under it), thus we backtrack to node 3.
 
-At node 3 the second clause of \texttt{path/2} is tried (step 15): the first clause of \texttt{edge/2} fails (step 16),
-but the second succeeds (step 17), culminating in
-a new answer for \texttt{path(b,Z)}, $Z = a$, which is stored. We propagate variable bindings in step 18, generating a new answer
-to subgoal \texttt{path(X,Z)}, \texttt{X = a, Z = a}.
+At node 3, the second clause of \texttt{path/2} is tried (step 15) and the first clause of
+\texttt{edge/2} fails (step 16), but the second succeeds with a new answer for \texttt{path(b,Z)},
+\texttt{\{Z~=~a\}} (step 17). Again, we propagate variable bindings in step 18, generating a new
+answer to subgoal \texttt{path(X,Z)}, \texttt{\{X~=~a,~Z~=~a\}}.
 
-We go back to node 3, where no more clauses are available, but completion can be attempted safely because every consumer in lower
-branches does not depend on any generator node older than 3. Node 3 is called, by definition, a \textit{leader node} and the branch of nodes
+We go back to node 3, where no more clauses are available, but now completion can be safely
+attempted because all consumers in lower branches do not depend on any generator node older
+than node 3. Node 3 is called, by definition, a \textit{leader node} and the branch of nodes
 below it form a \textit{Strongly Connected Component} (SCC) \cite{Tarjan-72}.
 
-Next, by inspecting the execution tree, we can see that node 8 has unconsumed answers and thus can be resumed.
-We resume computation to consume the answer $Z = b$ and forward it to subgoal \texttt{path(a,Z)} at node 6 (step 19).
-Here, we note that it is a repeated answer
-to this subgoal by checking the table space, and thus we mark step 19 as \texttt{fail}. Failing repeated answers is crucial
-to avoid unnecessary computations and sometimes looping.
+However, by inspecting the execution tree, we can see that node 8 has two unconsumed answers.
+We thus resume the computation at node 8 to consume the answer \texttt{\{Z~=~b\}} and forward it to subgoal
+\texttt{path(a,Z)} at node 6 (step 19). Here, we note that it is a repeated answer
+to this subgoal by checking the table space, and thus we fail (step 19).
+Failing repeated answers is crucial to avoid unnecessary computations and sometimes looping.
 
-As the last answer has failed, we fetch the next available answer: $Z = a$ (step 20), that is propagated
-to node 6, generating a new answer to \texttt{path(a,Z)}. This binding is once again propagated, now for node 3 (step 21) but it is
-a repeated answer, thus the computation fails. With no more unconsumed answers, we return back to node 3 to re-attempt completion. This time, no consumers have unconsumed
-answers and we can safely complete (step 22). Subgoals \texttt{path(b,Z)} (node 3) and \texttt{path(a,Z)} (node 6) are marked as \textbf{complete}
-in the table space and no new answers are accepted.
+Then, we fetch the next available answer, \texttt{\{Z~=~a\}}, that is propagated
+to node 6, generating a new answer to \texttt{path(a,Z)} (step 20). This binding
+is once again propagated, now for node 3 but it is a repeated answer, and thus
+the computation fails (step 21). With no more unconsumed answers, we
+return back to node 3 to re-attempt completion. This time, no consumers have
+unconsumed answers and we can safely complete all the subgoals in the current SCC
+(step 22). Subgoals \texttt{path(b,Z)} (node 3) and \texttt{path(a,Z)} (node 6)
+are marked as \textbf{complete} in the table space and no new answers are accepted.
 
 Next, we backtrack to node 2 to try the second \texttt{edge/2} clause. A new consumer node is allocated (step 23) and answers can be
-promptly consumed from the table space. As the subgoal \texttt{path(a,Z)} as been completed before, the consumer node is thus deallocated.
-The retrieved answers in step 23 are propagated to node 1 and new answers are generated (step 24 and 25).
+promptly consumed from the table space as the subgoal \texttt{path(a,Z)} is already completed.
+The retrieved answers in step 23 are propagated to node 1 and new answers are generated (steps 24 and 25).
 
 We backtrack to node 1 to try the second \texttt{path/2} clause (step 26). Resolution succeeds for both
 \texttt{edge/2} clauses but as the newly found answers
-are repeated we fail for both cases (step 27 and 28). The process backtracks again to node 1 and with no more clauses to try,
+are repeated we fail for both cases (steps 27 and 28). The process backtracks again to node 1 and with no more clauses to try,
 we attempt completion. As there are no consumer nodes, completion is done (step 29) and computation terminates successfully.
 
 From the described example we can summarize four main operations needed to support tabled evaluation:
@@ -365,12 +376,10 @@ path/2_2:
 
 The \texttt{table\_try} instruction implements the tabled subgoal call operation. If the subgoal is called
 for the first time, the data structures associated with this subgoal and a new generator node are created.
-Execution then proceeds by executing each predicate clause. This is performed by
-\texttt{table\_retry}, which alters the next instruction of the generator choice point to the next clause
-of the predicate.
-On the other hand, if the subgoal is repeated,
-a consumer choice point is allocated and set to execute the \texttt{answer\_resolution}
-instruction, which consumes answers and implements the answer resolution operation.
+Execution then proceeds by executing each predicate clause. This is performed by the \texttt{table\_retry}
+instruction, which alters the next instruction of the generator choice point to the next clause of the predicate.
+On the other hand, if the subgoal is repeated, a consumer choice point is allocated and set to execute the
+\texttt{answer\_resolution} instruction, which consumes answers and implements the answer resolution operation.
 
 The instruction \texttt{table\_trust} is executed by generator nodes and sets the next
 instruction to execute upon backtracking to
@@ -378,34 +387,37 @@ instruction to execute upon backtracking to
 
 Finally, at the end of each clause, the instruction \texttt{new\_answer} is appended to implement
 the new answer operation. This instruction has access to the arguments of a tabled subgoal call,
-thus by dereferencing them we obtain a new solution, which can be added unto the table space.    
+thus by dereferencing them it obtains the corresponding answer, which can be added into the table space.    
 
 \subsection{Scheduling Strategies}
 
 During evaluation of the previous example it is very clear that at several points we can choose between
 different \textit{scheduling} strategies: continue forward execution, backtrack to interior nodes,
-return answers to consumer nodes, or perform completion. Depending on how and when the return of answers is scheduled, different
-strategies and searches can be formulated. It is also well known
-that using different strategies leads to tremendous effect on performance as some predicates are better suited to specific strategies. 
-The most popular scheduling strategies are batched scheduling and local scheduling \cite{Freire-96}.
+return answers to consumer nodes, or perform completion. Depending on how and when the return of answers
+is scheduled, different strategies and searches can be formulated. It is also well known that using
+different strategies can lead to tremendous effect on performance as some predicates are better suited to specific strategies. 
+The most popular scheduling strategies are \textit{batched scheduling} and \textit{local scheduling} \cite{Freire-96}.
 
-\textit{Batched scheduling} reduces the need to suspend and move around the search tree by batching the return of answers.
-When the engine generates answers, while evaluating a particular goal, the answers are added to the table and the subgoal continues its normal
-evaluation until it resolves all available program clauses. Only then the answers are consumed by consumer nodes \cite{Freire-96}.
-In some cases, this results in creating dependencies to older subgoals, therefore enlarging the current SCC and delaying completion
-to older generator nodes. When backtracking, three situations may arise:
+Batched scheduling reduces the need to suspend and move around the search tree by batching the return of answers.
+When the engine generates answers, while evaluating a particular goal, the answers are added to the table and
+the subgoal continues its normal evaluation until it resolves all available program clauses. Only then the answers
+are consumed by consumer nodes \cite{Freire-96}. In some cases, this results in creating dependencies to older
+subgoals, therefore enlarging the current SCC and delaying completion to older generator nodes. When backtracking,
+three situations may arise:
 
 \begin{itemize}
   \item if backtracking to a generator or interior node, try the next available clause.
   \item if backtracking to a consumer node, consume new answers.
-  \item if no more clauses are left to try or no more unconsumed answers are available, two options are available:
+  \item if no more clauses are left to try or no more unconsumed answers are available, two new situations may arise:
     \begin{itemize}
       \item if the node is a leader node, attempt completion.
       \item if not, backtrack to a previous branch.
     \end{itemize}
 \end{itemize}
 
-For some problems, \textit{local scheduling} is better suited because it tries to evaluate a single exact SCC at a time, preserving the dynamic
+Note that batched scheduling was the strategy used in the evaluation of the example in Figure \ref{fig:tabling_path}.
+
+For some problems, local scheduling is better suited because it tries to evaluate a single exact SCC at a time, preserving the dynamic
 SCC ordering during the evaluation. In other words, in a local evaluation, answers are returned to consuming nodes outside of an SCC only after that
 SCC is completely evaluated \cite{Freire-96}.
 It differs from batched scheduling in that once the answers are found, they are added to the table space, but execution
@@ -420,8 +432,8 @@ variables.
 
 For example, \texttt{path(X,Z)} is variant of the subgoal \texttt{path(X,Y)}, as they represent the same subgoal if we try
 to rename their variables to a standardized format. One format was proposed by Bachmair \textit{et al} \cite{Bachmair-93}. Formally,
-we have a set $V$ of variables present in a term and a function $renameVar$, such that the first term variable $a \in V$
-results in $renameVar(a) = VAR0$ and the following distinct variables are named incrementally ($VAR1, VAR2, ...$).
+we have a set $V$ of variables present in a term and a function $renameVar$, such that the first term variable $v0 \in V$
+results in $renameVar(v0) = VAR0$ and the following distinct variables are named incrementally ($VAR1, VAR2, ...$).
 Using this mechanism, \texttt{path(X,Z)} and \texttt{path(X,Y)} both result in \texttt{path(VAR0,VAR1)}. The resulting
 standardized subgoal is then checked against the table space to verify if it is a repeated subgoal call.
 
@@ -442,7 +454,8 @@ method will be greatly reduced. This new approach will be throughly explored in 
   
   The YAP Prolog system is a high-performance Prolog compiler developed at the University of Porto.
   It is one of the fastest available Prolog systems and implements a wide range of functionalities: 
-  stream I/O, sockets, modules, exceptions, debugging, a C-interface, dynamic code, internal database, DCGs, saved states, co-routining, arrays and threads.
+  stream I/O, sockets, modules, exceptions, debugging, a C-interface, dynamic code, internal database,
+  DCGs, saved states, co-routining, arrays, threads and tabling.
   It is based on the WAM and follows the Edinburgh tradition. Most of the ISO-Prolog standard is implemented.
   
   Tabling in Yap is implemented through the YapTab sub-system \cite{Rocha-05a}, a suspension based tabling engine supporting evaluation of
@@ -455,9 +468,10 @@ method will be greatly reduced. This new approach will be throughly explored in 
   and efficient handling of \textit{incomplete tables} \cite{Rocha-06b}. Incomplete tables are created when the current computation is pruned from the execution stacks, keeping the pruned subgoals from retrieving
   the complete answer set. Currently, only call by variant checking is supported.
   
-  XSB is a research-oriented logic programming system for Unix and Windows based systems. In addition to providing all the functionality
-  of the Prolog language, XSB contains several features not usually found in logic programming systems, namely, evaluation according to the
-  Well-Founded Semantics (tabling with negation) \cite{Gelder-91} through the use of a delaying-based tabling engine, the SLG-WAM \cite{Chen-96}.
+  XSB is a research-oriented logic programming system for Unix and Windows based systems. In addition to providing all
+  the functionality of the Prolog language, XSB contains several features not usually found in logic programming systems,
+  namely, evaluation according to the Well-Founded Semantics (tabling with negation) \cite{Gelder-91} through the use of
+  a delaying-based tabling engine, the SLG-WAM.
   Other features of XSB include: a fully threaded engine, constraint handling for tabled programs on a engine level, a variety of indexing
   techniques, interfaces to other languages, various compiler directives like \texttt{auto\_table}, which does static
   analysis to decide which predicates to table, etc. \cite{system-xsb}.
@@ -483,8 +497,8 @@ method will be greatly reduced. This new approach will be throughly explored in 
   Also, a new register is created, the \textbf{TR\_FZ} trail freeze register.
 
   The differences between SLG-WAM and YapTab reside in the data structures and algorithms used to control the process of leader detection
-  and the scheduling of unconsumed answers. Each engine is described in the next two sections.
-
+  and the scheduling of unconsumed answers. These differences are described next in more detail.
+  
   \subsubsection{SLG-WAM}
 
   The SLG-WAM considers that evaluation control should be done at the level of the data structures
@@ -519,23 +533,24 @@ method will be greatly reduced. This new approach will be throughly explored in 
 
   In YapTab, it is considered that the control of leader detection and scheduling of unconsumed answers should be
   performed through the data structures corresponding to repeated calls to tabled subgoals, and it associates a new
-  data structure, the \textit{dependency frame}, to consumer nodes \cite{Rocha-00a}.
+  data structure, the \textit{dependency frame}, to consumer nodes \cite{Rocha-00a}. Each consumer choice point thus
+  contains a field that points to the respective dependency frame.
 
   Dependency frames are used to check for completion points and to move across the consumer nodes with unconsumed answers,
   thus they are linked together, forming the \textit{dependency space}.
-  They reduce the number of extra fields in tabled choice points.
 
-  Each consumer choice point contains a field that points to the respective dependency frame. Generator choice points
-  have two extra fields: a pointer to the subgoal frame; the substitution factor; and, optionally, a pointer to a dependency frame. This pointer
+  Generator choice points are WAM choice points extended with the substitution factor area, a pointer
+  to the subgoal frame and, a pointer to a dependency frame. This pointer
   is only used when local scheduling is employed. A generator node for local scheduling only exports its answers to the calling
   environment when all clauses for the subgoal have been exhausted, hence it must act like a consumer.
 
-  In SLG-WAM if we want to release space previously frozen, the stored values in the generator choice point are used. In
-  YapTab, as they are not saved there, the top stack values kept in the youngest consumer choice point younger than
-  the current completion point are used.
+  In SLG-WAM, if we want to release space previously frozen and restore the freeze registers, we use the
+  stack values stored in the generator choice point to perform completion. In YapTab, as the freeze registers
+  are not saved there, we use the top stack values kept in the youngest consumer choice point younger than the current completion point.
 
-  Each dependency frame contains the following fields: the last answer continuation for this consumer called \textbf{try\_answer};
-  a pointer to the consumer choice point (\textbf{cons\_cp}); the \textbf{leader} field which points to the leader node
-  at creation time; and the \textbf{back\_leader} field that changes during evaluation, pointing to the leader node where we
-  performed the last unsuccessful completion operation. 
+  YapTab reduces the size of consumer choice points by using dependency frames. Each frame contains the
+  following fields: \textbf{last\_answer} field that stores the last answer consumed by the choice point;
+  the \textbf{cons\_cp} field that points to the consumer choice point; the \textbf{leader} field which
+  points to the leader node at creation time; and the \textbf{back\_leader} field that changes during
+  evaluation, pointing to the leader node where we performed the last unsuccessful completion operation.
   A new global register, called \textbf{TOP\_DF}, always points to the youngest dependency frame.
