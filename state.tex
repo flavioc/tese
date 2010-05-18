@@ -158,22 +158,34 @@ The \textit{Warren Abstract Machine} (WAM) is a stack-based architecture
 with various data areas, registers, and low level instructions that can be efficiently executed, manipulated and optimized.
 A simplified layout is presented in Figure \ref{fig:wam}.
 
+\begin{samepage}
+   
 In terms of execution stacks, the WAM defines the following:
 
 \begin{itemize}
   \item \textbf{PDL}: a push down list used by the unification process.
   \item \textbf{Trail}: stores the addresses of the variables that must be reset when backtracking.
   \item \textbf{Stack}: stores \textit{environment} and \textit{choice point} frames.
-         Environments track the flow control in a program and choice points store open alternatives,
-         which are used to restore the state of the computation when backtracking.
+         Environments track the flow control in a program and consist of: the stack address of the
+         previous environment; a pointer to the next instruction to execute upon return of the invoked
+         clause; and a set of \textit{permanent variables} \footnote{A permanent variable is a variable
+         which occurs in multiple body subgoals and must be preserved between calls.} as a sequence of cells.
+         
+         Choice points store open alternatives which are used to restore the state of the computation
+         when backtracking. A pointer to the instruction for the next alternative is stored in case
+         the current execution branch fails.
+         A choice point is created when there are more than one alternative for a subgoal call.
+         We pop the choice point from the stack when the last alternative clause is attempted. 
   \item \textbf{Heap}: array of data cells used to store variables and compound terms that cannot
          be stored in the stack.
   \item \textbf{Code Area}: contains the compiled instructions.
 \end{itemize}
 
+\end{samepage}
+
 \begin{figure}[ht]
   \centering
-    \includegraphics[scale=0.6]{wam.pdf}
+    \includegraphics[scale=0.7]{wam.pdf}
   \caption{WAM memory layout, frames and registers.}
   \label{fig:wam}
 \end{figure}

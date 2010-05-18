@@ -195,7 +195,7 @@ is exhausted, yielding no results.
 
 The \texttt{match\_constant} procedure (Figure \ref{fig:match_constant}) is called whenever the
 next term from the term stack is a integer or an atom.
-First, in phase \textbf{(1)}, the procedure checks if the match method is to exactly match the
+First, in phase (1), the procedure checks if the match method is to exactly match the
 sub-term constant against a trie symbol, which means
 that this is the first time this trie level is explored. If the current trie level is represented by a simple
 linked list, both \texttt{node} and \texttt{var\_chain} point to the start of the chain, but if the trie level
@@ -239,7 +239,7 @@ Note that only trie variables can be explored next as there is at most one node 
 If an exact match fails, we know that the current path cannot be variant of the called subgoal, and we call
 \texttt{no\_variant\_found} with the parent node as argument, which will record the node.
 
-Phase \textbf{(2)} of \texttt{match\_constant} can be reached by a failed exact match or by backtracking
+Phase (2) of \texttt{match\_constant} can be reached by a failed exact match or by backtracking
 (remember that the match mode changes to \texttt{MATCH\_TRIE\_VARS} when backtracking). In this step
 we call \texttt{find\_bound\_trie\_var} that will iterate over the \texttt{node} chain to look for
 \textit{bound trie variables}. When inserting new subgoals on the call trie, each new trie variable
@@ -250,9 +250,9 @@ Given that we are trying to match a constant symbol, we verify if the bound term
 In this case, we create a new choice point for the sibling node of the matched trie variable, and use
 the currently set variable chain.
 
-Finally, if phase \textbf{(1)} and \textbf{(2)} fail, we try to match our constant against an unbound trie variable
+Finally, if phase (1) and (2) fail, we try to match our constant against an unbound trie variable
 (procedure \texttt{find\_unbound\_trie\_var}).
-Phase \textbf{(3)} can be also reached by a failed exact and bound trie variable match or by subsequent backtrack
+Phase (3) can be also reached by a failed exact and bound trie variable match or by subsequent backtrack
 attempts. If a node is found, we trail the variable and bind it to a position on the variable bindings
 vector to point to the new constant.
 
@@ -293,13 +293,13 @@ match_structured_term(term, match_mode, node, var_chain) {
 \end{figure}
 
 Figure \ref{fig:match_functor} shows the evolution of the term stack for finding
-a subsuming goal for subgoal \texttt{p(a,f(b))}. Step \textbf{(1)} shows the initial 
-term stack, followed by a match of the term on top of the stack, \texttt{a}, against \textbf{VAR0}.
+a subsuming goal for subgoal \texttt{p(a,f(b))}. Step (1) shows the initial 
+term stack, followed by a match of the term on top of the stack, \texttt{a}, against \texttt{VAR0}.
 Being an unbound trie variable, the first position of the variable bindings vector is
 bound to \texttt{a}.
-In step \textbf{(2)}, we try to match the functor \texttt{f/1} against node \textbf{(b)}, but we fail.
-Node \textbf{(c)} succeeds as it is an exact match and the functor argument, \texttt{b}, is pushed on
-the term stack. In step \textbf{(3)}, \texttt{b} matches against \texttt{b}, and we find a subsuming call:
+In step (2), we try to match the functor \texttt{f/1} against node (b), but we fail.
+Node (c) succeeds as it is an exact match and the functor argument, \texttt{b}, is pushed on
+the term stack. In step (3), \texttt{b} matches against \texttt{b}, and we find a subsuming call:
 \texttt{p(VAR0,f(b))}.
 
 \begin{figure}[ht]
@@ -431,7 +431,7 @@ from the most general subgoal, and is called a \textit{consumer answer template}
 Consumer answer templates have the exact same size of generator answer templates
 and instead of being composed only of variables, can also be composed with other types of subterms.
 
-If a generator subgoal \texttt{p(X,f(Y))} exists and the consumer subgoal \texttt{p(a,f(g(2, X)))}
+If a generator subgoal \texttt{p(X,f(Y))} exists and the consumer subgoal \texttt{p(a,f(g(2,X)))}
 is called, the corresponding answer template is illustrated on Figure \ref{fig:answer_template_consumer}.
 The result \texttt{[a,~g(2,X)]} is derived by instantiating the generator variables,
 \texttt{X} and \texttt{Y}, using the consumer subgoal.
@@ -937,7 +937,7 @@ Node (c) has a valid time stamp and its symbol matches \texttt{a}.
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_ex1.pdf}
+    \includegraphics[scale=0.5]{collect_ex1.pdf}
   \caption{At trie node (a).}
   \label{fig:collect_ex1}
 \end{figure}
@@ -950,7 +950,7 @@ resulting in what is presented in Figure \ref{fig:collect_ex2}.
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_ex2.pdf}
+    \includegraphics[scale=0.5]{collect_ex2.pdf}
   \caption{At trie node (d).}
   \label{fig:collect_ex2}
 \end{figure}
@@ -961,7 +961,7 @@ Leaf node (e) is our first answer (Figure \ref{fig:collect_ex3}).
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_ex3.pdf}
+    \includegraphics[scale=0.5]{collect_ex3.pdf}
   \caption{At trie node (e).}
   \label{fig:collect_ex3}
 \end{figure}
@@ -970,7 +970,7 @@ Now, we need to backtrack to collect more answers. The top choice point frame is
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_ex4.pdf}
+    \includegraphics[scale=0.5]{collect_ex4.pdf}
   \caption{Backtracking to node (f).}
   \label{fig:collect_ex4}
 \end{figure}
@@ -979,7 +979,7 @@ In node (f) we dereference the trie variable \texttt{VAR0} and get the constant 
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_ex5.pdf}
+    \includegraphics[scale=0.5]{collect_ex5.pdf}
   \caption{New answer as the leaf node (f).}
   \label{fig:collect_ex5}
 \end{figure}
@@ -989,7 +989,7 @@ the answers found (Figure \ref{fig:collect_ex6}), finishing the search.
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_ex6.pdf}
+    \includegraphics[scale=0.5]{collect_ex6.pdf}
   \caption{Untrailing variables and returning.}
   \label{fig:collect_ex6}
 \end{figure}
@@ -997,11 +997,10 @@ the answers found (Figure \ref{fig:collect_ex6}), finishing the search.
 \subsection{Unification of Structured Terms}
 
 For structured terms, the unification process is similar to constant unification.
-First, we check if the current
-trie node is an hash table and the match and unify chains are computed.
-If the match chain contains a valid trie node, before we descend into the child
-node we must push the functor or list arguments into the term stack, so they can
-be unified with the next trie nodes.
+First, we check if the current trie node is an hash table and then the match and unify
+chains are computed. If the match chain contains a valid trie node, before we descend
+into the child node we must push the functor or list arguments into the term stack,
+so they can be unified with the next trie nodes.
 
 \begin{figure}[ht]
 \begin{Verbatim}
@@ -1015,7 +1014,7 @@ unify_structured_term(term, chain, ts) {
          return chain
       // exact match failed
       chain = alt_chain
-    if chain is NULL
+    if (chain is NULL)
       return NULL
   return search_chain_unify_with_structured_term(chain, term, ts)
 }
@@ -1024,25 +1023,26 @@ unify_structured_term(term, chain, ts) {
 \label{fig:unify_structured_term}
 \end{figure}
 
-When using the unify chain with the procedure \texttt{search\_chain\_unify\_with\_structured\_term}
-(represented in Figure \ref{fig:search_chain_unify_with_structured_term}),
-we also loop the chain for valid time stamped nodes.
-Here, four situations may arise:
+\begin{samepage}
+When using the unify chain (Figure \ref{fig:search_chain_unify_with_structured_term}),
+we also iterate the chain looking for valid time stamped nodes. For each valid node
+four situations may arise:
 
 \begin{enumerate}
-  \item The current term is variable, which is trailed and bound to the structured term;
+  \item The trie symbol is a variable, which is trailed and bound to the structured term;
   \item The trie symbol is a structured term and matches our functor or list.
   The term arguments are pushed into the term stack for unification;
   \item We find a trie variable bound to a structured term. The WAM function \texttt{unify}
   is executed to check for a match and perform additional unifications;
   \item No match was found, the next alternative node is inspected.
 \end{enumerate}
+\end{samepage}
 
 \begin{figure}[ht]
 \begin{Verbatim}
 search_chain_unify_with_structured_term(chain, term, ts) {
   chain = chain_next_valid_node(chain, ts)
-  while (chain is not null)
+  while (chain != NULL)
     alt_chain = chain_next_valid_node(sibling(chain), ts)
     symbol = trie_deref(symbol(chain))
     if (is_variable(symbol)) // case (1)
@@ -1050,25 +1050,26 @@ search_chain_unify_with_structured_term(chain, term, ts) {
       bind_and_conditionally_trail(symbol, term)
       push(term_log_stack, term)
       return chain
-    else if symbol is a structured term
-      if original type of symbol is a structured term and symbol == term
+    else if (is_functor(symbol) or is_list(symbol))
+      if ((is_functor(original_type(chain)) or is_list(original_type(chain))) and symbol == term)
         // case (2)
-        cpstack_push_frame(alt_chain)
-        termstacklog_push(term)
-        termstack_push_arguments(term)
-        descend_tst(chain)
-      else if unify(term, symbol) // case (3)
+        push_frame(choice_point_stack, alt_chain)
+        push(term_log_stack, term)
+        push_arguments(term_stack, term)
+        return chain
+      else if (unify(term, symbol)) // case (3)
         // trie variable bound to an heap structured term
-        cpstack_push_frame(alt_chain)
-        termstacklog_push(term)
-        descend_tst(node)
+        push_frame(choice_point_stack, alt_chain)
+        push(term_log_stack, term)
+        return node
     else
       chain = alt_chain
   }
   // case (4)
+  return NULL
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{search\_chain\_unify\_with\_structured\_term}.}
+\caption{Pseudo-code for procedure \texttt{search\_chain\_unify\_with\_structured\_term}.}
 \label{fig:search_chain_unify_with_structured_term}
 \end{figure}
 
@@ -1089,7 +1090,7 @@ as $2 > 1$.
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_functor1.pdf}
+    \includegraphics[scale=0.5]{collect_functor1.pdf}
   \caption{Term stack and variable bindings vector at node (a).}
   \label{fig:collect_functor1}
 \end{figure}
@@ -1100,7 +1101,7 @@ resulting in Figure \ref{fig:collect_functor2}.
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_functor2.pdf}
+    \includegraphics[scale=0.5]{collect_functor2.pdf}
   \caption{Term stack and variable bindings vector at node (b).}
   \label{fig:collect_functor2}
 \end{figure}
@@ -1111,7 +1112,7 @@ is pushed into the term stack to be processed in the next node (Figure \ref{fig:
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_functor3.pdf}
+    \includegraphics[scale=0.5]{collect_functor3.pdf}
   \caption{Term stack and variable bindings vector at node (d).}
   \label{fig:collect_functor3}
 \end{figure}
@@ -1121,7 +1122,7 @@ execution proceeds to node (f) (Figure \ref{fig:collect_functor4}).
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_functor4.pdf}
+    \includegraphics[scale=0.5]{collect_functor4.pdf}
   \caption{Term stack and variable bindings vector at node (e).}
   \label{fig:collect_functor4}
 \end{figure}
@@ -1132,94 +1133,108 @@ In this situation we call \texttt{unify}, which will try to unify both terms.
 The unification has the side effect of setting the heap variable cell 4 to \texttt{3}
 (Figure \ref{fig:collect_functor5}).
 This variable is conditional because it is positioned before the register \texttt{HB},
-which given the algorithm design must be greater than 10.
+which given the algorithm must be greater than 10.
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_functor5.pdf}
+    \includegraphics[scale=0.5]{collect_functor5.pdf}
   \caption{Term stack, variable bindings vector and heap at node (f).}
   \label{fig:collect_functor5}
 \end{figure}
 
 \subsection{Variable Unification}
 
-Because variables unify with anything, when the top of the term
-stack is a variable, the next trie branches only need to be pruned using the time stamp.
-
-Figure \ref{fig:unify_variable} presents the function
-\texttt{unify\_variable}. Here, we have three cases:
+\begin{samepage}
+Variable unification is done when the next term to unify is a variable. In this case, trie branches are only pruned
+by using the time stamp as variables can unify with anything.
+Figure \ref{fig:unify_variable} presents the procedure \texttt{unify\_variable}. In this function, three
+situations may arise:
 
 \begin{enumerate}
-  \item The current chain link is an hash table. In this situation we can select the next transitions by using the time stamped index, which can efficiently prune based on the time stamp;
-  \item The current node is inside an hash table, hence on the time stamped index. The node is matched against the variable and the alternative node is selected by following the index chain links;
-  \item Current node is a simple sibling chain. Both the chain and the alternative chain are set by iterating over the node chain, looking for valid time stamps.
+  \item The current chain link is an hash table. In this situation we can select the next transitions
+   by using the time stamped index, which can efficiently prune based on the time stamp. Notice that we visit
+   an hash table only one time, subsequent backtracking uses time stamp index nodes;
+  \item The current node is inside an hash table and thus indexed on the time stamp index.
+   The node is matched against the variable and the alternative node is selected by following the index chain links;
+  \item Current node is a simple sibling chain. Both the chain and the alternative chain are set by
+   iterating over the node chain, looking for valid time stamps.
 \end{enumerate}
-
-Once chains are set, we create a new choice point, run the variable unification algorithm
-and proceed into the next trie node.
+\end{samepage}
 
 \begin{figure}[ht]
 \begin{Verbatim}
-unify_variable(var) {
-  if is_hash_table(chain) // case (1)
+unify_variable(var, chain, ts) {
+  if (is_hash_table(chain)) // case (1)
     index = index_head(chain)
-    if timestamp(index) > ts
+    if (timestamp(index) > ts)
       chain = node(index)
       alt_chain = next_valid_index(index, ts)
-    else backtrack
+    else
+      return NULL
   else if is_hashed_node(chain) // case (2)
     // can only be here via backtracking
     alt_chain = next_valid_index(get_index(chain), ts)
   else // case (3)
     // simple chain of siblings
     chain = chain_next_valid_node(chain, ts)
-    if chain is NULL backtrack
+    if (chain == NULL)
+      return NULL
     alt_chain = sibling(chain)
   
-  cpstack_push_frame(alt_chain)
-  termstacklog_push(var)
+  push_frame(choice_point_stack, alt_chain)
+  push(term_log_stack, var)
   symbol = trie_deref(symbol(chain))
   unifiy_with_variable(var, symbol, chain)
-  descend_tst(chain)
+  return chain
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{unify\_variable}.}
+\caption{Pseudo-code for procedure \texttt{unify\_variable}.}
 \label{fig:unify_variable}
 \end{figure}
 
-From the pseudo-code in Figure \ref{fig:unify_with_variable}, variable unification
-must consider the following situations:
+\begin{samepage}
+
+Once chains are set, we create a new choice point, run the variable unification algorithm
+and proceed into the next trie node.
+From the pseudo-code in Figure \ref{fig:unify_with_variable}, unification with a term variable
+is dictated by the type of trie symbol. It follows the following rules:
 
 \begin{itemize}
-  \item symbol is a constant: the term variable is bound to the symbol and conditionally trailed.
-  \item symbol is a structured term: if the symbol was a trie variable bound to a term then we bind the variable to the heap location; else, we create a new structure (functor or list) on the heap and bind the variable to it, resulting in a term with various heap variables as arguments, which will be pushed into the term stack and will be bound in the next iterations of the algorithm.
-  \item symbol is a variable: if the variable is a trie variable, we bind and trail it; if it is an heap variable that was dereferenced from a trie variable using \texttt{trie\_deref}, \texttt{unify} chooses the binding direction, resulting in one of the variables being trailed.
+  \item Constant: the term variable is bound to the symbol and conditionally trailed;
+  \item Structured term: if the symbol was a trie variable bound to a term then we bind
+  the variable to the heap location; else, we create a new structure (functor or list) on the heap and bind
+  the variable to it, resulting in a term with various heap variables as arguments, which will be pushed into
+  the term stack and will be uses in the next iterations of the algorithm;
+  \item Variable: if the variable is a trie variable, we bind and trail it; if it is an heap variable that
+  was dereferenced from a trie variable using \texttt{trie\_deref}, \texttt{unify} chooses the binding direction,
+  resulting in one of the variables being trailed.
 \end{itemize}
+\end{samepage}
+
 
 \begin{figure}[ht]
 \begin{Verbatim}
 unify_with_variable(var, symbol, node) {
-  if symbol is a constant
+  if (is_constant(symbol))
     bind_and_conditionally_trail(var, symbol)
-  else if symbol is a structured term
-    if node symbol is a structured term
+  else if (is_functor(symbol) or is_list(symbol))
+    if (is_list(original_type(node)) or is_functor(original_type(node))
       bind_and_conditionally_trail(var, H)
       create_heap_structure(symbol)
-      termstack_push_arguments(deref(var))
+      push_arguments(deref(var)) // push new structure arguments
     else
       // trie variable bound to an heap structure
       bind_and_conditionally_trail(var, symbol)
-  else if symbol is a variable
-    if symbol is a trie variable
+  else if (is_variable(symbol))
+    if (is_trie_variable(symbol))
       bind_and_trail(symbol, var)
     else
       // two heap variables
       unify(symbol, var)
-  else
-    backtrack
+  else fail
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{unify\_with\_variable}.}
+\caption{Pseudo-code for procedure \texttt{unify\_with\_variable}.}
 \label{fig:unify_with_variable}
 \end{figure}
 
@@ -1233,11 +1248,11 @@ The input answer template is $\{$\texttt{REF2,REF2,b}$\}$ and the start time sta
   \label{fig:collect_variable}
 \end{figure}
 
-Starting on root node (a), we have the following data structure configuration:
+Starting on root node (a), we have the data structure configuration presented in Figure \ref{fig:collect_variable1}.
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_variable1.pdf}
+    \includegraphics[scale=0.5]{collect_variable1.pdf}
   \caption{At node (a).}
   \label{fig:collect_variable1}
 \end{figure}
@@ -1250,7 +1265,7 @@ and its argument (\texttt{REF 5}) being pushed into the term stack
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_variable2.pdf}
+    \includegraphics[scale=0.5]{collect_variable2.pdf}
   \caption{After unifying with node (b).}
   \label{fig:collect_variable2}
 \end{figure}
@@ -1260,7 +1275,7 @@ resulting in the update of the heap cell 5 (Figure \ref{fig:collect_variable3}).
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_variable3.pdf}
+    \includegraphics[scale=0.5]{collect_variable3.pdf}
   \caption{After unifying with node (d).}
   \label{fig:collect_variable3}
 \end{figure}
@@ -1271,12 +1286,12 @@ a structure on cell 4. On node (e) we have the unbound trie variable
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{collect_variable4.pdf}
+    \includegraphics[scale=0.5]{collect_variable4.pdf}
   \caption{After unifying with node (e).}
   \label{fig:collect_variable4}
 \end{figure}
 
-Finally, the last term on the term stack is \texttt{b}, that
+Finally, the last term on the term stack is \texttt{b}, which
 can not be matched against \texttt{a} on node (f), hence no
 relevant answers are found on this trie.
 
@@ -1296,7 +1311,19 @@ at a time and is completely separated from the collection phase.
 Assume we have a trie path from the leaf node $L$ representative of $A$ and
 the trie root $R$. Consuming $A$ amounts to unify the symbols on the trie path from $R$ to $L$
 to the answer template $AT$ that is built for the consumer choice point. In the end, the variables
-on $AT$ are updated so the WAM evaluation branch can proceed with new bindings.
+on $AT$ are updated to match the answer on the trie.
+
+As we are certain that $A$ unifies with $AT$, consumption is reduced to a simple unification
+between $AT$ and the trie nodes of $L$ to $R$.
+Implementation wise, we use the term stack that is initially pushed with $AT$
+and a symbol stack containing symbols from $L$ to $R$. Then, we proceed by
+iteratively popping one term from the term stack and one symbol from the symbol stack
+and unifying one against the other.
+
+In Figure \ref{fig:consume_answer} we present the data structures involved in consuming
+a subsumptive answer. The subsumptive subgoal is \texttt{p(X,Y,Z)} and the
+subsumed subgoal is \texttt{p(d,p(X),3)}. The answer to consume is \texttt{p(d,f(a),3)}.
+After consumption, the subsumed subgoal consumes a new answer: \texttt{\{X~=~a\}}.
 
 \begin{figure}[H]
   \centering
@@ -1305,27 +1332,22 @@ on $AT$ are updated so the WAM evaluation branch can proceed with new bindings.
   \label{fig:consume_answer}
 \end{figure}
 
-As we are certain that $A$ unifies with $AT$, consumption can be reduced to locating a relevant
-answer in a trie with only the answer $A$, and no time stamp pruning or backtracking are done.
-Implementation wise, we use the term stack that is initially pushed with $AT$
-and a symbol stack containing symbols from $R$ to $L$. Then, we proceed by
-iteratively popping one term from the term stack and one symbol from the symbol stack
-and unifying one against the other.
-
-In Figure \ref{fig:consume_answer} we present the data structures involved in consuming
-a subsumptive answer. The subsumptive subgoal is \texttt{p(X,Y,Z)} and the
-subsumed subgoal is \texttt{p(d,p(X),3)}. The answer to consume is \texttt{p(d,f(a),3)}.
-After consumption, the subsumed subgoal gets a new answer: \texttt{\{X~=~a\}}.
-
 \section{Compiled Tries}\label{sec:compiled_tries}
 
-After an answer trie is completed, it is very common to "compile" the trie,
-annotating each trie node with a \textit{trie instruction}. This optimization technique
+After an answer trie is completed, we can optimize the process of consuming answers from a complete
+subgoal by annotating each trie node with a \textit{trie instruction}. This optimization technique
 is called \textit{compiled tries} \cite{RamakrishnanIV-99}.
 
 Compiled tries are based around the observation that all common prefixes of the terms in a trie
 are shared during execution of trie instructions. Thus, when backtracking
-through the terms of a trie, each transition is taken only once.
+through the terms of a trie, each transition is taken at most only once.
+
+In Figure \ref{fig:compiled_trie} we represent a compiled answer trie for the subgoal
+\texttt{p(X,Y,Z)}. Notice that each node is extended with an instruction field.
+The instruction set follows the standard WAM instruction style with \textit{try}, \textit{retry} and \textit{trust}.
+On a sibling chain the leftmost nodes are marked with \textit{try} instructions and middle
+nodes with \textit{retry} instructions. Right-most nodes use the \textit{trust} instruction,
+while single nodes use the \textit{do} instruction.
 
 \begin{figure}[H]
   \centering
@@ -1334,19 +1356,11 @@ through the terms of a trie, each transition is taken only once.
   \label{fig:compiled_trie}
 \end{figure}
 
-In Figure \ref{fig:compiled_trie} we represent a compiled answer trie for the subgoal
-\texttt{p(X,Y,Z)}. Note that each node is extended with an instruction field.
-The instruction set follows the standard WAM instruction style with \textit{try},
-\textit{retry} and \textit{trust}.
-On a sibling chain the leftmost nodes are marked with \textit{try} instructions and middle
-nodes with \textit{retry} instructions. Right-most nodes use the \textit{trust} instruction,
-while single nodes use the \textit{do} instruction.
-
 A \textit{try} instruction creates a new WAM choice point pointing to the sibling node,
 while \textit{retry} instructions change the previous choice point to point to the next sibling node,
 thus enabling us to navigate to new trie branches while backtracking. The \textit{trust}
 instruction removes the choice point as no more siblings are available. Finally, \textit{do}
-instructions do not create choice points as no backtracking options are available.
+instructions do not create choice points as no backtracking options are available (trie level with a single node).
 
 In a variant tabling engine, each trie instruction just binds each variable on the substitution factor to a term.
 On structured terms, like functors or lists, the term is first built on the heap and then
@@ -1357,9 +1371,8 @@ In XSB, time stamped tries are used to evaluate subsumed subgoals while the subs
 is incomplete, thus providing incremental retrieving of answers.
 When a subgoal $G$ completes, the engine uses the compiled answer trie from $G$
 to evaluate a subsumed subgoal $G'$, instead of loading each individual answer.
-Using the compiled trie to evaluate $G'$ is thus more efficient, because
-each trie path is traversed at most only once. Note that certain paths are pruned when they
-are not relevant to $G'$.
+Not all answers of from $G$ will be relevant to $G'$, thus we must prune irrelevant paths
+through the process of unification. 
 
 Some modifications are thus required to use compiled tries in subsumptive tabling. First,
 instead of using the substitution factor when running compiled code, we use the answer template.
@@ -1367,9 +1380,16 @@ Next, each instruction must now do unifications instead of simple bind operation
 because in addition to unbound variables, these instructions can also receive instantiated terms.
 Finally, while each instruction succeeds when running with the substitution factor of the generator
 subgoal, for subsumed subgoals some instructions can fail, because not every answer will be relevant,
-hence will not unify with the answer template. The unification operations done on each trie node
+hence will not unify with the answer template. The unification operations applied on each trie node
 are similar to the unifications done while collecting relevant answers in time stamped tries
 (Section \ref{sec:collect}).
+
+Variant engines like YapTab collapse each hash table into a chain of nodes before compiling
+the trie. While this technique makes sense for a variant engine, in subsumptive engines
+having hash tables helps the unification process by enabling fast search of instantiated terms.
+Thus, instead of removing hash tables, they must be kept on a subsumptive tabling engine.
+To use the hash tables, we must extend the trie instruction set with a new instruction,
+\textit{do\_hash} (Figure \ref{fig:compiled_hash}).
 
 \begin{figure}[H]
   \centering
@@ -1377,12 +1397,6 @@ are similar to the unifications done while collecting relevant answers in time s
   \caption{Compiled hash table.}
   \label{fig:compiled_hash}
 \end{figure}
-
-Variant engines like YapTab collapse each hash table into a chain of nodes before compiling
-the trie. While this technique makes sense for a variant engine, in subsumptive engines
-having hash tables helps the unification process by enabling fast search of instantiated terms.
-Thus, instead of removing hash tables, they are kept and also extended with a new instruction,
-\textit{do\_hash} (Figure \ref{fig:compiled_hash}).
 
 When the next term to unify is instantiated we first lookup the bucket for this
 term and execute the code of the bucket chain, optionally, we also store a choice point that will
@@ -1392,18 +1406,18 @@ hash tables provide $O(1)$ search complexity.
 
 If the term is a variable, we must visit every trie node in the hash table. This can be done
 by storing a choice point where the next hash bucket to execute is stored. If no more
-buckets are available, this choice point is removed and computation fails.
+buckets are available, this choice point is removed and the computation fails.
 
 \section{Subsumptive YapTab}
 
 Our first attempt to extend the variant YapTab engine to support call by subsumption
 involved importing the subsumption related algorithms and data structures described in
-the previous sections from XSB into YapTab. These algorithms were imported as faithful as possible,
+the previous chapter from XSB into YapTab. These algorithms were imported as faithful as possible,
 hence very little modifications were made as C macros were used to translate the original
 code to YapTab. Sections of code specific to XSB or Yap were protected with conditional
 compilation, thus enabling both Prolog systems to use the same code.
 
-Other modifications to the following components of YapTab were needed:
+This section will describe the modifications made to the following components of YapTab:
 tabling instructions, compiled trie instructions, data structures, and algorithms
 related to unconsumed answers and consumer detection.
 This new version of YapTab is called S1YapTab and will be described in the next sections.
@@ -1417,9 +1431,9 @@ data structures needed to implement S1YapTab.
 
 YapTab uses two types of trie nodes: subgoal nodes, for call tries; and answer nodes, for
 answer tries. In terms of hash tables, the situation is identical, with subgoal and answer
-hash tables. S1YapTab extends the answer and subgoal node with a \texttt{status} field and
-creates the time stamped node as an answer node with an extra field: the time stamp.
-The \texttt{status} bit field is used to identify the type of trie node, and if it is
+hash tables. S1YapTab extends the answer and subgoal node with a \textbf{status} field and
+creates the time stamped node as an answer node with the \textbf{timestamp} field.
+The \textbf{status} bit field is used to identify the type of trie node, and if it is
 an hash table, a leaf node or an hashed node.
 
 For hash tables, we extended the answer hash table with
@@ -1431,7 +1445,8 @@ The index data structure was integrally copied from XSB.
 The table entry contains a bit field called \texttt{mode\_flags} which stores various flags
 that change the behavior of tabled predicates. The original YapTab supports the
 following mutually exclusive flags: \textbf{batched} / \textbf{local}, the scheduling strategy;
-and \textbf{load answers} / \textbf{exec answers}, the later implements the compiled trie optimization, while the first forces the engine to load a completed table by loading answers individually.
+and \textbf{load answers} / \textbf{exec answers}, the later makes the engine use compiled tries,
+while the first forces the engine to load a completed table by loading answers individually.
 
 Two new mutually exclusive flags were created: \textbf{variant}, which forces the predicate to use variant
 tabling and \textbf{subsumptive} to use subsumptive tabling.
@@ -1439,14 +1454,35 @@ tabling and \textbf{subsumptive} to use subsumptive tabling.
 \subsubsection{Subgoal Frames}
 
 The subgoal frame structure in YapTab is a main component of the table space.
-It contains the fields: \texttt{answer\_trie}, a pointer to the answer trie;
-\texttt{state}, the state flag; \texttt{first\_answer} and \texttt{last\_answer}
-as the answer return list; \texttt{next}, a pointer to the next executing subgoal;
-and \texttt{generator\_cp}, which points to the generator choice point.
+It contains the fields: \textbf{answer\_trie}, a pointer to the answer trie;
+\textbf{state}, the state flag; \textbf{first\_answer} and \textbf{last\_answer}
+as the answer return list; \textbf{next}, a pointer to the next executing subgoal;
+and \textbf{generator\_cp}, which points to the generator choice point.
 
-Two new kinds of subgoal frame were created: the
-\textit{subsumptive producer subgoal frame} and
+Two new kinds of subgoal frame were created: the \textit{subsumptive producer subgoal frame} and
 the \textit{subsumed consumer subgoal frame}.
+
+The subsumptive producer subgoal frame extends the original variant subgoal frame
+with the field \textbf{consumers}. This field points to a consumer subgoal frame and works
+as a chain link to the subsumed subgoal frames of the producer subgoal.
+
+The subsumptive consumer subgoal frame does not extend the variant subgoal frame, because
+some variant fields are not needed.
+The consumer frame contains the following fields: \textbf{state}, the state of execution;
+\textbf{producer}, pointer to the subsumptive producer subgoal frame; \textbf{cons\_cp},
+pointer to the first consumer choice point; \textbf{first\_answer} and \textbf{last\_answer},
+as the answer return list; \textbf{ts}, the consumer time stamp;
+\textbf{next}, pointer to the next evaluating consumer subgoal frame; \textbf{answer\_template},
+a pointer to the answer template built on the heap; and \textbf{consumers},
+to link consumer subgoals of the producer subgoal frame.
+
+Each subgoal frame was extended with the \textbf{type} field, which identifies the subgoal frame type.
+The variant subgoal now uses an answer return list instead of using the \textbf{child} field of
+each trie node to link answers.
+
+Figure \ref{fig:subgoal_frames} illustrates a call trie for the predicate \texttt{p/2}
+and the following subgoals: \texttt{p(X,Y)}, a producer subgoal; \texttt{p(2,X)} and
+\texttt{p(3,X)} as consumer subgoals.
 
 \begin{figure}[H]
   \centering
@@ -1454,28 +1490,6 @@ the \textit{subsumed consumer subgoal frame}.
   \caption{Call trie with producer and consumer subgoal frames}
   \label{fig:subgoal_frames}
 \end{figure}
-
-The subsumptive producer subgoal frame extends the original variant subgoal frame
-with the field \texttt{consumers}. This field points to a consumer subgoal frame and works
-as a chain link to the subsumed subgoal frames of the producer subgoal.
-
-The subsumptive consumer subgoal frame does not extend the variant subgoal frame, because
-some variant fields are not needed.
-The consumer frame contains the following fields: \texttt{state}, the state of execution;
-\texttt{producer}, pointer to the subsumptive producer subgoal frame; \texttt{cons\_cp},
-pointer to the first consumer choice point; \texttt{first\_answer} and \texttt{last\_answer},
-as the answer return list; \texttt{ts}, the consumer time stamp;
-\texttt{next}, pointer to the next evaluating consumer subgoal frame; \texttt{answer\_template},
-a pointer to the answer template built on the heap; and \texttt{consumers},
-to link consumer subgoals of the producer subgoal frame.
-
-Each subgoal frame was extended with the \texttt{type} field, which identifies the subgoal frame type.
-The variant subgoal now uses an answer return list instead of using the \texttt{child} field of
-each trie node to link answers.
-
-Figure \ref{fig:subgoal_frames} illustrates a call trie for the predicate \texttt{p/2}
-and the following subgoals: \texttt{p(X,Y)}, a producer subgoal; \texttt{p(2,X)} and
-\texttt{p(3,X)} as consumer subgoals. 
 
 \subsection{Tabled Subgoal Call}
 
@@ -1486,33 +1500,7 @@ the other case, a new generator node is allocated and the tabled subgoal code is
 followed by the \texttt{completion} operation, which attempts to complete the SCC if the
 generator node is a leader.
 
-\begin{figure}[ht]
-\begin{Verbatim}
-tabled_subgoal_call(table_entry, arguments) {
-  subgoal_frame = subgoal_search(call_trie(table_entry), arguments)
-  
-  if state(subgoal_frame) == ready
-    // new generator
-    store_generator_node(table_entry, arguments, subgoal_frame)
-    jump_to_predicate_code()
-  else if state(subgoal_frame) == evaluating
-    // new consumer
-    dependency = find_dependency_node(subgoal_frame)
-    leader = find_leader_node(subgoal_frame, dependency)
-    store_consumer_node(table_entry, subgoal_frame, leader)
-    jump_to_answer_resolution()
-  else
-    // subgoal is completed
-    if answer_trie(subgoal_frame) not compiled
-      compile_answer_trie(answer_trie(subgoal_frame))
-    execute_answer_trie(answer_trie(subgoal_frame))
-}
-\end{Verbatim}
-\caption{Pseudo-code for \texttt{tabled\_subgoal\_call}.}
-\label{fig:tabled_subgoal_call}
-\end{figure}
-
-Figure \ref{fig:tabled_subgoal_call} presents pseudo-code for the tabled subgoal call.
+Figure \ref{fig:tabled_subgoal_call} presents pseudo-code for the tabled subgoal call operation.
 In the consumer case, we use \texttt{find\_dependency\_node} and \texttt{find\_leader\_node}
 to locate the leader node for this consumer. The function \texttt{find\_dependency\_node} simply
 returns the choice point of the generator node for this subgoal, while \texttt{find\_leader\_node}
@@ -1521,10 +1509,37 @@ to locate a dependency frame in which the leader is outside this range. If no su
 exists, the leader node is set as the generator choice point found in \texttt{find\_dependency\_node},
 else we use the leader of the dependency frame that satisfied the previous condition. 
 
-S1YapTab extends the tabled subgoal call operation to deal with subsumed subgoals.
-If the predicate uses call by subsumption, we use \texttt{subsumptive\_subgoal\_search}
+\begin{figure}[ht]
+\begin{Verbatim}
+tabled_subgoal_call(table_entry, arguments) {
+  subgoal_frame = subgoal_search(call_trie(table_entry), arguments)
+  
+  if (state(subgoal_frame) == ready)
+    // new generator
+    store_generator_node(table_entry, arguments, subgoal_frame)
+    jump_to_predicate_code()
+  else if (state(subgoal_frame) == evaluating)
+    // new consumer
+    dependency = find_dependency_node(subgoal_frame)
+    leader = find_leader_node(subgoal_frame, dependency)
+    store_consumer_node(table_entry, subgoal_frame, leader)
+    jump_to_answer_resolution()
+  else
+    // subgoal is completed
+    if (state(answer_trie(subgoal_frame)) != COMPILED)
+      compile_answer_trie(answer_trie(subgoal_frame))
+    execute_answer_trie(answer_trie(subgoal_frame))
+}
+\end{Verbatim}
+\caption{Pseudo-code for the tabled subgoal call operation.}
+\label{fig:tabled_subgoal_call}
+\end{figure}
+
+S1YapTab extends the tabled subgoal call operation to deal with either subsumptive and variant subgoals.
+
+If the predicate uses call by subsumption, we call the procedure \texttt{subsumptive\_subgoal\_search}
 (Figure \ref{fig:subsumptive_subgoal_search}) to look on the call trie for subsuming subgoals.
-If no path is found, we insert the subgoal path on the call trie and create a new producer
+If no subsuming path is found, we insert the subgoal path on the call trie and create a new producer
 subgoal frame. If some path is found and the subgoal frame is a producer it can be either
 a variant of our subgoal or a more general subgoal. For both cases
 we use \texttt{extract\_template\_from\_lookup}, which constructs the right answer template for us.
@@ -1539,25 +1554,25 @@ to create a consumer subgoal frame.
 subsumptive_subgoal_search(table_entry, arguments) {
   (path, leaf) = lookup_subsuming_call(call_trie(table_entry), arguments)
   
-  if path == NO_PATH
+  if (path == NO_PATH)
     leaf = insert_with_variant_continuation(call_trie)
     local_stack = extract_template_from_insertion(local_stack)
     return create_producer_subgoal_frame(leaf)
   else
     found = subgoal_frame(leaf)
     
-    if type(found) == producer
+    if (type(found) == PRODUCER)
       subsumer = found
       local_stack = extract_template_from_lookup(local_stack)
     else
       subsumer = producer(found)
       local_stack = reconstruct_template_for_producer(subsumer, local_stack)
     
-    if path_type == VARIANT_PATH
+    if (path_type == VARIANT_PATH)
       return found
     
     // subsumptive path
-    if state(subsumer) == evaluating
+    if (state(subsumer) == EVALUATING)
       // create variant path
       leaf = insert_with_variant_continuation(call_trie)
       copy_answer_template_to_heap(local_stack)
@@ -1566,7 +1581,7 @@ subsumptive_subgoal_search(table_entry, arguments) {
       return subsumer
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{subsumptive\_subgoal\_search}.}
+\caption{Pseudo-code for procedure \texttt{subsumptive\_subgoal\_search}.}
 \label{fig:subsumptive_subgoal_search}
 \end{figure}
 
@@ -1584,47 +1599,50 @@ This value of \texttt{H} points to the top of the heap during the choice point c
 to the answer template copied before. The field \texttt{answer\_template} points to \texttt{H}
 and is used to avoid accessing the choice point, thus it must be recalculated during garbage collection.
 
-This differs from XSB \cite{XXX} where a non-structural copy of the answer template is built on the heap for each
+This differs from XSB \cite{Johnson-00} where a non-structural copy of the answer template is built on the heap for each
 consumer node, but whenever the need to collect relevant answers arises, we must reconstitute the
 environment of the consumer to ensure that the answer template is valid, which involves using the trail
 to unbind and/or rebind variables. Our approach has the disadvantage of making structural copies,
 but only one copy is done and there is no need to invoke the algorithm
 within the environment of the subsumed call.
 
+Other modifications were applied to the tabled call operation in order to abstract some details about
+variant and subsumptive tabling. Figure \ref{fig:tabled_subgoal_call_new} shows the updated tabled
+subgoal operation.
+
 \begin{figure}[ht]
 \begin{Verbatim}
 tabled_subgoal_call(table_entry, arguments) {
   subgoal_frame = subgoal_search(call_trie(table_entry), arguments)
   
-  if is_new_generator_call(subgoal_frame)
+  if (is_new_generator_call(subgoal_frame))
     store_generator_node(table_entry, arguments, subgoal_frame)
     jump_to_predicate_code()
-  else if is_new_consumer_call(subgoal_frame)
+  else if (is_new_consumer_call(subgoal_frame))
     dependency = find_dependency_node(subgoal_frame)
     leader = find_leader_node(subgoal_frame, dependency)
     store_consumer_node(table_entry, subgoal_frame, leader)
-    if type(subgoal_frame) == consumer and state(subgoal_frame) == ready
+    if ((type(subgoal_frame) == consumer) and (state(subgoal_frame) == ready))
       cons_cp(subgoal_frame) = B
       recompute_answer_template(subgoal_frame)
     jump_to_answer_resolution()
   else
     // subgoal is completed
-    if answer_trie(subgoal_frame) not compiled
+    if (state(answer_trie(subgoal_frame)) != COMPILED)
       compile_answer_trie(answer_trie(subgoal_frame))
     execute_answer_trie(answer_trie(subgoal_frame))
 }
 \end{Verbatim}
-\caption{Pseudo-code for the new \texttt{tabled\_subgoal\_call}.}
+\caption{Pseudo-code for the new tabled subgoal call operation.}
 \label{fig:tabled_subgoal_call_new}
 \end{figure}
 
-Other modifications were applied in order to abstract some details about
-variant and subsumptive tabling (Figure \ref{fig:tabled_subgoal_call_new}).
 The function \texttt{is\_new\_generator\_call} inspects the found
 subgoal frame in order to tell if a new generator node must be allocated.
-For call subsumption, a new generator is allocated whenever a variant subgoal is not found
+For call by subsumption, a new generator is allocated whenever a variant subgoal is not found
 on the trie and the resulting subgoal frame is a producer.
-The function \texttt{is\_new\_consumer\_call} knows returns \texttt{TRUE} when:
+The function \texttt{is\_new\_consumer\_call} knows the new tabled subgoal call must allocate
+a new consumer node when:
 
 \begin{enumerate}
   \item The subgoal frame is variant or producer and is currently being evaluated;
@@ -1633,19 +1651,19 @@ The function \texttt{is\_new\_consumer\_call} knows returns \texttt{TRUE} when:
 
 Another important change involves calculating the leader node of a subsumptive consumer node.
 Surprisingly, only the algorithm to find the dependency node must be altered, as
-the dependency node of a subsumptive consumer is the generator choice point of
+the dependency node of a subsumed consumer is the generator choice point of
 the producer subgoal frame (Figure \ref{fig:find_dependency_node}).  
 
 \begin{figure}[ht]
 \begin{Verbatim}
 find_dependency_node(subgoal_frame) {
-  if type(subgoal_frame) == variant or type(subgoal_frame) == producer
+  if (type(subgoal_frame) == VARIANT or type(subgoal_frame) == PRODUCER)
     return generator_cp(subgoal_frame)
   else
     return generator_cp(producer(subgoal_frame))
 }
 \end{Verbatim}
-\caption{Pseudo-code for the new \texttt{find\_dependency\_node}.}
+\caption{Pseudo-code for the new \texttt{find\_dependency\_node} procedure.}
 \label{fig:find_dependency_node}
 \end{figure}
 
@@ -1664,7 +1682,7 @@ The function accepts a dependency frame (note that there is a dependency frame f
 each consumer node) and returns an answer continuation, which contains the answer
 to consume and contains enough state to retrieve the next available answer continuation, if any.
 An answer continuation is represented by a pointer to a linked list with two fields:
-\texttt{answer} and \texttt{next}, which points to the next element of the list.
+\textbf{answer}, the answer itself; and \textbf{next}, which points to the next element of the list.
 
 \begin{figure}[ht]
 \begin{Verbatim}
@@ -1673,10 +1691,10 @@ get_next_answer_continuation(dependency_frame) {
   last_continuation = depfr_last(dependency_frame)
   next_continuation = continuation_next(last_continuation)
   
-  if type(sg_fr) == variant or type(sg_fr) == producer
+  if (type(sg_fr) == VARIANT or type(sg_fr) == PRODUCER)
     return next_continuation
   
-  if next_continuation is not NULL
+  if (next_continuation != NULL)
     return next
   
   // must collect new available answers, if any
@@ -1684,7 +1702,7 @@ get_next_answer_continuation(dependency_frame) {
   producer = producer(sg_fr)
   producer_ts = timestamp(answer_trie(producer))
       
-  if(producer_ts == consumer_ts)
+  if (producer_ts == consumer_ts)
     return NULL
         
   // collect answers
@@ -1692,13 +1710,13 @@ get_next_answer_continuation(dependency_frame) {
         consumer_ts, answer_template(sg_fr))
   timestamp(sg_fr) = producer_ts
       
-  if answer_list is not NULL
+  if (answer_list != NULL)
     append_return_list(sg_fr, answer_list)
       
   return answer_list
 }
 \end{Verbatim}
-\caption{Pseudo-code for \texttt{get\_next\_answer\_continuation}.}
+\caption{Pseudo-code for function \texttt{get\_next\_answer\_continuation}.}
 \label{fig:get_next_answer_continuation}
 \end{figure}
 
@@ -1712,52 +1730,52 @@ relevant answers for this consumer that can be appended into the answer return l
 and returned for consumption.
 In any case, the time stamp of the consumer is thus updated to avoid collecting
 repeated answers in future iterations. Remember that once a single consumer node
-collects newer answers, every consumer node of a subsumptive subgoal will see them, thus
+collects newer answers, every consumer node of a subsumed subgoal will see them, thus
 enabling sharing of answers among the consumer nodes.
 
-The dependency frame data structure was extended with the \texttt{sg\_fr} field,
+Note that the dependency frame data structure was extended with the \textbf{sg\_fr} field,
 in order to run this algorithm.
+
+Figure \ref{fig:completion_operation} presents the updated completion operation,
+using the devised abstractions.
 
 \begin{figure}[ht]
 \begin{Verbatim}
 completion(generator) {
-  if G is the current leader node
+  if (is_leader_node(generator))
     df = TOP_DF
-    while depfr_cons_cp(df) is younger than G {
+    while (younger_than(depfr_cons_cp(df), generator))
       cont = get_next_answer_continuation(dep_fr)
-      if cont
+      if (cont)
         // unconsumed answers
-        depfr_back_cp(df) = G
-        C = depfr_cons_cp(df)
-        restore_bindings(CP_TR(G), CP_TR(C))
-        goto answer_resolution(C)
+        depfr_back_cp(df) = generator
+        consumer = depfr_cons_cp(df)
+        restore_bindings(CP_TR(generator), CP_TR(consumer))
+        goto answer_resolution(consumer)
       df = depfr_next(df)
-    }
     perform_completion()
     adjust_freeze_registers()
-  backtrack_to(CP_B(G))
+  backtrack_to(CP_B(generator))
 }
 \end{Verbatim}
-\caption{Pseudo-code for the updated \texttt{completion} operation.}
+\caption{Pseudo-code for the updated completion operation.}
 \label{fig:completion_operation}
 \end{figure}
-
-Figure \ref{fig:completion_operation} presents the updated \texttt{completion} operation,
-using the devised abstractions.
 
 \subsection{Completion}
 
 Once a generator node completes we must mark each subgoal that appears under the SCC as \textit{complete}.
-Hence, some modifications must be made to complete subsumptive consumer subgoal frames.
+Hence, some modifications must be made to complete subsumed consumer subgoal frames.
 
 In YapTab each variant subgoal frame is chained in a linked list during execution. The top of this list
 can be accessed by using \texttt{LOCAL\_top\_sg\_fr} and completion is done by iterating this list until
 the target subgoal frame is reached. The dependency frames that are younger than the completion point
 are also iterated and freed. 
 
-Subsumptive consumer subgoal frames are also chained in a linked list
+Subsumed consumer subgoal frames are also chained in a linked list
 that is iterated during completion. Any subgoal frame with a consumer choice point (\texttt{cons\_cp})
-younger than the completion point is completed.
+younger than the completion point is completed. Figure \ref{fig:completion_space} illustrates both the
+subgoal frame list of producers and the list of subsumed subgoal frames.
 
 Some data structures, like the time stamp indexes, are deleted during completion from the
 subsumptive producer subgoal frames.
@@ -1777,7 +1795,7 @@ we needed to change each trie instruction to do unification instead of simple va
 Another important modification was the hash instructions. Two new instructions were
 implemented: \texttt{trie\_do\_hash} and \texttt{trie\_retry\_hash}.
 The instruction \texttt{trie\_do\_hash} is executed once an hash table node is reached.
-If the next term to unify is a variable (case 2) each hash bucket will be executed, if it is an instantiated term (case 2)
+If the next term to unify is a variable (case 1) each hash bucket will be executed, if it is an instantiated term (case 2)
 the indexed bucket will be executed first, followed by the variable bucket.
 
 We use an hash choice point (\texttt{hash\_choice\_pt}) to execute each bucket.
@@ -1786,9 +1804,9 @@ exist and are different. For variables, the choice point is always stored. The i
 set to execute upon backtracking is \texttt{trie\_retry\_hash}.
 
 An hash choice point is an WAM choice point extended with two new fields:
-\texttt{last\_bucket} and \texttt{final\_bucket}.
-The field \texttt{last\_bucket} points to the last executed bucket on case 1 or the
+\textbf{last\_bucket} and \textbf{final\_bucket}.
+The field \textbf{last\_bucket} points to the last executed bucket on case 1 or the
 variable bucket for case 2.
-The second field, \texttt{final\_bucket}, helps differentiate between
+The second field, \textbf{final\_bucket}, helps differentiate between
 case 1 and 2, as in case 2 its value is NULL. In case 1 points to the final hash table bucket,
 hence it is easy to know when to remove the choice point.

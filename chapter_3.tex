@@ -209,11 +209,6 @@ This evaluation example, when compared to variant tabling, shows a smaller execu
 program clauses expanded. The subsumptive computation also took less steps to complete and a greater
 reuse of answers was done between \texttt{path(X,Z)}, \texttt{path(b,Z)} and \texttt{path(a,Z)}.
 
-% Although this example shows a very good performance of this method of evaluation, if we tried
-% to evaluate \texttt{path(a,Z)} and then \texttt{path(X,Z)}, no reuse could be done with \texttt{path(a,Z)}
-% because no previous subsuming goal was present. The more general subgoals are called first, the greater
-% the reuse in call subsumption.
-
 Like variant tabling, the same four main operations are used when evaluating subsumptive subgoals.
 These operations are very similar, with a few differences. Operations \textit{new answer} and
 \textit{completion} remain the same, while the \textit{tabled subgoal call} and \textit{answer resolution}
@@ -233,6 +228,11 @@ from the subsuming subgoal and retrieve the next answer that matches with the su
 answer is retrieved and loaded, the answer continuation is updated to reflect the new answer consumed.
 
 \end{itemize}
+
+% Although this example shows a very good performance of this method of evaluation, if we tried
+% to evaluate \texttt{path(a,Z)} and then \texttt{path(X,Z)}, no reuse could be done with \texttt{path(a,Z)}
+% because no previous subsuming goal was present. The more general subgoals are called first, the greater
+% the reuse in call subsumption.
 
 We next describe two known techniques that implement subsumptive tabling. These two approaches were
 both implemented in XSB.
