@@ -21,38 +21,38 @@ to match the node symbols with subterms from $G$. The process stops once a leaf 
 
 The matching process gives priority to match non-variable terms from $G$
 with an identical symbol from $C$.
-If the current trie symbol is a variable, for example \texttt{VAR0}, on its first occurrence, \texttt{VAR0}
+Alternatively, if the current trie symbol is a variable, for example \texttt{VAR0}, on its first occurrence, \texttt{VAR0}
 is bound to the respective $G$ sub-term
-and match succeeds; on the next occurrences, the current sub-term from $G$ must
+and match succeeds. On the next occurrences, the current sub-term from $G$ must
 be identical to the term bound to \texttt{VAR0}. Throughout the search process, bound variables are
-matched before unbound variables.
+matched before new unbound variables.
 
 Favoring non-variable terms, results in a mechanism that finds \textit{minimally subsuming calls}.
 In particular, if there is a variant trie path of $G$ called $G''$, $G''$ is found before any other subgoal.
 If no variant path exits, it is possible to speedup the process of inserting a variant path of $G$
-by recording a trie node where one of the following conditions was met: (1) the first constant match
-failure occurred or (2) an already seen $G$ variable paired to a trie variable could
+by recording the trie node where: (1) the first constant match
+failure occurred; or (2) an already seen $G$ variable paired to a trie variable could
 not be paired to the same trie variable.
 
 \begin{figure}[ht]
   \centering
     \includegraphics[scale=0.6]{sub_call_search.pdf}
-  \caption{Call trie for predicate \texttt{p/3}.}
+  \caption{Call trie for a tabled predicate \texttt{p/3}.}
   \label{fig:sub_call_search}
 \end{figure}
 
-For illustration purposes, Figure \ref{fig:sub_call_search} shows a call trie for a table predicate \texttt{p/3}.
+For illustration purposes, Figure \ref{fig:sub_call_search} shows a call trie for a tabled predicate \texttt{p/3}.
 The first subgoal called was \texttt{p(X,2,X)}, followed by \texttt{p(X,f(Y),a(Z))} and finally \texttt{p(X,Y,Z)}.
 
 If the subgoal \texttt{p(X,2,X)} is called again, the algorithm described above
 should find the variant subgoal represented by the leaf node $n3$. First, we unify the trie variable
-\texttt{VAR0} with \texttt{X} (node $n1$), hence we must mark the \texttt{X} variable as \textit{seen},
+\texttt{VAR0} with \texttt{X} (node $n1$), hence we must mark the variable \texttt{X} as \textit{seen},
 because if the same variable appears again it must unify with the same trie variable for a variant path
 to exist. Next, \texttt{2} easily unifies with trie node $n2$ and unification proceeds. In trie node $n3$,
 the current call term is \texttt{X} and we also have a variable in the trie node. As \texttt{X} was already seen before,
-it must unify with \texttt{VAR0}, it does and thus a variant path is found. Please note that if
-the trie symbol at node $n3$ was \texttt{VAR1}, the process could proceed but a variant path would be impossible
-to exist, and a subsuming subgoal would be found, as \texttt{p(VAR0,2,VAR1)} subsumes \texttt{path(VAR0,2,VAR0)}.
+it must unify with \texttt{VAR0}. It does and thus a variant path is found. Please note that if
+the trie symbol at node $n3$ was \texttt{VAR1} no variant path would exist, but the process could proceed
+and a subsuming subgoal would be found, as \texttt{p(VAR0,2,VAR1)} subsumes \texttt{path(VAR0,2,VAR0)}.
 In this case, a variant path could be created by resuming the insert operation at node $n2$ to insert
 a \texttt{VAR0} node.
 
@@ -98,7 +98,7 @@ the variable trie nodes. The skeleton for this algorithm is presented in Figure 
 \begin{figure}[ht]
   \centering
     \includegraphics[scale=0.6]{lookup_subgoal_termstack_start.pdf}
-  \caption{Initial term stack and heap for subgoal \texttt{p(X,f(Y),a(Z))}.}
+  \caption{Initial term stack and heap representation for subgoal \texttt{p(X,f(Y),a(Z))}.}
   \label{fig:lookup_subgoal_termstack_start}
 \end{figure}
 
@@ -113,40 +113,36 @@ by backtracking, forcing variable matching.
 \begin{Verbatim}
 lookup_subsuming_call(call_trie, subgoal_call) {
   match_mode = MATCH_EXACTLY
+  path_type = VARIANT_PATH
   parent = trie_root(call_trie)
   node = child(parent)
-  variant_path = TRUE
-  variable_chain = NULL
+  var_chain = NULL
   push_terms(term_stack, subgoal_call)
 
-while_loop:
   while (!empty(term_stack))
-    subterm = deref(pop(term_stack))
-    push(term_log_stack, subterm)
+    term = deref(pop(term_stack))
+    push(term_log_stack, term)
   
-    if (is_atom(subterm) or is_integer(subterm))
-      match = match_constant(subterm, match_mode, node, var_chain)
-    else if (is_functor(subterm) or is_list(subterm))
-      match = match_structured_term(subterm, match_mode, node, var_chain)
-    else if (is_variable(subterm))
-      match = match_variable(subterm, match_mode, node, var_chain)
+    if (is_atom(term) or is_integer(term))
+      match_node = match_constant_term(term, parent, node, var_chain, match_mode, path_type)
+    else if (is_functor(term) or is_list(term))
+      match_node = match_structured_term(term, parent, node, var_chain, match_mode, path_type)
+    else if (is_variable(term))
+      match_node = match_variable_term(term, parent, node, var_chain, match_mode, path_type)
   
-    if (match == FAIL)
-      if (empty(call_choice_point_stack)) // no more alternatives
+    if (match_node == NULL)
+      if (empty(call_choice_point_stack))   // no more alternatives
         return NO_PATH
       else
-        (alt_node, var_chain) = pop_choice_point_frame(call_choice_point_stack)
-        match_mode = MATCH_TRIE_VARS // backtrack mode
-    else // valid match, descend into node
-      parent = match
-      node = child(match)
+        match_mode = MATCH_TRIE_VARS   // backtrack mode
+        (node, var_chain) = pop_choice_point_frame(call_choice_point_stack)
+        parent = parent(node)
+    else   // valid match, descend into node
       match_mode = MATCH_EXACTLY
-      goto while_loop
-  
-  if (variant_path == TRUE)
-    return (VARIANT_PATH, parent)
-  else
-    return (SUBSUMPTIVE_PATH, parent)
+      parent = match_node
+      node = child(parent)
+      
+    return (path_type, parent)
 }
 \end{Verbatim}
 \caption{Pseudo-code for procedure \texttt{lookup\_subsuming\_call}.}
@@ -174,57 +170,58 @@ the top of the term stack (\texttt{term\_stack\_top}),
 the top of the term log stack (\texttt{term\_log\_stack\_top}),
 and the top of the trail stack (\texttt{trail\_stack\_top}).
 
-When popping a frame from the stack, the state of the auxiliary stacks and the other data
-structures is restored. Consider a computational state $S1$ that pushed into the stack
-the frame $F1$. Given that we are at state $S2$ and we need to backtrack to the previous state, $S1$,
-first we need remove $F1$ from the stack and use the frame's information to restore $S1$,
-which includes the alternative node, variable chain and the auxiliary stacks.
+When popping a frame from the call choice point stack, the state of the auxiliary stacks and the other data
+structures is restored. Consider a computational state $S1$ pushed onto the stack
+as frame $F1$. Given that we are at state $S2$ and we need to backtrack to the previous state,
+first we need to remove $F1$ from the stack and then we use the frame's information to restore $S1$.
 
 Any terms that were popped from the term stack from $S1$ to $S2$, which were
 stored in the term log stack must be restored back into the term stack.
 Then, any bindings made from $S1$ to $S2$ must be untrailed, which is
 accomplished by \textit{unwinding} the trail stack. The unwind process untrails
-any trie variables bound to the trie variable bindings vector
-and any term variable which may have been made to point to the variable enumerator.
-
-The node associated with state $S2$ and its successors are never visited again and
+the trie variables bound to the variable bindings vector
+and the term variables which may have been made to point to the variable enumerator
+vector. The node associated with state $S2$ and its successors are never visited again and
 the process continues until a leaf node is reached or the call choice point stack
-is exhausted, yielding no results.
+is exhausted.
 
 \subsection{Matching Constants}
 
 The \texttt{match\_constant} procedure (Figure \ref{fig:match_constant}) is called whenever the
-next term from the term stack is a integer or an atom.
-First, in phase (1), the procedure checks if the match method is to exactly match the
+next term from the term stack is a integer or an atom term.
+First, the procedure checks if the match method is to exactly match the
 sub-term constant against a trie symbol, which means
-that this is the first time this trie level is explored. If the current trie level is represented by a simple
-linked list, both \texttt{node} and \texttt{var\_chain} point to the start of the chain, but if the trie level
-is an hash table, \texttt{node} will point to the indexed bucket and \texttt{var\_chain} to the variable
-bucket, which is the first bucket.
+that this is the first time this trie level is explored (phase 1 in Figure \ref{fig:match_constant}).
+If the current trie level is represented by a simple linked list, both \texttt{node} and \texttt{var\_chain}
+point to the start of the chain, but if the trie level is an hash table,
+\texttt{node} will be made to point to the corresponding indexed bucket and \texttt{var\_chain}
+to the variable bucket, which is always the first bucket. This is accomplished by the \texttt{set\_node\_and\_var\_chain}
+procedure.
 
 \begin{figure}[ht]
 \begin{Verbatim}
-match_constant(constant, match_mode, node, var_chain) {
-  if (match_mode == MATCH_EXACTLY) // (1)
-    (node, var_chain) = set_node_and_var_chain(constant)
+match_constant(constant, parent, node, var_chain, match_mode, path_type) {
+  // phase 1: try exact match
+  if (match_mode == MATCH_EXACTLY)
+    (node, var_chain) = set_node_and_var_chain(constant, node)
     match_node = find_matching_node(constant, node)
     if (match_node != NULL)
       conditionally_create_choice_point(var_chain)
       return match_node
     else // no match found
       node = var_chain
-      no_variant_found(parent)
-  // no exact match, try bound trie variables (2)
+      no_variant_found(parent, path_type)
+  // phase 2: no exact match, try bound trie variables
   match_node = find_bound_trie_var(constant, node)
   if (match_node != NULL)
     push_call_choice_frame(call_choice_point_stack, next(match_node), var_chain)
     return match_mode
-  // no bound trie variable found, use unbound trie variables (3)
+  // phase 3: no bound trie variable, try unbound trie variables
   match_node = find_unbound_trie_var(var_chain)
   if (match_node != NULL)
     bind_trie_var(match_node, constant)
     return match_node
-  return FAIL
+  return NULL
 }
 \end{Verbatim}
 \caption{Pseudo-code for procedure \texttt{match\_constant}.}
@@ -264,9 +261,10 @@ match is found (Figure \ref{fig:match_structured_term}).
 
 \begin{figure}[ht]
 \begin{Verbatim}
-match_structured_term(term, match_mode, node, var_chain) {
-  if (match_mode == MATCH_EXACTLY) // (1)
-    (node, var_chain) = set_node_and_var_chain(term)
+match_structured_term(term, parent, node, var_chain, match_mode, path_type) {
+  // step 1: try exact match
+  if (match_mode == MATCH_EXACTLY)
+    (node, var_chain) = set_node_and_var_chain(term, node)
     match_node = find_matching_node(term, node)
     if (match_node != NULL)
       push_arguments(term_stack, term)
@@ -274,18 +272,18 @@ match_structured_term(term, match_mode, node, var_chain) {
       return match_node
     else // no match found
       node = var_chain
-      no_variant_found(parent)
-  // no exact match, try bound trie variables (2)
+      no_variant_found(parent, path_type)
+  // step 2: no exact match, try bound trie variables
   match_node = find_bound_trie_var(term, node)
   if (match_node != NULL)
     push_call_choice_frame(call_choice_point_stack, next(match_node), var_chain)
     return match_node
-  // no bound trie variable found, use unbound trie variables (3)
+  // step 3: no bound trie variable found, use unbound trie variables
   match_node = find_unbound_trie_var(var_chain)
   if (match_node != NULL)
     bind_trie_var(match_node, term)
     return match_node
-  return FAIL
+  return NULL
 }
 \end{Verbatim}
 \caption{Pseudo-code for procedure \texttt{match\_structured\_term}.}
@@ -335,7 +333,7 @@ call variable against the same trie variable already bound to it.
 
 \begin{figure}[ht]
 \begin{Verbatim}
-match_variable(term, match_mode, node, var_chain) { // term represents a variable on the heap
+match_variable(term, parent, node, var_chain, match_mode, path_type) {
   if (match_mode == MATCH_EXACTLY)
     if (node != NULL and is_hash_table(node))
       node = var_chain = hash_bucket(node, VARIABLE_BUCKET)
@@ -349,8 +347,8 @@ match_variable(term, match_mode, node, var_chain) { // term represents a variabl
           bind_trie_var(test_node, term)
           mark_prolog_var(term, var_index(test_node))
           return test_node
-      no_variant_found(parent)
-      return FAIL
+      no_variant_found(parent, path_type)
+      return NULL
   // variable has been seen before
   foreach (test_node in node)
     if (is_trie_var(test_node) and !is_new_variable(test_node))
@@ -358,14 +356,14 @@ match_variable(term, match_mode, node, var_chain) { // term represents a variabl
         push_call_choice_frame(call_choice_point_stack, next(test_node), var_chain)
         return test_node
   // variant path is not possible here
-  no_variant_found(parent)
+  no_variant_found(parent, path_type)
   // match against unbound trie variable
   foreach (test_node in var_chain)
     // only one new trie variable per level, no choice point needed
     if (is_trie_var(test_node) and is_new_variable(test_node))
       bind_trie_var(test_node, trie_var_bindings[prolog_var_index(term)])
       return test_node
-  return FAIL
+  return NULL
 }
 \end{Verbatim}
 \caption{Pseudo-code for procedure \texttt{match\_variable}.}
