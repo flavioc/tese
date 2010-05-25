@@ -1,4 +1,4 @@
-This chapter introduces the concept of retroactive call subsumption (RCS). RCS
+This chapter explores the concept of retroactive call subsumption (RCS). RCS
 enables full sharing of answers among subgoal calls, independent of the order they are called,
 using the relation of subsumption.
 
@@ -15,3 +15,16 @@ In traditional call subsumption, a new call to the subgoal $G$ is considered to 
 when a more general subgoal $G'$ is not found on the call trie and it is the first time $G$ is called.
 When $G'$ exists, a new consumer is stored to consume answers from the subsuming subgoal $G'$, thus creating
 a consumer subgoal.
+
+Consider that subgoal \texttt{p(X,1,2)} is called first, followed by \texttt{p(X,1,Z)}.
+Notice that when \texttt{p(X,1,2)} is called it is considered a producer subgoal as no subsuming subgoals
+are found on the call trie. The subgoal \texttt{p(X,1,Z)} is also considered as a producer, because
+\texttt{p(X,1,2)} does not subsume \texttt{p(X,1,Z)}. If the call order is swapped, \texttt{p(X,1,Z)} continues
+to be considered a producer subgoal, but now \texttt{p(X,1,2)} finds \texttt{p(X,1,Z)} as a subsuming subgoal
+on the call trie, and thus is considered a consumer subgoal.
+
+While call subsumption provides good results in terms of memory utilization and time it suffers from a
+major problem: the order in which the the subgoals are called can greatly affect the performance
+and applicability of the technique. Therefore, we introduce a new mechanism called \textit{retroactive call
+subsumption} (RCS) that solves this problem by retroactively changing past tabled nodes to enable full sharing
+of answers between subsuming and subsumed subgoals, independently of the order they are called.
