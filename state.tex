@@ -121,7 +121,7 @@ factorial(N,R) :-
 \label{fig:factorial_prolog}
 \end{figure}
 
-For illustration purposes, in Figure \ref{fig:factorial_prolog} we define the predicate \texttt{factorial/2} that
+For illustration purposes, in Figure~\ref{fig:factorial_prolog} we define the predicate \texttt{factorial/2} that
 computes the factorial of a given number. This predicate has arity of 2, where the first argument is an
 \textit{input} argument and the second argument an \textit{output} argument.
 Factorial is composed of two clauses, the first represents the factorial base case (factorial of 0 is 1) and
@@ -131,7 +131,7 @@ calls factorial to compute the value of $factorial(N-1)$. Finally, the output ar
 to $N * factorial(N-1)$. The first clause uses the \textit{cut} operator (\texttt{!})
 that tells the Prolog engine to not explore alternative clauses, i.e., the factorial of 0 is not to be
 computed using the recursive call defined on the second clause.
-Once Prolog finds the first answer (Figure \ref{fig:factorial_tree}), the cut control operator disables further
+Once Prolog finds the first answer (Figure~\ref{fig:factorial_tree}), the cut control operator disables further
 alternatives, completing the depth first search in the tree.
 
 \begin{figure}[ht]
@@ -156,7 +156,7 @@ These special operators make programming more practical and useful in real world
 
 The \textit{Warren Abstract Machine} (WAM) is a stack-based architecture
 with various data areas, registers, and low level instructions that can be efficiently executed, manipulated and optimized.
-A simplified layout is presented in Figure \ref{fig:wam}.
+A simplified layout is presented in Figure~\ref{fig:wam}.
 
 \begin{samepage}
    
@@ -239,11 +239,11 @@ edge(b,a).
 \label{fig:prolog_path}
 \end{figure}
 
-One classical example that is used to demonstrate the advantages of using tabling is presented in Figure \ref{fig:prolog_path}.
+One classical example that is used to demonstrate the advantages of using tabling is presented in Figure~\ref{fig:prolog_path}.
 This program describes the predicate \texttt{path/2} that computes reachability between two nodes on a directed graph.
 Connections are established as facts using the \texttt{edge/2} predicate.
 If we tried to evaluate the query goal \texttt{path(X,Z)}, traditional Prolog would enter an infinite
-loop (Figure \ref{fig:infinite_loop}) because \texttt{edge/2} facts define a cyclic graph and the first
+loop (Figure~\ref{fig:infinite_loop}) because \texttt{edge/2} facts define a cyclic graph and the first
 clause of \texttt{path/2} is right recursive, leading to a repeated call.
 
 \begin{figure}[ht]
@@ -262,7 +262,7 @@ know if it is a repeated call by inspecting the table space. Nodes in the search
 or \textit{interior nodes} if they are non-tabled subgoals. Generator nodes are matched against the predicate clauses as usual but
 consumer nodes are not, instead they consume answers stored in the table space from the respective subgoal.
 
-In Figure \ref{fig:tabling_path} we depict the tabled evaluation of the query goal \texttt{path(X,Z)}.
+In Figure~\ref{fig:tabling_path} we depict the tabled evaluation of the query goal \texttt{path(X,Z)}.
 Generator nodes are represented by rectangles with double lines and consumer nodes by simple rectangles.
 Note that we need to declare \texttt{path/2} as tabled using the \texttt{table} directive.
 
@@ -427,7 +427,7 @@ three situations may arise:
     \end{itemize}
 \end{itemize}
 
-Note that batched scheduling was the strategy used in the evaluation of the example in Figure \ref{fig:tabling_path}.
+Note that batched scheduling was the strategy used in the evaluation of the example in Figure~\ref{fig:tabling_path}.
 
 For some problems, local scheduling is better suited because it tries to evaluate a single exact SCC at a time, preserving the dynamic
 SCC ordering during the evaluation. In other words, in a local evaluation, answers are returned to consuming nodes outside of an SCC only after that
@@ -438,7 +438,7 @@ It differs from batched scheduling in that once the answers are found, they are 
 \subsection{Variant Tabling} \label{sec:variant_tabling}
 
 When the subgoal \texttt{path(X,Z)} is called, a check for the presence of this subgoal in the table space is done first.
-In the example in Figure \ref{fig:tabling_path}, this was done by checking wether a \textit{variant} of the new goal already
+In the example in Figure~\ref{fig:tabling_path}, this was done by checking wether a \textit{variant} of the new goal already
 exists in the table. We say that two terms $t_1$ and $t_2$ are variants of each other if they are identical up to renaming of their
 variables.
 

@@ -56,13 +56,13 @@ described in Section \ref{sec:variant_tabling}.
   \label{fig:tries_use}
 \end{figure}
 
-Figure \ref{fig:tries_use} shows a trie with three terms. First, in (a) the trie is represented by a \textit{root node} and has
+Figure~\ref{fig:tries_use} shows a trie with three terms. First, in (a) the trie is represented by a \textit{root node} and has
 no terms. Next, in (b) the term \texttt{t(X,a)} is inserted and three nodes are created that represent each part of the term.
 In (c) a new term, \texttt{u(X,b,Y)} is inserted. This new term differs from the first one and a new distinct branch is created.
 Finally, in (d), the input term is \texttt{t(Y,1)} is inserted and only a new node needs to be created as this term shares
 two prefix nodes with \texttt{t(X,a)}.
 
-Yap and XSB use two levels of tries to implement the table space (see Figure \ref{fig:table_space_tries}):
+Yap and XSB use two levels of tries to implement the table space (see Figure~\ref{fig:table_space_tries}):
 
 \begin{itemize}
   \item The first level (subgoal trie) stores subgoal calls for each predicate;
@@ -93,8 +93,8 @@ information about the subgoal, namely an entry point to its \textit{answer trie}
 The answer trie stores answers to the subgoal. When inserting answers only substitutions
 for the variables in the call are stored. This optimization is called \textit{substitution factoring} \cite{RamakrishnanIV-95}.
 
-Figure \ref{fig:table_space_tries} shows the table space organization after evaluating the query goal
-\texttt{path(X,Z)} for the example in Figure \ref{fig:tabling_path}.
+Figure~\ref{fig:table_space_tries} shows the table space organization after evaluating the query goal
+\texttt{path(X,Z)} for the example in Figure~\ref{fig:tabling_path}.
 The figure shows how the subgoals \texttt{path(X,Z)}, \texttt{path(b,Z)} and \texttt{path(a,Z)} are
 stored in the \texttt{path/2} subgoal trie and how the answer trie for \texttt{path(a,Z)} is represented.
 Notice that by using substitution factoring for the answer trie, only the substitutions
@@ -146,9 +146,9 @@ associated answer sets need to be preserved \cite{Johnson-99}. However, implemen
 the subsuming call to contain all answers, as the process of generating answers is incremental.
 \end{enumerate}
 
-For illustration purposes, in Figure \ref{fig:tabling_path_sub}, we describe the evaluation of \texttt{path(X,Z)}
-using the program presented in Figure \ref{fig:prolog_path}
-and compare it against the variant approach in Figure \ref{fig:tabling_path}.
+For illustration purposes, in Figure~\ref{fig:tabling_path_sub}, we describe the evaluation of \texttt{path(X,Z)}
+using the program presented in Figure~\ref{fig:prolog_path}
+and compare it against the variant approach in Figure~\ref{fig:tabling_path}.
 
 \begin{figure}[ht]
 \centering
@@ -271,7 +271,7 @@ In each state we verify if the \textit{last transition} $s$ matches the current 
 we take the transition and advance to the next state; if not, a new transition for $t$ is created and we advance
 to the newly created state. When all term symbols $t$ are exhausted, the current state is marked as a leaf,
 representing a new answer.
-Figure \ref{fig:sfa_example} represents a SFA for the subgoal \texttt{p(X,Y,Z)} and
+Figure~\ref{fig:sfa_example} represents a SFA for the subgoal \texttt{p(X,Y,Z)} and
 illustrates insert operations.
 
 When a new subgoal $G$ subsumed by the subgoal $G'$ is first called, we must determine the \textit{answer template}
@@ -291,7 +291,7 @@ If no applicable transitions are available at state $s$ or if an answer was foun
 the stack and use it to search for more answers. Once no more transitions can be taken and the stack is empty, the
 search process ends.
 
-Using the SFA in Figure \ref{fig:sfa_example} and the subgoal $G$, \texttt{p(a,a,V)}, the search mechanism starts
+Using the SFA in Figure~\ref{fig:sfa_example} and the subgoal $G$, \texttt{p(a,a,V)}, the search mechanism starts
 at the root state and is ready to retrieve all answers that unify with $G$.
 The first applicable transition is $s1 \rightarrow s2$ because it unifies with the first symbol: $a$. The transition
 $s1 \rightarrow s5$ can not be pushed into the continuation stack because it does not unify, but $s1 \rightarrow s8$ does.
@@ -310,11 +310,11 @@ Finally, once states $s13$ and $s14$ are visited, the process arrives at a leaf 
 
 A \textit{Threaded Sequential Automata} extends the SFA with a concept called
 \textit{equivalent states}. One state $S1$ is equivalent to state $S2$ if when $S1$ is taken, $S2$ is also
-guaranteed to be visited. For example, in Figure \ref{fig:sfa_example}, whenever states $s2$ and $s3$ are
+guaranteed to be visited. For example, in Figure~\ref{fig:sfa_example}, whenever states $s2$ and $s3$ are
 visited, states $s8$ and $s9$ are also guaranteed to be visited, as they denote the same path.
 
 A SFA is converted to a TSA by adding \textit{equivalence links} between equivalent states.
-The SFA in Figure \ref{fig:sfa_example} was transformed into a TSA in Figure \ref{fig:tsa_example}.
+The SFA in Figure~\ref{fig:sfa_example} was transformed into a TSA in Figure~\ref{fig:tsa_example}.
 
 \begin{figure}[ht]
   \centering
@@ -349,7 +349,7 @@ are retrieved, the continuation stack can be used to retrieve newly inserted ans
 
 The Dynamic Threaded Sequential Automata extends the TSA with special transitions in states
 were new transitions can be inserted or in states were no equivalence links exist.
-Figure \ref{fig:dtsa_example} illustrates two DTSAs: (a) shows the converted TSA from Figure \ref{fig:tsa_example}, and
+Figure~\ref{fig:dtsa_example} illustrates two DTSAs: (a) shows the converted TSA from Figure~\ref{fig:tsa_example}, and
 (b) the resulting DTSA after inserting the answer \texttt{p(a,b,c)}.
 
 \begin{figure}[ht]
@@ -373,7 +373,7 @@ $[s1~\rightarrow~v1,~s8~\rightarrow~v8,~s13~\rightarrow~v13]$.
 This continuation stack contains the transitions from where it is possible that a relevant
 answer will be inserted, by using either normal transitions or equivalence links.
 
-After the new answer \texttt{p(a,b,c)} is inserted into the DTSA in Figure \ref{fig:dtsa_example}
+After the new answer \texttt{p(a,b,c)} is inserted into the DTSA in Figure~\ref{fig:dtsa_example}
 (b) and a consumer is resumed to consume new answers, we must check if new answers are available,
 hence the continuation stack must be transformed in order to convert the virtual transitions to
 instantiated transitions that may have been created after the last retrieval operation.
@@ -408,7 +408,7 @@ positive integer. The time stamps are then used for incremental answer retrieval
 
 For each node in a trie, we extend it by including a time stamp. Along the augmented trie, the maximum time stamp
 $T$ is also stored, thus allowing the insert mechanism to know the next time stamp to use for new trie paths.
-An example TST for the subgoal \texttt{p(X,Y,Z)} is represented in Figure \ref{fig:tst_1}.
+An example TST for the subgoal \texttt{p(X,Y,Z)} is represented in Figure~\ref{fig:tst_1}.
 By looking at the leaf nodes, the order of answer insertion
 can be readily known: \texttt{p(a,a,a)}, \texttt{p(b,a,VAR0)}, \texttt{p(a,a,c)}, \texttt{p(a,b,b)} and then
 \texttt{p(a,a,d)}.
@@ -430,11 +430,11 @@ is traversed and its time stamp is updated to $T + 1$.
 \begin{figure}[ht]
   \centering
     \includegraphics[scale=0.6]{tst_2.pdf}
-  \caption{Time Stamped Trie from Figure \ref{fig:tst_1} after inserting the answer \texttt{p(a,b,c)}.}
+  \caption{Time Stamped Trie from Figure~\ref{fig:tst_1} after inserting the answer \texttt{p(a,b,c)}.}
   \label{fig:tst_2}
 \end{figure}
 
-Figure \ref{fig:tst_2} shows the TST from Figure \ref{fig:tst_1} after a new answer \texttt{p(a,b,c)} was inserted.
+Figure~\ref{fig:tst_2} shows the TST from Figure~\ref{fig:tst_1} after a new answer \texttt{p(a,b,c)} was inserted.
 Note that each node from the answer leaf node to root node was updated with time stamp 6. Apart from
 the time stamps, search and insertion in TSTs work exactly the same as standard tries.
 
@@ -442,7 +442,7 @@ the time stamps, search and insertion in TSTs work exactly the same as standard 
 
 Retrieving all answers that are specific to a subsumed subgoal $G$ from a TST with answers from subgoal $G'$
 works by navigating the TST and unifying the answers against the answer template.
-If we wanted to retrieve answers to the subgoal \texttt{p(a,a,X)} from the TST in Figure \ref{fig:tst_2},
+If we wanted to retrieve answers to the subgoal \texttt{p(a,a,X)} from the TST in Figure~\ref{fig:tst_2},
 during the subgoal call we determine the answer template relative to \texttt{path(X,Y,Z)}:
 \texttt{\{X~=~a,~Y~=~a,~Z~=~VAR0\}},
 and store it under the choice point. Then, the terms $[a, a, VAR0]$ are unified
