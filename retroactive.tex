@@ -1,0 +1,17 @@
+This chapter introduces the concept of retroactive call subsumption (RCS). RCS
+enables full sharing of answers among subgoal calls, independent of the order they are called,
+using the relation of subsumption.
+
+First, we introduce the motivations behind RCS by illustrating the shortcomings of traditional call
+subsumption mechanisms. Next, we present the concepts introduced by RCS and how execution
+rules are extended to support retroactive tabling. Other extensions are then discussed, namely:
+the new table space organization based around the ideas of the \textit{common global trie} proposal
+\cite{CostaJ-08} and the algorithm to traverse the call trie to search for subsumed subgoals. Finally, we
+give some details about the implementation of this new extension.
+
+\section{Motivation}
+
+In traditional call subsumption, a new call to the subgoal $G$ is considered to create a producer subgoal
+when a more general subgoal $G'$ is not found on the call trie and it is the first time $G$ is called.
+When $G'$ exists, a new consumer is stored to consume answers from the subsuming subgoal $G'$, thus creating
+a consumer subgoal.
