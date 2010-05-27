@@ -150,8 +150,9 @@ is generated.
 \end{figure}
 
 Next, subgoal \texttt{p(Z,W)} is called, which subsumes \texttt{p(1,X)} and the evaluation of this subgoal
-must be pruned. Now, the subgoal \texttt{p(1,X)} includes various choice points involved in its computation,
-namely \texttt{a(\_,X)} and \texttt{b(X)}.
+must be pruned (Figure~\ref{fig:retro_eval2}). As \texttt{p(Z,W)} is external to \texttt{p(1,X)} we have
+a case of external pruning. Please notice that \texttt{p(1,X)} now includes various choice
+points involved in its computation, namely \texttt{a(\_,X)} and \texttt{b(X)}.
 
 The consumer node associated with the subgoal \texttt{a(\_,X)} must leave the computation and no longer
 participates in answer resolution, thus its dependency frame is removed from the dependency space.
@@ -160,7 +161,17 @@ Pruning the generator node associated with the subgoal \texttt{b(X)} is a more t
 the consumer \texttt{b(Y)} depends on this subgoal to consume new answers, thus by removing the generator node
 the consumer will become an \textit{orphaned consumer} and the computation will complete too early.
 Therefore, we mark the subgoal \texttt{b(X)} as \textit{pruned} and turn the consumer node of \texttt{b(Y)}
-into a retroactive node.
+into a retroactive node. Finally, the \textit{previous choice point} field of the choice point associated
+with \texttt{b(Y)} must now point to \texttt{p(1,X)}, because we must prevent the evaluation to step into
+pruned branches by means of backtracking. The choice point of \texttt{b(Y)} is called a
+\textit{frontier choice point}. Figure \ref{fig:retro_eval3} shows the state of the computation after pruning.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.5]{retro_example3.pdf}
+  \caption{After external pruning over choice points belonging to the subsumed subgoal.}
+  \label{fig:retro_eval3}
+\end{figure}
 
 Next, the subgoal \texttt{p(Z,W)} starts to execute the first clause of \texttt{p/2} and creates
 a new consumer for \texttt{a(\_,X)}, that will consume one answer. By forward execution, an answer
@@ -171,7 +182,7 @@ After \texttt{b(Y)} generates all the answers, it completes successfully and exe
 \texttt{p(Z,W)}, to attempt completion of this subgoal. As the leader node is currently \texttt{a(X,Y)},
 completion fails.
 
-We backtrack to the retroactive node \texttt{b(Y)} will order to do retroactive resolution. Evaluation
+We backtrack to the retroactive node \texttt{b(Y)} in order to do retroactive resolution. Evaluation
 notices that the subgoal has already completed, thus the retroactive node is transformed into a loader node
 to consume all answers that were not consumed. By forward execution, a new consumer for \texttt{p(Z,W)} is
 created that will generate more answers for the query goal. Once \texttt{b(Y)} does not have more answers
@@ -199,7 +210,6 @@ choice points}. This problem also affects delaying based tabling engines like Ya
 choice points under consumers are frozen and remain until completion. The CHAT approach to tabling
 solves this problem by removing trapped choice points \cite{Demoen-99b}. Another solution would involve
 modifications to the WAM garbage collector to collect unused space on the choice point stack.
-
 
 \subsubsection{Internal Consumers}   
    
@@ -264,11 +274,13 @@ abolish_subgoal_frames(specific_sg, min, max) {
             else
                free(sg_fr)
          else if (type(sg_fr) == SUBSUMPTIVE)
-            if (has_proper_consumers(sg_fr))
-               transform_external_subsumed_consumers(specific_sg, sg_fr, sg_cp, max)
+            if (has_subsumed_consumers(sg_fr))
+               transform_external_subsumed_consumers(specific_sg, sg_fr, sg_cp, max,
+                  has_variant_consumers(sg_fr))
             
             if (has_variant_consumers(sg_fr))
                update_external_consumers(specific_sg, sg_fr, sg_cp, max)
+               state(sg_fr) = pruned
                
             if (has_no_consumers(sg_fr))
                free(sg_fr)
@@ -278,16 +290,324 @@ abolish_subgoal_frames(specific_sg, min, max) {
 \label{fig:abolish_subgoal_frames}
 \end{figure}
 
+Figure~\ref{fig:abolish_subgoal_frames} shows the procedure \texttt{abolish\_subgoal\_frames} that is
+responsible in abolishing internal generators. For variant and retroactive tabled subgoals we remove
+the subgoal frame from the stack (using \texttt{remove\_subgoal\_from\_stack}) and then check if the
+subgoal has external consumers. If those consumers are found, they are turned into retroactive nodes
+by the procedure \texttt{update\_external\_consumers}.
+
+Our system is also able to mix tabled subgoals using traditional call subsumption with retroactive tabling.
+For this case we distinguish between variant consumers and subsumed consumers.
+If the subgoal has no external variant consumers, we remove the subgoal frame from the system and
+its path from the call trie, which means that external subsumed consumers are turned into producers as
+the producer has been deleted. When we have external variant consumers, the pruned subgoal changes its state
+to \textit{pruned} in order to be reactivated later or by an orphaned consumer.
+
+A tricky situation happens when an orphaned variant consumer is pruned by another subgoal and orphaned
+subsumed consumers are left in a situation where the producer subgoal will not be reactivated. In this case,
+we check for situations where the subsumptive subgoal has no more variant consumers and we change its state
+to \textit{dead}. Later on, when a subsumed consumer is reactivated by means of retroactive resolution, we
+verify if the producer is \textit{dead}. If this is the case, we simply convert the subgoal frame to a
+subsuming subgoal frame and turn the retroactive node into a generator. This also involves modifications
+to the answer template, which must be transformed into a producer answer template (with only variables).
+
+For an example using subsumptive subgoals, consider the program in Figure~\ref{fig:retro_sub} and
+the query goal `\texttt{p(1,A),~t(1,2,B),~b(1,C),~p(D,E),~b(F,G)}'.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+:- use_retroactive_tabling [b/2, p/2].
+:- use_subsumptive_tabling t/3.
+
+p(X, 55) :- t(X, A, B).
+p(1, 5).
+p(10, 10).
+
+b(X, 20) :- t(X, A, B).
+b(3, 1).
+
+t(1, 2, 3).
+t(1, 2, 5).
+t(3, 10, 20).
+\end{Verbatim}
+\caption{Example program using retroactive tabling with subsumptive tabling.}
+\label{fig:retro_sub}
+\end{figure}
+
+The first goal \texttt{p(1,A)}
+creates a new generator node and calls \texttt{t(1,A,B)}, which is considered a subsumptive producer subgoal.
+By forward execution we arrive at \texttt{t(1,2,B)}, which will create a consumer node that subsumes
+the subgoal \texttt{t(1,A,B)}. Next, we make another retroactive call with \texttt{b(1,C)} that creates
+another generator and calls \texttt{t(1,A,B)}, which is a variant consumer of initial the subsumptive generator.
+Finally, we call \texttt{p(D,E)} and \texttt{p(1,A)} must be pruned (Figure~\ref{fig:retro_sub1}).
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.5]{retro_sub1.pdf}
+  \caption{Evaluation before pruning subsumptive subgoals using the subgoal \texttt{p(C,D)}.}
+  \label{fig:retro_sub1}
+\end{figure}
+
+The generator \texttt{t(1,A,B)} is internal to \texttt{p(1,A)} and has two external consumers: one variant
+and one subsumed consumer,\texttt{t(1,2,B)}. Here, we modify the state of subsumptive subgoal to \textit{pruned}
+and turn each external consumer node into retroactive nodes. We are hoping that \texttt{t(1,A,B)} will be
+reactivated and \texttt{t(1,2,B)} will continue to consume from its producer. Figure~\ref{fig:retro_sub2}
+shows the state of computation after pruning.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.5]{retro_sub2.pdf}
+  \caption{Evaluation after pruning subsumptive subgoals using the subgoal \texttt{p(C,D)}.}
+  \label{fig:retro_sub2}
+\end{figure}
+
+Next, evaluation of \texttt{p(C,D)} generates a call to the subsumptive subgoal \texttt{t(X,A,B)}, which
+is a producer subgoal. By forward execution, we call \texttt{b(F,G)} which subsumes \texttt{b(1,C)} and triggers
+a new external pruning operation. The computation of \texttt{b(1,C)} contains the internal consumer
+\texttt{t(1,A,B)} that is currently associated with a retroactive node. We delete this consumer from the
+dependency space and as \texttt{t(1,A,B)} has no more variant consumers that can reactivate this subgoal,
+we update its state to \textit{dead}, in order to inform retroactive nodes that dependent on it that the producer
+will no longer produce answers (in this example, \texttt{t(1,2,B)}). The result of pruning is shown in
+Figure ~\ref{fig:retro_sub3}.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.5]{retro_sub3.pdf}
+  \caption{Evaluation after pruning subsumptive subgoals using the subgoal \texttt{b(F,G)}.}
+  \label{fig:retro_sub3}
+\end{figure}
+
+After the subgoals \texttt{b(F,G)}, \texttt{t(X,A,B)} and \texttt{p(D,E)} complete, we backtrack to
+the retroactive node \texttt{b(1,C)}. This node is transformed into a loader node as the producer
+subgoal has already completed. After the answers have been exhausted, we backtrack to the retroactive
+node \texttt{t(1,2,B)}. As the current producer subgoal is \textit{dead} we transform the consumer subgoal
+frame into a producer subgoal frame and the retroactive node is transformed into a generator node, because
+the subgoal must now generate its own answers. In order for this to work, the answer template is transformed
+from \texttt{\{2,~2,~B\}} to \texttt{\{1,~B\}}. Figure \ref{fig:retro_sub4} shows the state of the computation
+after this transformation.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.5]{retro_sub4.pdf}
+  \caption{Evaluation after transforming the subsumed consumer \texttt{t(1,2,B)} in a subsumptive producer.}
+  \label{fig:retro_sub4}
+\end{figure}
 
 \subsection{Orphaned Consumers}
 
+An orphaned consumer is an external consumer that loses its generator after a pruning operation.
+As we have seen, we transform each orphaned consumer node into a retroactive node.
+When an orphaned consumer node is reached by means of backtracking it will be transformed into either:
+(1) a loader node, if the pruned generator was reactivated and has completed; (2) a consumer node,
+if the pruned generator was reactivated but has not completed yet, which means that below the new pruned subgoal
+choice point there is a dependency on a upper generator node, thus this new consumer will participate
+in the completion operation as usual; or (3) a generator node,
+if the pruned generator was not reactivated until then. This latter situation only occurs with
+variant or subsumptive tabling. With retroactive tabling, the execution of the subsuming subgoal
+will call the same or a more general subgoal, and this subgoal will update the \texttt{producer} field
+of any subsumed subgoal frame, including orphaned consumers.
+
+By default, orphaned consumers always keep their frames on the dependency frame stack. The frame is only
+removed if the retroactive node turns into a loader or generator node. If the retroactive node turns again
+into a consumer node, lazy removal of dependency frames allows us to avoid removing and allocating a new
+frame and the potentially expensive operation of inserting it on the dependency frame stack in the
+correct order (ordered by choice point address).
+
 \subsection{Lost Consumers}
 
-\subsection{Frontier Choice Point}
+While it is usually possible to transform each retroactive node into the correct type of node by means
+of backtracking or answer resolution, there are some cases where this is not possible. This happens to
+external consumers turned into retroactive nodes and we call them \textit{lost consumers}.
+
+For an example, consider the program in Figure~\ref{fig:retro_lost_consumer_code} and the query goal
+`\texttt{a(X,Y)}'. Evaluation starts by storing a generator node for \texttt{a(X,Y)} and then calling
+the retroactive subgoal \texttt{p(1,X)}.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+:- use_variant_tabling [a/2, b/2].
+:- use_retroactive_tabling p/2.
+
+a(X, 0) :- p(1, X).
+a(0, Y) :- b(1, Y).
+a(X, Y) :- p(X, Y).
+
+b(1, Y) :- a(_, Y).
+b(2, 1).
+
+p(X, Y) :- b(X, Y).
+\end{Verbatim}
+\caption{Example program with a lost consumer.}
+\label{fig:retro_lost_consumer_code}
+\end{figure}
+
+Next, the subgoal \texttt{b(1,X)} is called, creating a new
+generator node; consequently \texttt{b(1,X)} calls subgoal \texttt{a(\_,Y)} that is a variant of the
+first called subgoal and thus a consumer node is stored. As no answers are available to consume,
+evaluation suspends and then backtracks to the second clause of \texttt{b/2}, but it does not
+unify with \texttt{b(1,X)}. By backtracking, we attempt the second clause of \texttt{a/2}, which
+originates a call to \texttt{b(1,Y)}. This is a variant call of \texttt{b(1,X)} and a new consumer is
+created. This node must be suspended as no answers are available.
+
+Through backtracking, we execute the second clause of \texttt{a/2} and the retroactive subgoal \texttt{p(X,Y)}
+is called. As this subgoal subsumes \texttt{p(1,X)} we must prune the evaluation of \texttt{p(1,X)}.
+The internal generator \texttt{b(1,X)} is pruned, leaving an orphaned consumer, \texttt{b(1,Y)}. The internal
+consumer \texttt{a(\_,X)} is simply thrown away. Note that here, we do not have a frontier choice point,
+because the subsumed subgoal appears outside the branch of the subsuming subgoal. This is safe, because
+the branch including the subsumed subgoal will only be resumed on consumers during completion and thus
+no backtracking to previous choice points will occur as they were fully explored before.
+
+After \texttt{p(X,Y)} is fully explored, the following answers are generated for \texttt{a(X,Y)}:
+\texttt{\{X~=~1,~Y\}} and \texttt{\{X~=~2,~Y~=~1\}}. Then, we attempt completion at the leader node,
+\texttt{a(X,Y)} (Figure~\ref{fig:retro_lost_consumer}). At this point, \texttt{b(1,Y)} still remains
+a retroactive node and it is clear that it must be resumed in order to be reactivated as a generator,
+and consequently, generate more answers to \texttt{a(X,Y)}, namely \texttt{\{X~=~0,~Y~=~1\}} and
+\texttt{\{X~=~0,~Y~=~1\}}. Note that \texttt{b(1,Y)} is not a real consumer and thus can not participate
+in the completion operation before retroactive resolution is applied. Therefore, to ensure that all
+retroactive nodes are resumed, the completion is extended to, while traversing the dependency space
+checking for new answers, also \textit{check for retroactive nodes}, and resume the corresponding
+consumer node in both cases. In the example, \texttt{b(1,Y)} is resumed and transformed into a
+generator node, thus allowing the computation to finish correctly.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{retro_lost_consumer.pdf}
+  \caption{Lost consumer \texttt{b(1,Y)} after an external pruning.}
+  \label{fig:retro_lost_consumer}
+\end{figure}
+
+\subsection{Pseudo-Completion}
+
+When the subsumed subgoal $G$ is pruned when it is a leader node for some consumers, the completion operation
+will not be run at node $G$ because $G$ is now a retroactive node and we will not be able to resume
+consumers that do not have been fully explored by other leader nodes. Therefore, we must ensure
+that every consumer is resumed in order to fully explore every evaluation branch.
+
+Consider the query goal `\texttt{p(1,A,B),~p(1,3,C),~p(D,E,F)}' and the program in Figure~\ref{fig:retro_ignored_consumer}. After the call to \texttt{p(1,A,B)} succeeds with the
+answer \texttt{\{A~=~2,~B~=~3\}}, subgoal \texttt{p(1,3,C)} is called and a new consumer of
+\texttt{p(A,B,C)} is created (consumer $C1$). As no answers are available to consume, execution
+backtracks to \texttt{p(1,A,B)} and a second answer is generated, \texttt{\{A~=~3,~B~=~2\}}. Next,
+subgoal \texttt{p(1,3,C)} is called again and a new consumer is generated (consumer $C2$).
+This consumers consumes the answer \texttt{\{C~=~2\}} and execution proceeds. 
+
+\begin{figure}[ht]
+\begin{Verbatim}
+:- use_retroactive_tabling p/2.
+
+p(1, 2, 3).
+p(1, 3, 2).
+\end{Verbatim}
+\caption{Example program for pseudo-completion.}
+\label{fig:retro_ignored_consumer}
+\end{figure}
+
+Subgoal \texttt{p(D,E,F)} is called and must prune the evaluation of \texttt{p(1,A,B)} 
+(Figure~\ref{fig:retro_pseudo_completion1}). Both subgoal frames, \texttt{p(1,A,B)} and \texttt{p(1,3,C)}
+are turned into consumer subgoal frames and their \texttt{producer} field is set to the subgoal
+frame of \texttt{p(D,E,F)}.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{retro_pseudo_completion1.pdf}
+  \caption{Query goal `\texttt{p(1,A,B),~p(1,3,C),~p(D,E,F)}' before pruning.}
+  \label{fig:retro_pseudo_completion1}
+\end{figure}
+
+After \texttt{p(D,E,F)} completes, execution backtracks to retroactive node $C2$ that is transformed
+in a loader node by retroactive resolution. After all answers are loaded, execution backtracks to
+the retroactive node of \texttt{p(1,A,B)}. If we transform the retroactive node into a loader node and
+then load all the answers relevant to this node we might lose the consumer $C1$, because there is no
+other way to reach that node.
+
+Notice that when consumer $C1$ has been created its leader node was
+\texttt{p(1,A,B)}. Hence, before loading all answers, we act as a \textit{pseudo-leader} (since no upper
+dependencies exist) and we look for younger retroactive nodes with unconsumed answers on the dependency
+frame stack. When we find node $C1$, we set the field \texttt{backchain\_cp} of the target dependency
+frame to the choice point of the pseudo-leader and computation is resumed at $C1$
+(Figure \ref{fig:retro_pseudo_completion2}).
+
+After $C1$ is solved
+through retroactive resolution, it loads all its answers and, instead of backtracking, jumps to the choice
+point saved in the \texttt{backchain\_cp} field, thus allowing the pseudo-leader to resume other retroactive
+nodes. The reason to use the \texttt{backchain\_cp} field instead of backtracking, is because any choice
+point between the pseudo-leader and the target consumer as been fully exploited, thus we must jump explicitly
+between nodes. The process of resuming consumers through a pseudo-leader is called \textit{pseudo-completion}.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{retro_pseudo_completion2.pdf}
+  \caption{Executing a pseudo-completion.}
+  \label{fig:retro_pseudo_completion2}
+\end{figure}
 
 \subsection{Leader Re-Computation}
 
+Each dependency frame contains the value of the leader node during the creation of the consumer node.
+External consumers can reference as a leader either: (1) a pruned generator choice point; or (2) a
+generator that appeared before the execution of the subsumed subgoal. In the second case we keep
+the dependency frame unmodified. In the first case, we update the leader choice point (\texttt{leader\_cp})
+field to the consumer node itself.
+
+The reason we update the \texttt{leader\_cp} field is to avoid the leader computation algorithm to compute
+a leader that simply does not exist, making completion impossible.
+For an example describing this problem, consider the program in Figure~\ref{fig:retro_leader_program}
+and the query goal `\texttt{p(1,A),~a(B,C),~a(1,D),~p(E,F)}'.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+:- use_retroactive_tabling p/2.
+:- use_variant_tabling p/2.
+
+a(1, 3).
+a(1, 2).
+a(2, 4).
+
+p(X, Y) :- a(X, Y).
+\end{Verbatim}
+\caption{Example program demonstrating the leader re-computation problem.}
+\label{fig:retro_leader_program}
+\end{figure}
+
+During the evaluation of the subgoal \texttt{p(1,A)}, a generator node
+for \texttt{a(1,Y)} is created. Next, a new generator is allocated for \texttt{a(B,C)},
+followed by the consumer node \texttt{a(1,D)}. When \texttt{p(E,F)} is called to
+prune \texttt{p(1,A)} (Figure~\ref{fig:retro_leader_recomputation}), the generator \texttt{a(1,Y)}
+is pruned and the \texttt{leader\_cp}
+field of the consumer \texttt{a(1,D)} still points to \texttt{a(1,Y)}.
+During execution of \texttt{p(E,F)} a new consumer is allocated for \texttt{a(X,Y)} that
+decides its leader should be the pruned \texttt{a(1,X)} generator, because between
+the generator and consumer nodes, the \texttt{a(1,D)} consumer has an older leader.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{retro_leader_recomputation.pdf}
+  \caption{Before pruning the subsumed subgoal.}
+  \label{fig:retro_leader_recomputation}
+\end{figure}
+
+Finally, execution proceeds and completion is attempted at the subgoal \texttt{p(E,F)}.
+Because this is not the leader node, we backtrack to \texttt{a(1,D)} that is transformed
+into a generator and then completes. Next, we backtrack to \texttt{a(B,C)} to try other
+alternatives of \texttt{a/2} and then completion is attempted, but without success because
+the leader node is the pruned generator \texttt{a(1,Y)}. It is then impossible to complete
+the evaluation because the leader node is never reached.
+
+By our delineated rules, the \texttt{leader\_cp} of the consumer \texttt{a(1,D)} would have been
+modified to itself, thus making the generator \texttt{a(B,C)} the leader of the computation.
+Notice that the consumer node, \texttt{X,Y} created during the evaluation of \texttt{p(E,F)} would
+consider that its leader was \texttt{a(B,C)}. Figure~\ref{fig:retro_leader_recomputation2} shows the
+state of computation at that point.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{retro_leader_recomputation2.pdf}
+  \caption{Updated \texttt{leader\_cp} fields.}
+  \label{fig:retro_leader_recomputation2}
+\end{figure}
+
 \section{Internal Pruning}
+
+\subsection{Multiple Internal Pruning}
 
 \section{Mixing External and Internal Pruning}
 
