@@ -225,6 +225,11 @@ In a nutshell, tabling is a refinement of the SLD resolution that consists in st
 subgoals so that they can be reused when a repeated subgoal appears in the resolution process.
 The use of tabling enables the programmer to write more expressive, but still valid, logical programs.
 
+One classical example that is used to demonstrate the advantages of using tabling is presented
+in Figure~\ref{fig:prolog_path}. This program describes the predicate \texttt{path/2} that computes
+reachability between two nodes on a directed graph. Connections are established as facts using the
+\texttt{edge/2} predicate.
+
 \begin{figure}[ht]
 \begin{verbatim}
 :- table path/2.
@@ -239,9 +244,6 @@ edge(b,a).
 \label{fig:prolog_path}
 \end{figure}
 
-One classical example that is used to demonstrate the advantages of using tabling is presented in Figure~\ref{fig:prolog_path}.
-This program describes the predicate \texttt{path/2} that computes reachability between two nodes on a directed graph.
-Connections are established as facts using the \texttt{edge/2} predicate.
 If we tried to evaluate the query goal \texttt{path(X,Z)}, traditional Prolog would enter an infinite
 loop (Figure~\ref{fig:infinite_loop}) because \texttt{edge/2} facts define a cyclic graph and the first
 clause of \texttt{path/2} is right recursive, leading to a repeated call.

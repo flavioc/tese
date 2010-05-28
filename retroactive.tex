@@ -607,7 +607,120 @@ state of computation at that point.
 
 \section{Internal Pruning}
 
+Although all the previous example used external pruning, both external and internal pruning
+suffer from the issues previously described. This section explores internal pruning
+and its differences in relation to external pruning.
+
+Internal pruning occurs when the subsuming subgoal $S$ is internal to the evaluation of the
+subsumed subgoal $R$. In this type of pruning we want to keep one part of $R$ running, the one
+that computes $S$, hence we are able to compute all answers of $R$ just by computing $R$.
+
+Our approach involves computing $S$ using local scheduling \cite{Freire-96}, but without returning
+answers to the environment of $R$, as it has been pruned. Instead, we jump directly to the
+choice point of $R$, which was transformed into a retroactive, and resume the computation there
+in order to consume the matching answers found by $S$. When resuming the retroactive node for $R$, it
+can become either: (1) a loader node, if $S$ has completed; or (2) a consumer node, if $S$ has not
+completed because it is not the leader node, i.e., the leader node is above $R$.
+
+Notice that, when the completion operation is later attempted at the leader node, the computation can
+still be resumed, as usual and without any special handling, at $R$ or at the internal consumers of $S$,
+until no unconsumed answers are available.
+
+For an example, consider the \texttt{path/2} program presented in Figure~\ref{fig:retro_path_program}.
+It computes the reachability between two nodes on a directed graph by using a left recursive
+definition. To know from which nodes we can reach node 3, we are interested in the solutions
+for the query goal `\texttt{path(X,3)}'.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+:- use_retroactive_tabling path/2.
+
+path(X, Y) :- path(X, Z), edge(Z, Y).
+path(X, Y) :- edge(X, Y).
+
+edge(1, 2).
+edge(2, 3).
+\end{Verbatim}
+\caption{Left recursive \texttt{path/2} program with retroactive tabling.}
+\label{fig:retro_path_program}
+\end{figure}
+
+Execution starts by creating a generator node for \texttt{path(X,3)}, followed by a call to
+subgoal \texttt{path(X,Z)}. Given that \texttt{path(X,Z)} is internal to the computation of
+\texttt{path(X,3)}, we have a case of internal pruning. Using the rules for internal pruning
+defined above, we will evaluate \texttt{path(X,Z)} with local scheduling.
+
+Next, a repeated call to the subgoal \texttt{path(X,Z)} is made and a consumer is created.
+As no answers are available for consumption, execution backtracks to the second clause of \texttt{p/2}.
+Here, we call \texttt{edge(X,Y)} and two new answers for \texttt{path(X,Z)} are generated,
+\texttt{\{X~=~1,~Z~=~2\}} and \texttt{\{X~=~2,~Z~=~3\}}. Execution returns to \texttt{path(X,Z)} and
+completion is attempted. As the \texttt{path(X,Z)} consumer now has answers to consume, they are
+thus consumed and by forward execution the solution \texttt{\{X~=~1,~Z~=~3\}}  is generated for
+\texttt{path(X,Z)}. Notice that these answers are not returned to the environment of
+\texttt{path(X,3)}, but are only saved on the table space.
+
+After a batch of repeated answers, execution backtracks to \texttt{path(X,Z)} where
+completion is attempted again (Figure~\ref{fig:retro_path}). With no more unconsumed answers, the subgoal
+\texttt{path(X,Z)} completes and instead of backtracking, jumps to the retroactive node of the subgoal
+\texttt{path(X,3)}. Here, the retroactive node first determines the relevant answers from the set of
+answers generated for \texttt{path(X,Z)}, namely, \texttt{\{X~=~1\}} and \texttt{\{X~=~2\}}. Next,
+the retroactive node is transformed into a loader node, thus loading its answers.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.7]{retro_path.pdf}
+  \caption{Evaluating `\texttt{path(X,3)}' using retroactive tabling.}
+  \label{fig:retro_path}
+\end{figure}
+
 \subsection{Multiple Internal Pruning}
+
+An important aspect in internal pruning is \textit{multiple internal pruning}.
+Consider that a subgoal $R_1$ calls recursively internal subgoals $R_1, R_2, ..., R_n$ until a subgoal
+$S$ is called that subsumes $R_1, R_2, ..., R_n$. In such cases, we ignore all intermediate subgoals
+and answers are only pushed from $S$ to $R_1$, the top subgoal. For an example, consider the
+query goal `\texttt{p(1,X)}' and the program in Figure~\ref{fig:retro_multiple_internal_program}.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+:- use_retroactive_tabling p/2.
+
+p(1,X) :- p(2,X).
+p(2,X) :- p(X, _).
+p(2,4).
+p(1,5).
+\end{Verbatim}
+\caption{Example program illustrating multiple internal pruning.}
+\label{fig:retro_multiple_internal_program}
+\end{figure}
+
+Execution starts by storing generator nodes for \texttt{p(1,X)} and \texttt{p(2,X)} and then
+\texttt{p(2,X)} calls \texttt{p(X,\_)} that subsumes both \texttt{p(1,X)} and \texttt{p(2,X)}.
+Pruning is done between the top subsumed subgoal \texttt{p(1,X)} and the subsuming subgoal
+\texttt{p(X,\_)} and the node for \texttt{p(2,X)} is ignored (Figure~\ref{fig:retro_multiple_internal1}).
+The choice point for \texttt{p(1,X)} is transformed into a retroactive node and execution proceeds by
+applying local scheduling to evaluate \texttt{p(X,\_)}.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{retro_multiple_internal1.pdf}
+  \caption{Before multiple internal pruning.}
+  \label{fig:retro_multiple_internal1}
+\end{figure}
+
+After \texttt{p(X,\_)} fully evaluates with the answers \texttt{\{X~=~1\}}, \texttt{\{X~=~2\}},
+\texttt{\{X~=~2,~\_~=~4\}} and \texttt{\{X~=~1,~\_~=~5\}}, execution is resumed at the retroactive node of
+subgoal \texttt{p(1,X)}, where the answers \texttt{true} and \texttt{\{X~=~5\}} are loaded
+(Figure~\ref{fig:retro_multiple_internal2}).
+While the subgoal \texttt{p(2,X)} did not participate in later phase of the computation, it has been completed
+during the computation of \texttt{p(X,\_)}. 
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{retro_multiple_internal2.pdf}
+  \caption{After the evaluation of \texttt{p(X,\_)}.}
+  \label{fig:retro_multiple_internal2}
+\end{figure}
 
 \section{Mixing External and Internal Pruning}
 
