@@ -678,8 +678,8 @@ the retroactive node is transformed into a loader node, thus loading its answers
 An important aspect in internal pruning is \textit{multiple internal pruning}.
 Consider that a subgoal $R_1$ calls recursively internal subgoals $R_1, R_2, ..., R_n$ until a subgoal
 $S$ is called that subsumes $R_1, R_2, ..., R_n$. In such cases, we ignore all intermediate subgoals
-and answers are only pushed from $S$ to $R_1$, the top subgoal. For an example, consider the
-query goal `\texttt{p(1,X)}' and the program in Figure~\ref{fig:retro_multiple_internal_program}.
+and answers are only pushed from $S$ to $R_1$, the top subgoal. 
+For an example, consider the query goal `\texttt{p(1,X)}' and the program in Figure~\ref{fig:retro_multiple_internal_program}.
 
 \begin{figure}[ht]
 \begin{Verbatim}
@@ -723,6 +723,143 @@ during the computation of \texttt{p(X,\_)}.
 \end{figure}
 
 \section{Mixing External and Internal Pruning}
+
+Although internal and external pruning form the basis of retroactive call subsumption, rules must
+be devised in order to prune multiple subgoals that combine both types of pruning. We want to
+the minimize the number of pruned subgoals in such a way that a choice point is pruned at
+most one time.
+
+Figure~\ref{fig:prune_subgoal_list} shows the \texttt{prune\_subgoal\_list} procedure that accepts
+as arguments the subsuming subgoal and the list of subgoals to prune.
+
+First, we compute the oldest internal subgoal $O$ in the set of subgoals and discard other internal
+subgoals (phase 1). By using the multiple internal pruning principle (Observation \ref{internal_obs}), we can prune only the oldest subgoal
+because pruning the oldest subgoal will also prune the other internal subgoals as a side-effect.
+Notice that we also change the subgoal frame type of all subsumed subgoals to \texttt{RETROACTIVE\_CONSUMER}
+and update the \texttt{producer} field to point to the subsuming subgoal.
+
+\begin{pruning_obs}\label{internal_obs}
+Let $R_1, R_2, ..., R_n$ be a set of subgoals that are recursively internal. In order to prune the subgoals
+$R_1, R_2, ..., R_n$, only the top subgoal, $R_1$, needs to be pruned.
+\end{pruning_obs}
+
+Next, in phase 2 we check if the list of subgoals is empty, that is, if no external subgoals exist in the list
+because internal subgoals have been removed from it in phase 1. Affirmatively, we return early from the procedure
+by doing an internal pruning.
+
+In phase 3, we remove all internal subgoal frames that are internal to the subgoal frame $O$ found in phase 1.
+Because we will prune the computation of $O$, every subgoal internal to $O$ will be pruned
+(except the subsuming subgoal), thus there is no need to prune the two subgoals separately
+(Observation~\ref{external_obs}). Next, we finally do an internal pruning using the $O$ subgoal frame
+and the resulting list at this point will be empty or contain only external subgoal frames not internal to
+$O$ where external pruning must be applied.
+
+\begin{pruning_obs}\label{external_obs}
+Let $G$ be a subgoal and $G'$ a subgoal internal to $G$. If $G$ is pruned, $G'$ is also pruned.
+\end{pruning_obs}
+
+If the list of subgoals is not empty, we iterate over each external subgoal frame to remove the subgoal frame if
+it is internal to another one in the list (phase 4). This is also based on Observation~\ref{external_obs}.
+Finally, in phase 5 we apply external pruning to each remaining external subgoal.
+
+For an example, consider the program in Figure~\ref{fig:retro_mix_program} and the query goal
+`\texttt{p(2,X),~p(4,Y)}'. Initially, execution creates the generator \texttt{p(2,X)} followed by the internal
+generator \texttt{p(3,X)}. Next, the subgoal \texttt{p(4,Y)} is called and the first alternative calls the
+subgoal \texttt{p(\_,Y)}, which subsumes every other subgoal (Figure~\ref{fig:retro_mix_multiple_before}).
+
+\begin{figure}[ht]
+\begin{Verbatim}
+:- use_retroactive_tabling p/2.
+
+p(2, X) :- p(3, X).
+p(2, 1).
+p(3, 2).
+p(3, 5).
+p(4, X) :- p(_, X).
+p(4, 7).
+\end{Verbatim}
+\caption{Example program illustrating multiple pruning.}
+\label{fig:retro_mix_program}
+\end{figure}
+
+By following the rules we previously defined, the oldest internal subgoal we find is \texttt{p(4,X)}.
+Next, we filter subgoals that are internal to \texttt{p(4,X)}, but no such subgoals exist. Computation is
+then internally pruned by the subgoal \texttt{p(4,X)} and then we must deal with external subgoals.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{retro_mix_multiple_before.pdf}
+  \caption{Before pruning with the subgoal \texttt{p(\_,Y)}.}
+  \label{fig:retro_mix_multiple_before}
+\end{figure}
+
+The remaining external subgoals are \texttt{p(2,X)} and \texttt{p(3,X)}. Here we must ignore any subgoal
+that is internal to any external subgoal. The subgoal \texttt{p(3,X)} matches these conditions and, is thus
+removed. Finally, the only remaining subgoal, \texttt{p(2,X)}, is then externally pruned and the computation
+can continue as normal.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{retro_mix_multiple_after.pdf}
+  \caption{After pruning with the subgoal \texttt{p(\_,Y)}.}
+  \label{fig:retro_mix_multiple_after}
+\end{figure}
+
+
+
+\begin{figure}[ht]
+\begin{Verbatim}
+prune_subgoal_list(subsuming, list) {
+  if (empty(list))
+    return
+    
+  // phase 1: locate oldest internal subgoal to prune
+  min_internal_sg = NULL
+  foreach (subgoal in list)
+    // change type of subgoal frame and producer
+    type(subgoal) = RETROACTIVE_CONSUMER
+    producer(subgoal) = subsuming
+    
+    if (is_internal(subgoal))
+      if (min_internal_sg == NULL or
+            older_than(generator_cp(subgoal), generator_cp(min_internal_sg)))
+        min_internal_sg = subgoal
+      
+      remove_from_list(list, subgoal)
+  
+  // only external subgoals in 'list'
+  
+  // phase 2: return early by checking the existance of external subgoals
+  if (empty(list))
+    // no external subgoals
+    internal_prune(subsuming, min_internal_sg)
+    return
+  
+  if (min_internal_sg)
+    // phase 3: filter external subgoals internal to 'min_internal_sg'
+    foreach (subgoal in list)
+      if (is_internal_subgoal_frame(min_internal_sg))
+        remove_from_list(list, subgoal)
+    
+    // internal prune with 'min_internal_sg'
+    internal_prune(subsuming, min_internal_sg)
+  
+  if (!empty(list))
+    // phase 4: remove external subgoals that are
+    // internal to other subgoals in 'list'
+    foreach (subgoal in list)
+      if (is_internal_to_set(subgoal, list))
+        remove_from_list(subgoal)
+    
+    // phase 5: now use the remaining and mutually exclusive
+    // external subgoals to apply external pruning
+    foreach (subgoal in list)
+      external_prune(subsuming, subgoal)
+}
+\end{Verbatim}
+\caption{Pseudo-code for procedure \texttt{prune\_subgoal\_list}.}
+\label{fig:prune_subgoal_list}
+\end{figure}
 
 \section{Table Space}
 

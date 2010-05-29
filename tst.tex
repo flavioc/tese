@@ -1394,108 +1394,103 @@ hence very little modifications were made as C macros were used to translate the
 code to YapTab. Sections of code specific to XSB or Yap were protected with conditional
 compilation, thus enabling both Prolog systems to use the same code.
 
-This section will describe the modifications made to the following components of YapTab:
-tabling instructions, compiled trie instructions, data structures, and algorithms
-related to unconsumed answers and consumer detection.
-This new version of YapTab is called S1YapTab and will be described in the next sections.
+In this section we will describe in more detail the modifications made to the following components of YapTab:
+tabled data structures, tabling operations and compiled tries.
+This new version of YapTab is called \textit{YapTab\_TST} and will be described in the next sections.
 
 \subsection{Data Structures}
 
-This section describes modifications made to existent data structures and also new 
-data structures needed to implement S1YapTab.
-
-\subsubsection{Trie Nodes}
-
-YapTab uses two types of trie nodes: subgoal nodes, for call tries; and answer nodes, for
-answer tries. In terms of hash tables, the situation is identical, with subgoal and answer
-hash tables. S1YapTab extends the answer and subgoal node with a \textbf{status} field and
-creates the time stamped node as an answer node with the \textbf{timestamp} field.
-The \textbf{status} bit field is used to identify the type of trie node, and if it is
-an hash table, a leaf node or an hashed node.
-
-For hash tables, we extended the answer hash table with
-the time stamp indexes to create the time stamped hash table.
-The index data structure was integrally copied from XSB.
+This section describes the modifications and extensions made to existent data structures
+in order to implement \textit{YapTab\_TST}.
 
 \subsubsection{Table Entry}
 
-The table entry contains a bit field called \texttt{mode\_flags} which stores various flags
-that change the behavior of tabled predicates. The original YapTab supports the
-following mutually exclusive flags: \textbf{batched} / \textbf{local}, the scheduling strategy;
-and \textbf{load answers} / \textbf{exec answers}, the later makes the engine use compiled tries,
+Each table entry contains a bit field called \textbf{mode\_flags} which stores information about
+the behavior of the corresponding tabled predicate. The original YapTab supports the
+following mutually exclusive flags: \textbf{batched} / \textbf{local}, for defining the scheduling strategy;
+and \textbf{load answers} / \textbf{exec answers}, the later makes the engine to use compiled tries,
 while the first forces the engine to load a completed table by loading answers individually.
 
-Two new mutually exclusive flags were created: \textbf{variant}, which forces the predicate to use variant
-tabling and \textbf{subsumptive} to use subsumptive tabling.
+Two new mutually exclusive flags were created for \textit{YapTab\_TST}: \textbf{variant},
+which forces the predicate to use variant tabling and \textbf{subsumptive} to use subsumptive tabling.
+
+\subsubsection{Trie Nodes}
+
+YapTab uses two types of trie nodes: subgoal trie nodes, for call tries; and answer trie nodes, for
+answer tries. In terms of hash tables, the same data structures are used for both subgoal and answer
+hash tables. \textit{YapTab\_TST} extends the answer and subgoal trie nodes with a \textbf{status}
+bit field and implements the time stamped trie nodes as answer trie nodes extended with a \textbf{timestamp} field.
+The \textbf{status} bit field is used to identify the type of trie node, i.e., if it is
+an hash table, a leaf node or an hashed node.
+For hash tables, we extended the answer hash table with the time stamp indexes to create the
+time stamped hash table. The index data structure was integrally copied from XSB.
 
 \subsubsection{Subgoal Frames}
 
 The subgoal frame structure in YapTab is a main component of the table space.
 It contains the fields: \textbf{answer\_trie}, a pointer to the answer trie;
-\textbf{state}, the state flag; \textbf{first\_answer} and \textbf{last\_answer}
+\textbf{state}, the state flag; \textbf{first\_answer} and \textbf{last\_answer},
 as the answer return list; \textbf{next}, a pointer to the next executing subgoal;
 and \textbf{generator\_cp}, which points to the generator choice point.
 
-Two new kinds of subgoal frame were created: the \textit{subsumptive producer subgoal frame} and
+Two new kinds of subgoal frame were created: the \textit{subsumptive generator subgoal frame} and
 the \textit{subsumed consumer subgoal frame}.
 
-The subsumptive producer subgoal frame extends the original variant subgoal frame
+The subsumptive generator subgoal frame extends the original variant subgoal frame
 with the field \textbf{consumers}. This field points to a consumer subgoal frame and works
-as a chain link to the subsumed subgoal frames of the producer subgoal.
+as a chain link to the subsumed subgoal frames of the generator subgoal.
 
 The subsumptive consumer subgoal frame does not extend the variant subgoal frame, because
 some variant fields are not needed.
 The consumer frame contains the following fields: \textbf{state}, the state of execution;
-\textbf{producer}, pointer to the subsumptive producer subgoal frame; \textbf{cons\_cp},
-pointer to the first consumer choice point; \textbf{first\_answer} and \textbf{last\_answer},
+\textbf{producer}, a pointer to the subsumptive generator subgoal frame; \textbf{cons\_cp},
+a pointer to the first consumer choice point; \textbf{first\_answer} and \textbf{last\_answer},
 as the answer return list; \textbf{ts}, the consumer time stamp;
-\textbf{next}, pointer to the next evaluating consumer subgoal frame; \textbf{answer\_template},
+\textbf{next}, a pointer to the next evaluating consumer subgoal frame; \textbf{answer\_template},
 a pointer to the answer template built on the heap; and \textbf{consumers},
-to link consumer subgoals of the producer subgoal frame.
+to link consumer subgoals of the generator subgoal frame.
 
-Each subgoal frame was extended with the \textbf{type} field, which identifies the subgoal frame type.
-The variant subgoal now uses an answer return list instead of using the \textbf{child} field of
+Each subgoal frame was also extended with a \textbf{type} field, which identifies the subgoal frame type.
+The variant subgoal frame now uses an answer return list instead of using the \textbf{child} field of
 each trie node to link answers.
 
 Figure~\ref{fig:subgoal_frames} illustrates a call trie for the predicate \texttt{p/2}
-and the following subgoals: \texttt{p(X,Y)}, a producer subgoal; \texttt{p(2,X)} and
+with the following subgoals: \texttt{p(X,Y)}, as a generator subgoal; and \texttt{p(2,X)} and
 \texttt{p(3,X)} as consumer subgoals.
 
 \begin{figure}[H]
   \centering
     \includegraphics[scale=0.6]{subgoal_frames.pdf}
-  \caption{Call trie with producer and consumer subgoal frames}
+  \caption{Call trie with a subsumptive generator and two subsumed consumer subgoal frames.}
   \label{fig:subgoal_frames}
 \end{figure}
 
 \subsection{Tabled Subgoal Call}
 
 The tabled subgoal call operation is one of the four main tabling operations. In YapTab,
-if a variant subgoal is already on the table space, a new consumer node is allocated and
-and starts to execute \texttt{answer\_resolution}, in order to consume answers. In
-the other case, a new generator node is allocated and the tabled subgoal code is executed,
-followed by the \texttt{completion} operation, which attempts to complete the SCC if the
-generator node is a leader.
+if a subgoal call is already on the table space, a new consumer node is allocated and
+the execution runs the answer resolution operation, in order to consume answers.
+Otherwise, a new generator node is allocated and the subgoal compiled code is executed.
 
-Figure~\ref{fig:tabled_subgoal_call} presents pseudo-code for the tabled subgoal call operation.
-In the consumer case, we use \texttt{find\_dependency\_node} and \texttt{find\_leader\_node}
+Figure~\ref{fig:tabled_subgoal_call} presents the pseudo-code for the original tabled subgoal call operation.
+In the consumer case, we use the \texttt{find\_dependency\_node} and \texttt{find\_leader\_node} procedures
 to locate the leader node for this consumer. The function \texttt{find\_dependency\_node} simply
 returns the choice point of the generator node for this subgoal, while \texttt{find\_leader\_node}
 iterates the dependency space between \texttt{dependency} and the new dependency frame for this consumer,
 to locate a dependency frame in which the leader is outside this range. If no such dependency frame
 exists, the leader node is set as the generator choice point found in \texttt{find\_dependency\_node},
-else we use the leader of the dependency frame that satisfied the previous condition. 
+else we use the leader of the dependency frame that satisfied the previous condition. \cite{Rocha-PhD}
 
 \begin{figure}[ht]
 \begin{Verbatim}
 tabled_subgoal_call(table_entry, arguments) {
   subgoal_frame = subgoal_search(call_trie(table_entry), arguments)
   
-  if (state(subgoal_frame) == ready)
+  if (state(subgoal_frame) == READY)
     // new generator
     store_generator_node(table_entry, arguments, subgoal_frame)
     jump_to_predicate_code()
-  else if (state(subgoal_frame) == evaluating)
+  else if (state(subgoal_frame) == EVALUATING)
     // new consumer
     dependency = find_dependency_node(subgoal_frame)
     leader = find_leader_node(subgoal_frame, dependency)
@@ -1508,22 +1503,21 @@ tabled_subgoal_call(table_entry, arguments) {
     execute_answer_trie(answer_trie(subgoal_frame))
 }
 \end{Verbatim}
-\caption{Pseudo-code for the tabled subgoal call operation.}
+\caption{Pseudo-code for the original tabled subgoal call operation.}
 \label{fig:tabled_subgoal_call}
 \end{figure}
 
-S1YapTab extends the tabled subgoal call operation to deal with either subsumptive and variant subgoals.
-
-If the predicate uses call by subsumption, we call the procedure \texttt{subsumptive\_subgoal\_search}
+\textit{YapTab\_TST} extends the tabled subgoal call operation to deal with either subsumptive and variant subgoals,
+and if a predicate uses call by subsumption, we call the \texttt{subsumptive\_subgoal\_search} procedure
 (Figure~\ref{fig:subsumptive_subgoal_search}) to look on the call trie for subsuming subgoals.
-If no subsuming path is found, we insert the subgoal path on the call trie and create a new producer
-subgoal frame. If some path is found and the subgoal frame is a producer it can be either
+If no subsuming path is found, we insert the subgoal path on the call trie and create a new generator
+subgoal frame. If some path is found and the subgoal frame is a generator it can be either
 a variant of our subgoal or a more general subgoal. For both cases
 we use \texttt{construct\_answer\_template\_from\_lookup}, which constructs the right answer template for us.
-If the found subgoal frame is a consumer, we must consume from its producer and reconstruct the answer
-template by using the producer trie path.
-Consumer trie paths are only constructed when the producer subgoal frame is still evaluating.
-When the producer is completed, we just execute the compiled trie, so there is no need
+If the found subgoal frame is a consumer, we must consume from its generator and reconstruct the answer
+template by using the generator trie path.
+Consumer trie paths are only constructed when the generator subgoal frame is still evaluating.
+When the generator is completed, we just execute the compiled trie, so there is no need
 to create a consumer subgoal frame.
 
 \begin{figure}[ht]
@@ -1534,54 +1528,78 @@ subsumptive_subgoal_search(table_entry, arguments) {
   if (path == NO_PATH)
     leaf = insert_with_variant_continuation(call_trie)
     local_stack = construct_answer_template_from_insertion(local_stack)
-    return create_producer_subgoal_frame(leaf)
+    return create_generator_subgoal_frame(leaf)
   else
-    found = subgoal_frame(leaf)
+    found_sf = subgoal_frame(leaf)
     
-    if (type(found) == PRODUCER)
-      subsumer = found
+    if (type(found_sf) == SUBSUMPTIVE_GENERATOR)
+      subsumer_sf = found_sf
       local_stack = construct_answer_template_from_lookup(local_stack)
     else
-      subsumer = producer(found)
-      local_stack = construct_answer_template_from_generator(subsumer, local_stack)
+      subsumer_sf = producer(found_sf)
+      local_stack = construct_answer_template_from_generator(subsumer_sf, local_stack)
     
     if (path_type == VARIANT_PATH)
-      return found
+      return found_sf
     
     // subsumptive path
-    if (state(subsumer) == EVALUATING)
+    if (state(subsumer_sf) == EVALUATING)
       // create variant path
       leaf = insert_with_variant_continuation(call_trie)
       copy_answer_template_to_heap(local_stack)
-      return create_new_consumer_subgoal(leaf, subsumer)
+      return create_consumer_subgoal_frame(leaf, subsumer_sf)
     else
-      return subsumer
+      return subsumer_sf
 }
 \end{Verbatim}
 \caption{Pseudo-code for procedure \texttt{subsumptive\_subgoal\_search}.}
 \label{fig:subsumptive_subgoal_search}
 \end{figure}
 
-When a consumer subgoal frame is created we make a structural copy of the answer template
-into the heap. This copy of the answer template will be used as an argument
-to the algorithm that collects relevant answers from the producer answer trie.
+When a consumer subgoal frame is created we make a \textit{structural copy} of the answer template
+into the heap. A structural copy is made by recursively copying structured terms (functors and lists)
+and by making integral copies of constant terms.
+For variables, we create a new variable on the heap for each variable on the local stack, in such a way
+that no references exist between the two answer templates.
+Figure~\ref{fig:structural_copy} illustrates a structural copy of the answer template
+\texttt{\{X,~f(a)\}} between the local stack and the heap.
+
+The answer template on the heap will be used as an argument
+to the algorithm that collects relevant answers from the generator answer trie.
 Each consumer subgoal frame has just one copy of the answer template on the heap,
 while each consumer node uses its own answer template built on the local stack to
 consume answers, because it references variables
 and terms from the arguments.
 
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{structural_copy.pdf}
+  \caption{Making a structural copy of the answer template \texttt{\{X,~f(a)\}}.}
+  \label{fig:structural_copy}
+\end{figure}
+
 The field \texttt{cons\_cp} of the consumer subgoal frame is set to point to the first call
-of the consumer subgoal and will be used access the value of \texttt{H} stored on the choice point.
+of the consumer subgoal and will be used to access the value of \texttt{H} stored on the choice point.
 This value of \texttt{H} points to the top of the heap during the choice point creation which corresponds
 to the answer template copied before. The field \texttt{answer\_template} points to \texttt{H}
 and is used to avoid accessing the choice point, thus it must be recalculated during garbage collection.
 
-This differs from XSB \cite{Johnson-00} where a non-structural copy of the answer template is built on the heap for each
-consumer node, but whenever the need to collect relevant answers arises, we must reconstitute the
-environment of the consumer to ensure that the answer template is valid, which involves using the trail
-to unbind and/or rebind variables. Our approach has the disadvantage of making structural copies,
-but only one copy is done and there is no need to invoke the algorithm
-within the environment of the subsumed call.
+This differs from XSB \cite{Johnson-00} where a \textit{non-structural copy} of the answer template
+is built on the heap for each consumer node. A non-structural copy is made by making references from
+the heap to the terms on the heap. Figure~\ref{fig:non_structural_copy} illustrates a non-structural
+copy of the answer template \texttt{\{X,~f(a)\}}. 
+while making non-structural copies is faster than doing structural copies, collecting relevant answers
+can, potentially, involve more environment switching, because we must reconstitute the environment of
+the consumer to ensure that the answer template is valid, which involves using the trail to unbind
+and/or rebind variables. Our approach has the disadvantage of making structural copies, but only one
+copy is done and there is no need to invoke the algorithm within the environment of the subsumed call.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.6]{non_structural_copy.pdf}
+  \caption{Making a non-structural copy of the answer template \texttt{\{X,~f(a)\}}.}
+  \label{fig:non_structural_copy}
+\end{figure}
 
 Other modifications were applied to the tabled call operation in order to abstract some details about
 variant and subsumptive tabling. Figure~\ref{fig:tabled_subgoal_call_new} shows the updated tabled
@@ -1590,18 +1608,25 @@ subgoal operation.
 \begin{figure}[ht]
 \begin{Verbatim}
 tabled_subgoal_call(table_entry, arguments) {
-  subgoal_frame = subgoal_search(call_trie(table_entry), arguments)
+  call_trie = call_trie(table_entry)
   
-  if (is_new_generator_call(subgoal_frame))
+  if(method(table_entry) == VARIANT)
+    subgoal_frame = variant_subgoal_search(call_trie, arguments)
+  else
+    subgoal_frame = subsumptive_subgoal_search(call_trie, arguments)
+  
+  if (is_new_generator_call(subgoal_frame)) // CHANGED
     store_generator_node(table_entry, arguments, subgoal_frame)
     jump_to_predicate_code()
-  else if (is_new_consumer_call(subgoal_frame))
+  else if (is_new_consumer_call(subgoal_frame)) // CHANGED
     dependency = find_dependency_node(subgoal_frame)
     leader = find_leader_node(subgoal_frame, dependency)
     store_consumer_node(table_entry, subgoal_frame, leader)
-    if ((type(subgoal_frame) == consumer) and (state(subgoal_frame) == ready))
-      cons_cp(subgoal_frame) = B
+    // NEW
+    if ((type(subgoal_frame) == SUBSUMED_CONSUMER) and (state(subgoal_frame) == READY))
       recompute_answer_template(subgoal_frame)
+      cons_cp(subgoal_frame) = B
+      add_to_consumer_stack(subgoal_frame)
     jump_to_answer_resolution()
   else
     // subgoal is completed
@@ -1614,27 +1639,59 @@ tabled_subgoal_call(table_entry, arguments) {
 \label{fig:tabled_subgoal_call_new}
 \end{figure}
 
-The function \texttt{is\_new\_generator\_call} inspects the found
+The function \texttt{is\_new\_generator\_call} (Figure~\ref{fig:is_new_generator_call}) inspects the found
 subgoal frame in order to tell if a new generator node must be allocated.
 For call by subsumption, a new generator is allocated whenever a variant subgoal is not found
-on the trie and the resulting subgoal frame is a producer.
-The function \texttt{is\_new\_consumer\_call} knows the new tabled subgoal call must allocate
-a new consumer node when:
+on the trie and the resulting subgoal frame is a generator.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+is_new_generator_call(subgoal_frame) {
+  if (type(subgoal_frame) == VARIANT or type(subgoal_frame) == SUBSUMPTIVE_GENERATOR)
+    // must be a first call to either a variant or subsumptive generator subgoal
+    return state(subgoal_frame) == READY
+    
+  // consumer subgoal are not generator calls
+  return FALSE
+}
+\end{Verbatim}
+\caption{Pseudo-code for function \texttt{is\_new\_generator\_call}.}
+\label{fig:is_new_generator_call}
+\end{figure}
+
+The function \texttt{is\_new\_consumer\_call} (Figure~\ref{fig:is_new_consumer_call}) decides
+that a consumer node must be allocated when:
 
 \begin{enumerate}
-  \item The subgoal frame is variant or producer and is currently being evaluated;
-  \item The subgoal frame is consumer and the producer subgoal is still evaluating.
+  \item The subgoal frame is variant or generator and is currently being evaluated;
+  \item Or, the subgoal frame is consumer and the generator subgoal is still evaluating.
 \end{enumerate}
+
+\begin{figure}[ht]
+\begin{Verbatim}
+is_new_consumer_call(subgoal_frame) {
+  if (type(subgoal_frame) == VARIANT or type(subgoal_frame) == SUBSUMPTIVE_GENERATOR)
+    // equal to the old tabled subgoal operation
+    // but also considering subsumptive generator calls
+    return state(subgoal_frame) == READY
+  
+  // consumer subgoal frames
+  return state(producer(subgoal_frame)) == EVALUATING
+}
+\end{Verbatim}
+\caption{Pseudo-code for function \texttt{is\_new\_consumer\_call}.}
+\label{fig:is_new_consumer_call}
+\end{figure}
 
 Another important change involves calculating the leader node of a subsumptive consumer node.
 Surprisingly, only the algorithm to find the dependency node must be altered, as
 the dependency node of a subsumed consumer is the generator choice point of
-the producer subgoal frame (Figure~\ref{fig:find_dependency_node}).  
+the generator subgoal frame (Figure~\ref{fig:find_dependency_node}).  
 
 \begin{figure}[ht]
 \begin{Verbatim}
 find_dependency_node(subgoal_frame) {
-  if (type(subgoal_frame) == VARIANT or type(subgoal_frame) == PRODUCER)
+  if (type(subgoal_frame) == VARIANT or type(subgoal_frame) == SUBSUMPTIVE_GENERATOR)
     return generator_cp(subgoal_frame)
   else
     return generator_cp(producer(subgoal_frame))
@@ -1643,6 +1700,11 @@ find_dependency_node(subgoal_frame) {
 \caption{Pseudo-code for the new \texttt{find\_dependency\_node} procedure.}
 \label{fig:find_dependency_node}
 \end{figure}
+
+If the subsumed subgoal is called for the first time, we copy the answer template to the heap
+and the \texttt{cons\_cp} is made to point to the current choice point. The subgoal frame is
+also pushed into the consumer subgoal frame stack in order to be completed in the completion operation
+(see next section for more details).
 
 \subsection{Answer Resolution and Completion}
 
@@ -1656,36 +1718,40 @@ In order to abstract away if a consumer node has answers to consume,
 we created a function that distinguishes between both variant and subsumptive cases
 (Figure~\ref{fig:get_next_answer_continuation}).
 The function accepts a dependency frame (note that there is a dependency frame for
-each consumer node) and returns an answer continuation, which contains the answer
-to consume and contains enough state to retrieve the next available answer continuation, if any.
+each consumer node) and returns an answer continuation.
 An answer continuation is represented by a pointer to a linked list with two fields:
-\textbf{answer}, the answer itself; and \textbf{next}, which points to the next element of the list.
+\textbf{answer}, the answer itself; and \textbf{next}, which points to the next element of the list,
+if any.
 
 \begin{figure}[ht]
 \begin{Verbatim}
 get_next_answer_continuation(dependency_frame) {
-  sg_fr = depfr_sg_fr(dependency_frame)
-  last_continuation = depfr_last(dependency_frame)
-  next_continuation = continuation_next(last_continuation)
+  sg_fr = sg_fr(dependency_frame)
+  last_continuation = last(dependency_frame)
+  next_continuation = next(last_continuation)
   
   if (type(sg_fr) == VARIANT or type(sg_fr) == PRODUCER)
     return next_continuation
   
+  // subsumed consumer subgoal frame case
+  
   if (next_continuation != NULL)
-    return next
+    // no need to collect answers from the generator's answer trie
+    // as answers are still available on the answer return list
+    return next_continuation
   
   // must collect new available answers, if any
   consumer_ts = timestamp(sg_fr)
-  producer = producer(sg_fr)
-  producer_ts = timestamp(answer_trie(producer))
+  generator = producer(sg_fr)
+  generator_ts = timestamp(answer_trie(generator))
       
-  if (producer_ts == consumer_ts)
+  if (generator_ts == consumer_ts)
     return NULL
         
   // collect answers
-  answer_list = tst_collect_relevant_answers(answer_trie(producer),
+  answer_list = tst_collect_relevant_answers(answer_trie(generator),
         consumer_ts, answer_template(sg_fr))
-  timestamp(sg_fr) = producer_ts
+  timestamp(sg_fr) = generator_ts
       
   if (answer_list != NULL)
     append_return_list(sg_fr, answer_list)
@@ -1700,7 +1766,7 @@ get_next_answer_continuation(dependency_frame) {
 With subsumptive consumer nodes we first verify if the answer return list of the
 consumer subgoal frame contains more answers from the saved continuation. If there is
 any, we return the next answer from this list and consume it. If the list has no more answers,
-we inspect if the consumer time stamp is equal to the producer time stamp, which means
+we inspect if the consumer time stamp is equal to the generator time stamp, which means
 that no new answers were generated for the general subgoal. In the other hand, if new
 answers are available, we run \texttt{tst\_collect\_relevant\_answers} to collect any
 relevant answers for this consumer that can be appended into the answer return list
@@ -1709,58 +1775,55 @@ In any case, the time stamp of the consumer is thus updated to avoid collecting
 repeated answers in future iterations. Remember that once a single consumer node
 collects newer answers, every consumer node of a subsumed subgoal will see them, thus
 enabling sharing of answers among the consumer nodes.
+Note that in order to run this algorithm, the dependency frame data structure was extended
+with a new \textbf{sg\_fr} field.
 
-Note that the dependency frame data structure was extended with the \textbf{sg\_fr} field,
-in order to run this algorithm.
-
-Figure~\ref{fig:completion_operation} presents the updated completion operation,
+Figure~\ref{fig:completion_operation} presents the new completion operation,
 using the devised abstractions.
 
 \begin{figure}[ht]
 \begin{Verbatim}
 completion(generator) {
   if (is_leader_node(generator))
-    df = TOP_DF
-    while (younger_than(depfr_cons_cp(df), generator))
-      cont = get_next_answer_continuation(dep_fr)
+    df = TOP_DEP_FR
+    while (younger_than(cons_cp(df), generator))
+      cont = get_next_answer_continuation(dep_fr) // CHANGED
       if (cont)
         // unconsumed answers
-        depfr_back_cp(df) = generator
-        consumer = depfr_cons_cp(df)
+        back_cp(df) = generator
+        consumer = cons_cp(df)
         restore_bindings(CP_TR(generator), CP_TR(consumer))
         goto answer_resolution(consumer)
-      df = depfr_next(df)
+      df = next(df)
     perform_completion()
     adjust_freeze_registers()
   backtrack_to(CP_B(generator))
 }
 \end{Verbatim}
-\caption{Pseudo-code for the updated completion operation.}
+\caption{Pseudo-code for the new completion operation.}
 \label{fig:completion_operation}
 \end{figure}
 
-\subsection{Completion}
-
-Once a generator node completes we must mark each subgoal that appears under the SCC as \textit{complete}.
+Once a generator subgoal completes we must mark each subgoal that appears under the SCC as \textit{complete}.
 Hence, some modifications must be made to complete subsumed consumer subgoal frames.
 
-In YapTab each variant subgoal frame is chained in a linked list during execution. The top of this list
-can be accessed by using \texttt{LOCAL\_top\_sg\_fr} and completion is done by iterating this list until
-the target subgoal frame is reached. The dependency frames that are younger than the completion point
-are also iterated and freed. 
+In YapTab each variant subgoal frame is stacked into the \textit{subgoal frame stack} during execution.
+The top of the stack can be accessed by using \texttt{TOP\_SG\_FR}.  On completion, the subgoal frame
+stack is iterated until the leader subgoal frame is reached. We used this stack to complete for both
+variant and subsumptive generator subgoal frames.
 
-Subsumed consumer subgoal frames are also chained in a linked list
-that is iterated during completion. Any subgoal frame with a consumer choice point (\texttt{cons\_cp})
-younger than the completion point is completed. Figure~\ref{fig:completion_space} illustrates both the
-subgoal frame list of producers and the list of subsumed subgoal frames.
+Subsumed consumer subgoal frames are pushed into a stack called \textit{consumer subgoal frame stack}.
+During completion, the subgoal frames with a consumer choice point (\texttt{cons\_cp})
+younger than the completion point are completed. Figure~\ref{fig:completion_space} illustrates the
+subgoal frame stack, the consumer subgoal frame stack and the dependency space.
 
 Some data structures, like the time stamp indexes, are deleted during completion from the
-subsumptive producer subgoal frames.
+subsumptive generator subgoal frames.
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.6]{completion_space.pdf}
-  \caption{Subsumptive producer and consumers before completion.}
+    \includegraphics[scale=0.7]{completion_space.pdf}
+  \caption{Subsumptive generator and consumers before completion.}
   \label{fig:completion_space}
 \end{figure}
 
