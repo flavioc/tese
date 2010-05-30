@@ -805,8 +805,6 @@ can continue as normal.
   \label{fig:retro_mix_multiple_after}
 \end{figure}
 
-
-
 \begin{figure}[ht]
 \begin{Verbatim}
 prune_subgoal_list(subsuming, list) {
@@ -862,6 +860,206 @@ prune_subgoal_list(subsuming, list) {
 \end{figure}
 
 \section{Table Space}
+
+Once a pruned subgoal is reactivated and transformed into a loader or consumer node
+through retroactive resolution, it is important to avoid consuming answers that
+were generated when the subgoal was a generator. When a node consumes less answers,
+less code will be executed, thus making execution faster.
+
+In order to efficiently identify what answers have already been used, we designed
+the \textit{Single Time Stamped Trie} (STST). In STST we have a common answer trie
+to all subgoal calls for the predicate. This approach reduces memory usage and permits
+easy sharing of answers between subgoals, because an answer can be referenced by various
+subgoals.
+
+In this new table space organization, each predicate has two tries, the call trie and
+the STST, while each subgoal frame has the answer return list to reference answers
+from the STST.
+Figure~\ref{fig:stst} illustrates an example of the new table space with the
+subgoals \texttt{p(1,VAR0)}, \texttt{p(2,VAR0)} and \texttt{p(VAR0,VAR1)}.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{stst.pdf}
+  \caption{Example Single Time Stamped Trie.}
+  \label{fig:stst}
+\end{figure}
+
+In terms of implementation, the STST is stored on the \textbf{next} field of the root
+trie node of the call trie. The time stamp of the answer trie can be accessed by
+using the root answer trie node.
+
+For subgoal frames, we extended each retroactive subgoal
+frame with a \textbf{timestamp} field that stores the time stamp of the last answer
+generated or consumed.
+The time stamp mechanism helps us identify, using the answer return list, what answers
+are relevant to the subgoal from all the answers with the time stamp between 0 and
+\textbf{timestamp}. Then, when we need to turn a subgoal frame from generator to consumer,
+we can collect answers by using the time stamp stored in the subgoal frame, which was the
+time stamp of the last answer successfully inserted on the STST.
+
+\subsection{Answer Templates}
+
+On a traditional call subsumption engine that uses an answer trie per generator subgoal,
+the answer template of the consumer subgoal is built dependent of the generator subgoal.
+For \textit{retroactive answer templates}, the answer template is simply built by copying
+the argument registers of the WAM. This is a very efficient operation compared to traditional
+call subsumption methods.
+
+We clearly need the full answer template because the answers on the trie are fully
+instantiated on all the predicate arguments, hence the collection and unification of
+relevant answers must be seen as unifying against the most general subgoal.
+
+\subsection{Reusing of Answers}
+
+The STST approach also allows reusing answers when a new subgoal is called.
+As an example, consider that two unrelated (no subsumption involved) subgoals $S_1$
+and $S_2$ are fully evaluated. If a subgoal $S$ is then called, it is possible
+that some of the answers on the STST match $S$ even if $S$ neither subsumes
+$S_1$ or $S_2$. Hence, instead of eagerly running the predicate clauses, we start
+by loading the matching answers already on the STST, which can be enough if,
+for example, $S$ gets pruned by a cut. This is a similar approach to the \textit{incomplete
+tabling} approach for tabling with variant checks \cite{Rocha-06a}.
+
+While the reusing of answers has some advantages, it can lead to redundant computations,
+when running program clauses, $S$ generates more general answers than the ones initially
+loaded when using traditional call subsumption. For an example, consider the retroactive
+tabled predicate \texttt{p/1} with only one fact, '\texttt{p(X)}`. If \texttt{p(1)} is
+called, the answer represented as \texttt{\{ARG0~=~1\}} is added on the STST and execution
+would return \texttt{true}. If the subgoal \texttt{p(X)} was now called, we would search
+the STST for relevant answers and the first answer would be \texttt{\{X~=~1\}}. If we
+asked for more answers, the system would return a new answer, \texttt{true}, and add it
+to the STST as \texttt{\{ARG0~=~VAR0\}} (Figure~\ref{fig:stst_redundant}). If we called
+\texttt{p(X)} with an empty STST, only one answer would be returned, \texttt{true}.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{stst_redundant.pdf}
+  \caption{Answer redundancy with STST.}
+  \label{fig:stst_redundant}
+\end{figure}
+
+\subsection{Insertion of Answers}
+
+The insertion of answers on a STST works the same as standard TSTs, but special care
+must be taken when inserting an answer and updating the subgoal frame \textbf{timestamp}
+field.
+When only one subgoal is adding answers on the STST, the subgoal frame time stamp
+gets incremented each time an answer is inserted. Repeated answers are easily recognized
+by testing if the answer is new or not.
+The problem arises when various subgoals are inserting answers, thus it may be difficult
+to determining if an answer is repeated for a certain subgoal.
+
+Let's consider that two subgoals $S1$ and $S2$ are currently
+evaluating and each one can insert a new answer on the STST at any time (see
+Figure~\ref{fig:stst_conflicts}). $S1$ generates the first 3 answers (time stamp 3)
+and evaluation initiates in subgoal $S2$. Here, we do not find any answers relevant
+for $S2$ on the STST and the evaluation of program clauses results in three new answers,
+4, 5 and 6. The time stamp of $S2$ is thus updated to 6.
+
+Next, if $S1$ now generates the answer 5 we can incorrectly detect a repeated answer
+for this subgoal if we consider that repeated answers on the STST are repeated answers for the
+subgoal (which are not). We could also consider it a new answer, since the old $S1$ time stamp
+is in the past ($3 < 5$). But this will still arise problems after we update $S1$ time stamp
+to either 6 (the global time stamp) or 5 (the newer answer time stamp for the subgoal).
+If answer 4 is also relevant for $S1$, it will be considered a repeated answer
+during its insertion. Therefore, we need a more complex mechanism to
+detect repeated answers per subgoal.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.5]{stst_conflicts.pdf}
+  \caption{Insertion conflicts of answers on a STST.}
+  \label{fig:stst_conflicts}
+\end{figure}
+
+In our new approach, we create a \textit{pending answer index} for each subgoal frame.
+This index contains all the answers that are older than the subgoal frame time stamp
+and were still not generated by the subgoal. This indexed is created whenever the STST
+global time stamp is greater than the current subgoal frame time stamp. It is built by
+collecting all the relevant answers for the subgoal frame starting from the current
+subgoal frame time stamp. Then, whenever an answer appears on the past, we look up on the
+pending answer index to check if the answer is there. If the answer is really there,
+we consider it a new answer; if not, we consider it a repeated answer. In both cases
+the answer is removed from the index.
+
+Figure~\ref{fig:stst_insert} presents the code for the \texttt{stst\_insert} procedure,
+which inserts the answer on the STST and sets the \texttt{status} field bit indicating
+if the answer must be inserted into the answer return list of the subgoal frame. The
+pseudo-code is organized into four cases:
+
+\begin{enumerate}
+   \item Answers are inserted in order and only one subgoal is adding answers.
+   This happens in the majority of the situations.
+   \item One answer was inserted by another subgoal and it is the only answer that
+   the current subgoal has still not considered. It is trivially set as a new answer.
+   \item The answer time stamp is older than the subgoal frame time stamp, therefore
+   the pending answer index must be inspected.
+   \item The answer time stamp is younger than the subgoal frame time stamp $t$, thus
+   we must collect the relevant answers beginning from $t$ and add them into the pending
+   answer index, except the current answer.
+\end{enumerate}
+
+\begin{figure}[ht]
+\begin{Verbatim}
+stst_insert(subgoal_fr, answer) {
+  table_entry = table_entry(subgoal_fr)
+  stst = answer_trie(table_entry)
+  old_timestamp = timestamp(stst)
+  leaf_node = subsumptive_answer_search(stst, answer)
+  new_timestamp = timestamp(stst)
+  
+  if (old_timestamp == new_timestamp - 1 and
+        timestamp(subgoal_fr) == old_timestamp)
+    // case 1: new, incremental, answer
+    set_new_answer(leaf_node)
+    timestamp(subgoal_fr) = new_timestamp
+  else if (old_timestamp == new_timestamp and
+        timestamp(subgoal_fr) == old_timestamp - 1 and
+        timestamp(leaf_node) == new_timestamp)
+    // case 2: one new answer inserted by someone else
+    // and no answers were left behind
+    set_new_answer(leaf_node)
+    timestamp(subgoal_fr) == new_timestamp
+  else if (timestamp(leaf_node) <= timestamp(subgoal_frame))
+    // case 3: answer is in the past,
+    // check if it must be considered new
+    if (locate_pending_answer(subgoal_sf, leaf_node))
+      set_new_answer(leaf_node)
+    else
+      set_old_answer(leaf_node)
+  else
+    // case 4: answers were inserted by someone else
+    pending_list = tst_collect_relevant_answers(stst, timestamp(subgoal_fr),
+            answer_template(subgoal_fr))
+    
+    remove_from_list(answer_list, leaf_node)
+    add_pending_answers(subgoal_sf, pending_list)
+    set_new_answer(leaf_node)
+    timestamp(subgoal_fr) = new_timestamp
+}
+\end{Verbatim}
+\caption{Pseudo-code for procedure \texttt{stst\_insert}.}
+\label{fig:stst_insert}
+\end{figure}
+
+It is important to note that when a generator subgoal frame is transformed into a
+consumer subgoal frame, we must remove all the answers from the pending answer index
+and insert them on the answer return list. Therefore, all the consumer mechanisms
+can still work normally, without awareness of the pending answer index.
+
+\subsection{Compiled Tries and Completed Table}
+
+Our system only compiles the STST when the most general subgoal is completed.
+This avoids problems when a subgoal is executing compiled code and another
+is inserting answers, leading to the loss of answers as hash tables can be
+dynamically created and expanded.
+
+We also implemented the \textit{completed table optimization}. This optimization throws
+away the call trie and the subgoal frames when the most general subgoal is completed.
+When a subgoal call is made, we just build the answer template by copying the argument
+registers and then we execute the compiled trie, thus bypassing all the mechanisms of
+locating the subgoal on the call trie, leading to memory and speedup gains. 
 
 \section{Searching Subsumed Subgoals}
 
