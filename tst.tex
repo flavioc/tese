@@ -756,7 +756,7 @@ while_loop:
       node = child(parent)
       continue
     else if (empty(choice_point_stack))
-      unwind_trail(trail_base)
+      unwind_wam_trail()
       restore_wam_registers()
       return answers
     else
@@ -765,7 +765,7 @@ while_loop:
   
   new_answer_found(parent, answers)
   if (empty(choice_point_stack)
-    unwind_trail(trail_base)
+    unwind_wam_trail()
     restore_wam_registers()
     return answers
   node = pop_choice_point_frame(choice_point_stack)
@@ -777,7 +777,7 @@ while_loop:
 \label{fig:tst_collect_relevant_answers}
 \end{figure}
 
-\subsection{Choice Point Stack}
+\subsection{Choice Point Stack}\label{sec:cpstack_section}
 
 The choice point stack stores alternative search branches to use upon backtracking.
 Each stack frame (see Figure~\ref{fig:choice_point_stack}) stores the following fields:

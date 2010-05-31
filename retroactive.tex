@@ -983,6 +983,10 @@ pending answer index to check if the answer is there. If the answer is really th
 we consider it a new answer; if not, we consider it a repeated answer. In both cases
 the answer is removed from the index.
 
+The pending answer index is implemented as a single linked list, but can be transformed
+into an hash table if the linked list gets too big. Also, the hash table is dynamically
+resized after a certain threshold, in order to maintain good access times.
+
 Figure~\ref{fig:stst_insert} presents the code for the \texttt{stst\_insert} procedure,
 which inserts the answer on the STST and sets the \texttt{status} field bit indicating
 if the answer must be inserted into the answer return list of the subgoal frame. The
@@ -1063,6 +1067,480 @@ locating the subgoal on the call trie, leading to memory and speedup gains.
 
 \section{Searching Subsumed Subgoals}
 
+In order to efficiently find which subsumed subgoals are evaluating and are subsumed
+by the called subgoal, we extended the call trie data structure and designed a new
+algorithm to search these subgoals.
+
+\subsection{Data Structure}
+
+For the call trie, we extended each subgoal trie node with a new field called \texttt{in\_eval}
+which stores the number of subgoals, represented below the node, that are in evaluation.
+This field will then be used during search to prune the call trie branches that do not
+need to be searched, e.g., $in\_eval = 0$.
+
+When a subgoal enters the computation, by either being a consumer or generator, all the
+subgoal trie nodes in the subgoal trie path get the \texttt{in\_eval} field incremented.
+When the subgoal exists the computation, the path is decremented.
+By analyzing these rules, we can make various conclusions. For each subgoal leaf trie node
+the \texttt{in\_eval} field can be equal to either: 1, when the corresponding subgoal is in
+evaluation; or 0, when the subgoal is not executing. For the root subgoal trie node, we
+know that it will contain the total of subgoals currently evaluating.
+
+For an example, consider the call trie in Figure~\ref{fig:in_eval_trie} with four evaluating
+subgoals. If a new subgoal, \texttt{p(f(3),5)}, enters the computation, a new subgoal trie
+node is created on the trie and all the trie nodes from the leaf node to the root node
+get the \texttt{in\_eval} field incremented (Figure~\ref{fig:in_eval_add}). Note how the
+root node is incremented from 4 to 5, meaning that 5 subgoals are now evaluating.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{in_eval_trie.pdf}
+  \caption{Example call trie extended with the \texttt{in\_eval} field.}
+  \label{fig:in_eval_trie}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[scale=0.6]{in_eval_add.pdf}
+  \caption{Subgoal \texttt{p(f(3),5)} enters the evaluation.}
+  \label{fig:in_eval_add}
+\end{figure}
+
+When children nodes of a subgoal trie node are organized in a linked list, it is
+easy to select the trie branches with evaluating subgoals by looking for nodes
+with $in\_eval > 0$. But, when children nodes are organized into an hash table, it
+can become very slow to inspect each node as the number of children increases.
+In order to solve this problem, we designed a data structured called \textit{evaluation
+indexes}.
+
+An evaluation index is a double linked list that is built for each hash table and
+chains each trie node where the \texttt{in\_eval} field is greater than 0. Note that
+this linked list is not ordered by the \texttt{in\_eval} value. Each evaluation index
+node contains the following fields: \texttt{prev}, a pointer to the previous evaluation
+index node, if any; \texttt{next}, a pointer to the next evaluation index node, if any;
+\texttt{node}, points to the subgoal trie node this index node represents; and
+\texttt{in\_eval}, the number of evaluating subgoals under the corresponding subgoal trie node.
+We also extended the hash table with a field named \texttt{index} to point to the evaluation
+index.
+
+Figure~\ref{fig:hash_table_evaluation_index} shows an hash table and the corresponding
+evaluation index. Note that the trie nodes on the index have the \texttt{in\_eval} field
+made to point to the index node, while the only trie node with $in\_eval = 0$ is not indexed
+and thus does not have an index node. Using the \texttt{status} field of each subgoal trie node
+we can easily compute the $in\_eval$ value by checking if the trie node is inside an
+hash table.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.6]{hash_table_evaluation_index.pdf}
+  \caption{Indexing nodes through an hash table with an evaluation index.}
+  \label{fig:hash_table_evaluation_index}
+\end{figure}
+
+The evaluation index makes the operation of pruning trie branches much more efficient by
+providing direct access to trie nodes with evaluating subgoals. While advantageous,
+the operation of incrementing or decrementing a subgoal trie path is more costly, because
+these indexes must be maintained.
+
+Figure~\ref{fig:increment_in_eval} presents the pseudo-code for the
+\texttt{increment\_in\_eval} procedure. This procedure iterates over the subgoal trie path,
+from the leaf to the root, and increments the \texttt{in\_eval} field. When we find
+hashed trie nodes, we must check if the field is currently being indexed. If this is the case,
+we simply increment the \texttt{in\_eval} field of the index node, otherwise we create
+a new index node on the evaluation index pointing to the current node and the \texttt{in\_eval}
+field of the subgoal trie node is made to point to the index node.
+Figure~\ref{fig:hash_table_evaluation_index_increment} shows the
+Figure~\ref{fig:hash_table_evaluation_index} after the subgoal trie node that is not
+indexed gets incremented.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+increment_in_eval(trie_root, leaf) {
+  while (trie_root != leaf)
+    if (is_hashed_node(leaf))
+      if (in_eval(leaf) == 0)
+        hash_table = child(parent(leaf))
+        add_index_node(leaf, hash_table)
+      else
+        old_value = in_eval(index_node(leaf))
+        in_eval(index_node(leaf)) = old_value + 1
+    else
+      // simple chain list
+      in_eval(leaf) = in_eval(leaf) + 1
+    leaf = parent(leaf)
+    
+  in_eval(trie_root) = in_eval(trie_root) + 1
+}
+\end{Verbatim}
+\caption{Pseudo-code for procedure \texttt{increment\_in\_eval}.}
+\label{fig:increment_in_eval}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.6]{hash_table_evaluation_index_increment.pdf}
+  \caption{Indexing a non-indexed subgoal trie node through an evaluation index.}
+  \label{fig:hash_table_evaluation_index_increment}
+\end{figure}
+
+The procedure \texttt{decrement\_in\_eval} (Figure~\ref{fig:decrement_in_eval})
+does the inverse job of \texttt{increment\_in\_eval}. When decrementing an indexed
+subgoal trie node we must also maintain the evaluation index, therefore, if the
+\texttt{in\_eval} field will reach 0, the trie node no longer needs to be indexed,
+hence we must remove the index node from the evaluation index. In the other cases,
+we simply decrement the respective \texttt{in\_eval} field.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+decrement_in_eval(trie_root, leaf) {
+  while (trie_root != leaf)
+    if (is_hashed_node(leaf))
+      index_node = index_node(leaf)
+      if (in_eval(index_node) == 1)
+        hash_table = child(parent(leaf))
+        remove_index_node(leaf, hash_table)
+      else
+        old_value = in_eval(index_node)
+        in_eval(index_node) = old_value - 1
+    else
+      // simple chain list
+      in_eval(leaf) = in_eval(leaf) - 1
+    leaf = parent(leaf)
+    
+  in_eval(trie_root) = in_eval(trie_root) - 1
+}
+\end{Verbatim}
+\caption{Pseudo-code for procedure \texttt{decrement\_in\_eval}.}
+\label{fig:decrement_in_eval}
+\end{figure}
+
+\subsection{Algorithm}
+
+The algorithm to find running subsumed subgoals on a call trie works by
+matching the subgoal arguments against the trie symbols. By using the
+\texttt{in\_eval} field described previously we can also prune irrelevant
+branches as we descend the trie. If a leaf node is reached, we append the subgoal
+frame in a result list that is returned once the process finishes. If the matching process
+fails at some point or a leaf node was reached, the algorithm backtracks to try another
+alternative subgoal trie node, in order to fully explore the call trie.
+
+We want to find a set of subgoal frames, $S_1, S_2, ..., S_n$, stored in the call trie $T$ that
+are subsumed by the subgoal $S$. This subgoal is represented by a set of terms known as the
+subgoal arguments $SA$, which are matched against the trie symbols from $T$. If $G$
+is more general than $S_i$, thus we can not match trie variables with instantiated terms of
+$SA$, because every term from $SA$ must be paired with either instances or variables if the term
+is a variable and only with instantiated terms if the $SA$ term is an instance.
+
+Consider the trie in Figure~\ref{fig:call_trie_lookup_subsumed}.
+If matching the trie subgoal \texttt{p(VAR0,VAR1)} with the subgoal \texttt{p(2,X)}, we
+can not match the constant \texttt{2} against the trie variable \texttt{VAR0} (node $n1$),
+because \texttt{p(2,X)} does not subsume \texttt{p(X,Y)}.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.6]{call_trie_lookup_subsumed.pdf}
+  \caption{Example call trie.}
+  \label{fig:call_trie_lookup_subsumed}
+\end{figure}
+
+When a $SA$'s variable is paired with an instantiated term from $T$, subsequent matches of
+the variable must always match against the same instantiated term. As an example, consider
+the trie subgoal \texttt{p(2,4)} and the subgoal \texttt{p(X,X)}. The variable \texttt{X}
+is paired with \texttt{2} but the second pairing, \texttt{4} against \texttt{X} fails, because
+\texttt{X} is bound to \texttt{2}.
+
+Now consider the subgoal \texttt{p(X,X)} and the trie subgoal \texttt{p(VAR0,VAR1)}
+from Figure~\ref{fig:call_trie_lookup_subsumed}. Variable \texttt{X} is paired with \texttt{VAR0}
+(node n1), but then we have to pair \texttt{X} with a new trie variable, \texttt{VAR1},
+but the process must fail, because \texttt{p(X,X)} does not subsume \texttt{p(X,Y)} but is subsumed
+by this subgoal.
+
+This last example evokes a new rule for variable matching. When a variable from $SA$ is paired
+with a trie variable, in the following matches the term variable must always match against
+the same trie variable. If the term variable was paired with an unpaired trie variable we would add more
+constraints to the terms from $SA$ and not against $T$'s trie symbols. Because subgoal $S$
+subsumes goals from $T$, the found subgoals must always be an \emph{instance} of $S$.
+Therefore, this problem can be reduced to the task of finding all instances of $S$ in trie $T$.
+
+The search algorithm uses various data structures:
+
+\begin{itemize}
+  \item \textit{WAM data structures}: heap, trail, and associated registers. The heap is used to
+  build structured terms, in which the subgoal arguments or trie variables are bound. Whenever a
+  term variable is bound, we trail it using the WAM trail;
+  
+  \item \textit{term stack}: stores remaining terms to be matched against subgoal trie symbols;
+  
+  \item \textit{term log stack}: stores already matched terms from the term stack. Used to
+  restore the state of the term stack when backtracking;
+  
+  \item \textit{choice point stack}: stores choice point frames, where each frame contains
+  information needed to restore the computation in order to search for alternative branches;
+  
+  \item \textit{variable enumerator vector}: used to mark term variables that are paired with
+  trie variables.
+\end{itemize}
+
+Figure~\ref{fig:collect_subsumed_subgoals} shows the pseudo-code of the \texttt{collect\_subsumed\_subgoals}
+procedure. The algorithm can be summarized in the following steps:
+
+\begin{enumerate}
+  \item Setup WAM machinery and push subgoal arguments into the term stack.
+  \item Fetch a term $T$ from the term stack;
+  \item Search for a trie node $N$ where the \texttt{in\_eval} field is not 0.
+  \item Search for the next node with a valid \texttt{in\_eval} field to be pushed on the choice point stack,
+         if any;
+  \item Pair $T$ with the trie symbol of $N$;
+  \item Proceed into the child of $N$ or, if steps 3 or 5 fail, backtrack by popping a frame from the choice point stack and use the alternative trie node;
+  \item Once a leaf is reached, add the subgoal frame into the resulting subgoal frame list.
+  If choice points are available, backtrack to try them;
+  \item If no more choice point frames exist, return the found subsumed subgoals.
+\end{enumerate}
+
+\begin{figure}[ht]
+\begin{Verbatim}
+collect_subsumed_subgoals(subgoal_call, call_trie) {
+  subgoals = NULL
+  push_arguments(term_stack, subgoal_call)
+  save_wam_registers()
+  parent = call_trie
+  node = child(parent)
+ 
+while_loop:
+  while (!empty(term_stack))
+    term = deref(pop(term_stack))
+    
+    if (is_atom(term) or is_integer(term))
+      try_node = try_constant_term(term, node)
+    else if (is_functor(term) or is_list(term))
+      try_node = try_structured_term(term, node)
+    else if (is_variable(term))
+      try_node = try_variable_term(term, node)
+    
+    if (try_node != NULL)
+      push(term_log_stack, term)
+      parent = try_node
+      node = child(parent)
+      continue
+    else if (empty(choice_point_stack))
+      unwind_wam_trail()
+      restore_wam_registers()
+      return subgoals
+    else
+      node = pop_choice_point_frame(choice_point_stack)
+      parent = parent(node)
+  
+  // new running subsumed subgoal found!
+  new_subgoal_found(subgoals, subgoal(parent))
+  if (empty(choice_point_stack))
+    unwind_wam_trail()
+    restore_wam_registers()
+    return subgoals
+  node = pop_choice_point_frame(choice_point_stack)
+  parent = parent(node)
+  goto while_loop
+}
+\end{Verbatim}
+\caption{Pseudo-code for procedure \texttt{collect\_subsumed\_subgoals}.}
+\label{fig:collect_subsumed_subgoals}
+\end{figure}
+
+\subsection{Choice Point Stack}
+
+To store alternative branches for exploration, we use a choice point stack.
+Each choice point frame (see Figure~\ref{fig:choice_point_stack2}) stores the following fields:
+\texttt{alt\_node}, the alternative node to explore;
+\texttt{term\_stack\_top}, the top of the term stack;
+\texttt{term\_log\_stack\_top}, the top of the term log stack;
+\texttt{trail\_top}, the current trail position;
+and \texttt{saved\_HB}, the register HB. Note that we used the same choice point stack
+from Section~\ref{sec:cpstack_section}.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.5]{choice_point_stack.pdf}
+  \caption{Choice point stack organization.}
+  \label{fig:choice_point_stack2}
+\end{figure}
+
+The HB register is used to detect conditional bindings in same manner as for the HB register in
+WAM choice points, that is, we use it do know if a term variable needs to be trailed.
+When a choice point frame is popped from the stack, the state of the computation is resumed
+by executing the following actions:
+
+\begin{itemize}
+  \item the current node and parent node are reset;
+  \item all terms stored in the term log stack are pushed back to the term stack;
+  \item the trail is unwinded to reset the variables that were bound after choice point creation;
+  \item registers H and HB are reseted to previous values.
+\end{itemize}
+
+Choice point frames are only pushed when the current term is a variable, because constant or structured
+terms can have at most one alternative in a trie level. If a node satisfies the \texttt{in\_eval} requisite,
+variable terms can pair with all types of trie symbols, including trie variables.
+
+\subsection{Matching Constant and Structured Terms}
+
+If the next term from the term stack is a constant or a structured term we must pair it we
+a similar instantiated term only. Both constant and structured terms work pretty much the
+same way, except in a list or functor we push the term arguments into the term stack
+before descending into the next trie node. The arguments are pushed into the stack in order
+to be matched against the next trie symbols.
+
+Figure~\ref{fig:try_structured_term} presents the pseudo-code
+for the \texttt{try\_structured\_term} procedure.  This procedure is divided into two steps.
+We arrive at step 1 if the current node is an hash table, then we index the term in the hash table
+to locate the term hash bucket that can contain a node with the pretended symbol.
+If the bucket is empty we simply return \texttt{NULL}, otherwise we get into step 2, where the bucket
+chain will be treated as a simple chain of nodes.
+
+In step 2 we traverse a chain of trie nodes (a simple chain or a bucket chain) in order to find a
+node with a symbol that matches our term and has a valid \texttt{in\_eval} field.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+try_structured_term(term, node)
+  if (is_hash_table(node))
+    // step 1: index the term bucket
+    node = set_match_bucket(node, term)
+    if (node == NULL)
+      return NULL
+  // step 2
+  foreach (try_node in node)
+    if (term == symbol(try_node))
+      if (in_eval(try_node) > 0)
+        push_arguments(term_stack, term)
+        return try_node
+      else
+        // no running subgoals below this node
+        return NULL
+  return NULL
+}
+\end{Verbatim}
+\caption{Pseudo-code for procedure \texttt{try\_structured\_term}.}
+\label{fig:try_structured_term}
+\end{figure}
+
+\subsection{Matching Variable Terms}
+
+A variable term can potentially be paired with any trie symbol. It is only
+when the variable is paired with a trie variable that some pairings are invalid.
+
+Figure~\ref{fig:try_variable_term} shows the pseudo-code for the
+\texttt{try\_variable\_term} procedure. It is clearly defined by three main cases,
+depending on the type of the current node, namely:
+
+\begin{enumerate}
+   \item The node is an hash table. For faster access of valid trie nodes, we use the
+   evaluation index, which gives us all the valid trie nodes in a linked list. We set
+   the next alternative node to be pushed on the choice point stack by using the function
+   \texttt{next\_valid\_index\_node} that uses the \texttt{next} pointer of the first
+   index node to locate the alternative trie node.
+   \item The node is an hashed node, thus is on the evaluation index of the corresponding
+   hash table. We also use the \texttt{next\_valid\_index\_node} function to identify
+   the next alternative trie node.
+   \item The node is part of a simple linked list. Here we must use the function
+   \texttt{next\_valid\_node} to find the next valid trie node ($in\_eval > 0$).
+   The alternative trie node is also set using this function on the sibling node.
+\end{enumerate}
+
+After the current valid node and alternative node are set, we push the alternative into
+the choice point stack and call the \texttt{attempt\_variable\_pairing} procedure
+(Figure~\ref{fig:attempt_variable_pairing})
+to pair the term variable with the trie node symbol.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+try_variable_term(variable, node) {
+  if (is_hash_table(node))
+    // case 1: hash table
+    index_node = index(node)
+    
+    if (index_node == NULL)
+      // no running goals below this node
+      return NULL
+    
+    node = node(index_node)
+    alt_chain = next_valid_index_node(node)
+  if (is_hashed_node(node))
+    // case 2: indexed node
+    alt_chain = next_valid_index_node(node)
+  else
+    // case 3: simple linked list
+    node = next_valid_node(node)
+    if (node == NULL)
+      return NULL
+    
+    alt_chain = next(node)
+    alt_chain = next_valid_node(node)
+  
+  symbol = symbol(node)
+  push_choice_point_frame(choice_point_stack, alt_chain)
+  
+  if (attempt_variable_pairing(symbol, variable, node))
+    return node
+  else
+    return NULL
+}
+\end{Verbatim}
+\caption{Pseudo-code for procedure \texttt{try\_variable\_term}.}
+\label{fig:try_variable_term}
+\end{figure}
+
+Pairing a term variable with a trie symbol depends on the type of the trie symbol.
+If the trie symbol is a trie variable, we have two cases: the term variable is paired
+with a trie variable (on the variable enumerator vector) or the term variable is free.
+Remember that previously paired term variables with trie variables must be paired
+again with the same trie variable, therefore we get both indexes and the pairing
+succeeds if they correspond to the same index (same variable). Otherwise, if the
+term variable is not marked, that is, paired with a trie variable, we simply pair it
+by making the term variable point to a position on the variable enumerator vector that
+corresponds to the trie variable index and we trail the term variable using the WAM trail.
+
+When the symbol is an instantiated term, we must verify if the term variable is on
+the variable enumerator vector, because term variables paired with trie variables
+must only be paired with the same trie variable, thus we fail if this happens.
+Otherwise, the pairing proceeds.
+For constant trie symbols we simply bind and trie the term variable against the symbol.
+For structured terms like lists or functors, we create the structured term on the heap
+and bind the variable to the heap address. We also need to push the new term arguments
+into the term stack to be matched against the next trie symbols.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+attempt_variable_pairing(symbol, variable, node) {
+  if (is_variable(symbol))
+    if (is_in_variable_enumerator_vector(variable))
+      enumerator_index = enumerator_index(variable)
+      var_index = var_index(symbol)
+      
+      return enumerator_index == var_index
+    else
+      // new term variable
+      var_index = var_index(symbol)
+      
+      mark_variable_enumerator_vector(variable, var_index)
+      return TRUE
+  else
+    // non-variable symbol
+    if (is_in_variable_enumerator_vector(variable))
+      // variable must be matched against the same trie variable
+      return FALSE
+    
+    if (is_constant(symbol))
+      bind_and_conditionally_trail(variable, symbol)
+    else if (is_functor(symbol) or is_list(symbol))
+      term = create_heap_structure(symbol)
+      bind_and_conditionally_trail(variable, term)
+      push_arguments(term_stack, deref(variable))
+    else
+      return FALSE
+}
+\end{Verbatim}
+\caption{Pseudo-code for procedure \texttt{attempt\_variable\_pairing}.}
+\label{fig:attempt_variable_pairing}
+\end{figure}
+
 \section{Implementation Details}
 
 \subsection{Retroactive Resolution}
@@ -1076,3 +1554,5 @@ locating the subgoal on the call trie, leading to memory and speedup gains.
 \subsection{Subgoal Dependency Tree}
 
 \subsection{Reference Counting}
+
+\subsection{Tabling Operations}
