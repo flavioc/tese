@@ -1080,7 +1080,7 @@ need to be searched, e.g., $in\_eval = 0$.
 
 When a subgoal enters the computation, by either being a consumer or generator, all the
 subgoal trie nodes in the subgoal trie path get the \texttt{in\_eval} field incremented.
-When the subgoal exists the computation, the path is decremented.
+When the subgoal exits the computation, the path is decremented.
 By analyzing these rules, we can make various conclusions. For each subgoal leaf trie node
 the \texttt{in\_eval} field can be equal to either: 1, when the corresponding subgoal is in
 evaluation; or 0, when the subgoal is not executing. For the root subgoal trie node, we
@@ -1543,16 +1543,222 @@ attempt_variable_pairing(symbol, variable, node) {
 
 \section{Implementation Details}
 
-\subsection{Retroactive Resolution}
-
-\subsection{Subgoal Frames}
-
-\subsection{External or Internal}
-
-\subsection{Transforming Consumers Into Generators}
+In this section we describe some details of the implementation that were not described
+in the previous sections, but are still important to understand how RCS was implemented.
 
 \subsection{Subgoal Dependency Tree}
 
+As we have already seen, we build a subgoal dependency tree for generator nodes
+in order to construct the call structure of tabled subgoals. We use the \texttt{top\_gen}
+field to link internal generator subgoals to the top subgoal.
+Hence, we can use the subgoal dependency tree to know if the subgoal $A$ is internal
+to the subgoal $B$. To know this, we traverse the \texttt{top\_gen} links until:
+(1) subgoal $B$ is reached, thus $A$ is internal to $B$; we reach an older subgoal
+than $B$, therefore $A$ is not internal to $B$. We use $B$'s generator choice point
+as the threshold for abandoning search and declaring $A$ external of $B$.
+Figure~\ref{fig:is_internal_subgoal_frame} presents the pseudo-code for the
+\texttt{is\_internal\_subgoal\_frame} function.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+is_internal_subgoal_frame(target_fr, subgoal_fr, min) {
+  if (target_fr == subgoal_fr)
+    return TRUE
+  
+  sg_fr = top_gen(subgoal_fr)
+  
+  while (sg_fr && younger_or_equal(generator_cp(sg_fr), min))
+    if (sg_fr == target_fr)
+      return TRUE
+    
+    sg_fr = top_gen(sg_fr)
+  
+  return FALSE
+}
+\end{Verbatim}
+\caption{Pseudo-code for function \texttt{is\_internal\_subgoal\_frame}.}
+\label{fig:is_internal_subgoal_frame}
+\end{figure}
+
+We also extended the dependency frame data structure with a \texttt{top\_gen} field.
+Hence, we can compute if a consumer node is internal to another subgoal by calling
+the \texttt{is\_internal\_subgoal\_frame} frame above with the dependency frame's top
+subgoal frame.
+
+For both cases, the value of the \texttt{top\_gen} field is initialized with the value
+of a global variable called \texttt{TOP\_GEN}. This variable is used in various
+situations: (1) when a tabled subgoal call creates a generator node we set the
+new subgoal frame's \texttt{top\_gen} field to \texttt{TOP\_GEN} and then update
+\texttt{TOP\_GEN} to the new subgoal frame; (2) when the new answer tabled operation
+is executed we set \texttt{TOP\_GEN} to the value of the subgoal frame's \texttt{top\_gen}
+field; (3) when a consumer node is created (and the respective dependency frame) we
+use the \texttt{TOP\_GEN} value to set the dependency frame's \texttt{top\_gen} field;
+(4) finally, when a consumer node is resumed we set \texttt{TOP\_GEN} to the value
+of the dependency frame's \texttt{top\_gen} field.
+
+\subsubsection{Faster External or Internal Test}
+
+While the previous mechanism works pretty well for most cases, it is possible to
+implement a faster internal/external test for subgoals that are currently running,
+e.g, to test if the more general subgoal is internal or external to a target subsumed
+subgoal.
+
+This mechanism extends each subgoal frame with two new fields: \texttt{start\_code}
+and \texttt{end\_code}, that initially are standard WAM variables.
+The \texttt{start\_code} field is bound to an arbitrary value when the subgoal starts
+executing and unbound when the subgoal backtracks, therefore allowing us to detect
+if the subgoal is in the current branch. The \texttt{end\_code} field is bound
+when a new answer is found, i.e., when the code has reached the end of a program
+clause, thus allowing us to easily detect if a pruned subgoal is external or external.
+
+\subsection{Transforming Consumers Into Generators}
+
+In order to be able to transform a consumer node into a retroactive node and then into a generator node,
+all consumer choice points are allocated, by default, as generator choice points.
+
+A generator choice points extends a WAM choice point with two fields:
+\texttt{sg\_fr}, a pointer to the subgoal frame; \texttt{dep\_fr}, a pointer to a dependency frame,
+if evaluating using local scheduling. Allocated along the generator choice point we also have the answer
+template and the subgoal arguments. In order for the consumer choice to be the same size as the
+generator choice point, we extended the consumer choice point with the \texttt{sg\_fr} field and
+the subgoal arguments are also pushed into the local stack.
+
 \subsection{Reference Counting}
 
+We extended the subgoal frame data structure with a field called \texttt{num\_deps}. This field
+counts the number of dependency frames dependent on this subgoal. Therefore, while updating
+external consumers to transform them into retroactive nodes we count the number of external consumers
+already processed, and thus we can exit early when the count reaches the target number. This speedups
+the pruning process because we known when all external consumers were already processed.
+
+For subsumptive generator subgoal frames, we extended them with an extra field called \texttt{num\_sub\_deps}, that
+counts the number of subsumed consumers. By knowing how many variant consumers and subsumed consumers we
+have for a generator we can decide more efficiently when to transform external consumers and if we
+need to transform subsumed consumer nodes to use a generator subgoal frame, if no variant external consumers
+exist anymore.
+
+\subsection{Computing Stack Limits}
+
+One important input parameter of pruning are the choice points relevant to the
+computation of target subgoal. We estimate this parameter by first storing the
+address of the generator choice point as the upper limit, and the lower limit is
+updated to the lowest value of \textbf{B\_FZ} or \textbf{B} when: (1) a new answer is
+generated, (2) a new clause is executed, or (3) completion is attempted. While this
+is a simple approach, some parts of the local stack can belong to an
+\textit{external generator}. This can happen when an \textit{external consumer}
+suspends. Updating the bottom limit to \textbf{B\_FZ} allow us to cover areas of
+the stack that were frozen during evaluation of the subgoal.
+
+\subsection{Data Structure Modifications}
+
+To be able to set a predicate to use retroactive call subsumption, we added another flag to the
+\texttt{mode\_flag} bit field of the table entry. In addition to the flags \textbf{variant} and 
+\textbf{subsumptive}, \textbf{retroactive} is also available.
+
+For the dependency frame, we extended it with the bit field \texttt{flags}. Among other things,
+one bit marks if the corresponding consumer is a potential lost consumer, therefore if the completion
+operation will attempt to resume the consumer, it will check first for that bit flag to execute
+retroactive resolution in order to transform the node into a generator.
+
+The retroactive subgoal frame was extended with a \texttt{try\_answer} field. This field is used
+to consume the available answers from the answer trie that are relevant to the subgoal
+before attempting to execute the predicate clauses.
+
+We extended both the subgoal and the dependency frame with two new fields, \texttt{prev} and
+\texttt{next}, that are used to double link the frames on the respective stacks. These pointers
+make the operation of removing a frame from the stack more efficient.
+
 \subsection{Tabling Operations}
+
+The most important modifications to tabling operations were done in the tabled subgoal call and
+completion operations. For the tabled subgoal call operation (Figure~\ref{fig:tabled_subgoal_call_retro})
+we distinguish the new retroactive evaluation method by calling \texttt{retroactive\_subgoal\_search}.
+When we have a new generator call, after storing the
+generator node, we collect the running subsumed subgoals, we mark ourselves as a running subgoal, and
+then we prune the found subgoals by calling \texttt{prune\_subgoal\_list}.
+Next, we attempt to collect new relevant answers from the STST with
+\texttt{collect\_available\_retroactive\_answers} and if the subgoal frame contains any answer
+we load them by using the \texttt{table\_try\_answer} instruction.
+
+The tabled subgoal call operation must also check if the subgoal frame is in the pruned state. Here,
+we simply load all the available answers and then call the \texttt{table\_try\_answer}, which will
+load all the available answers and then execute the program clauses.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+tabled_subgoal_call(table_entry, arguments) {
+  call_trie = call_trie(table_entry)
+  
+  if(method(table_entry) == VARIANT)
+    subgoal_frame = variant_subgoal_search(call_trie, arguments)
+  else if (method(table_entry) == SUBSUMPTIVE)
+    subgoal_frame = subsumptive_subgoal_search(call_trie, arguments)
+  else if (method(table_entry) == RETROACTIVE) // NEW
+    subgoal_frame = retroactive_subgoal_search(call_trie, arguments)
+  
+  if (is_new_generator_call(subgoal_frame))
+    store_generator_node(table_entry, arguments, subgoal_frame)
+    if (type(subgoal_frame) == RETROACTIVE_GENERATOR)
+      subgoals = collect_subsumed_subgoals(arguments, call_trie)
+      increment_in_eval(subgoal_frame)
+      prune_subgoal_list(subgoal_frame, subgoals)
+      collect_available_retroactive_answers(subgoal_frame)
+      if (get_first_answer(subgoal_frame))
+        // consume pre stored answers
+        first = get_first_answer(subgoal_frame)
+        load_answer_from_trie(first)
+        try_answer(subgoal_frame) = first
+        CP_AP(B) = table_try_answer
+        goto continuation_instruction()
+  else if (state(subgoal_frame) == pruned) // NEW
+    // consume pre stored answers
+    state(subgoal_frame) = evaluating
+    first = get_first_answer(subgoal_frame)
+    load_answer_from_trie(first)
+    try_answer(subgoal_frame) = first
+    CP_AP(B) = table_try_answer
+    goto continuation_instruction()
+  else if (is_new_consumer_call(subgoal_frame))
+    // (...)
+  else
+    // (...)
+}
+\end{Verbatim}
+\caption{Pseudo-code for the new tabled subgoal call operation.}
+\label{fig:tabled_subgoal_call_retro}
+\end{figure}
+
+When trying to complete by traversing the dependency space for unconsumed answers, we must
+also check for lost consumers. These consumers must be restarted as generators in order for
+computation be completed. Figure~\ref{fig:completion_operation_retro} presents the new completion
+operation. Note that we detect a lost consumer we call the \texttt{retroactive\_resolution}
+instruction in order to restart the consumer.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+completion(generator) {
+  if (is_leader_node(generator))
+    df = TOP_DEP_FR
+    while (younger_than(cons_cp(df), generator))
+      // NEW
+      if (is_lost_consumer(df))
+        consumer = cons_cp(df)
+        CP_B(consumer) = generator
+        restore_bindings(CP_TR(generator), CP_TR(consumer))
+        goto retroactive_resolution(consumer)
+      cont = get_next_answer_continuation(dep_fr)
+      if (cont)
+        // unconsumed answers
+        back_cp(df) = generator
+        consumer = cons_cp(df)
+        restore_bindings(CP_TR(generator), CP_TR(consumer))
+        goto answer_resolution(consumer)
+      df = next(df)
+    perform_completion()
+    adjust_freeze_registers()
+  backtrack_to(CP_B(generator))
+}
+\end{Verbatim}
+\caption{Pseudo-code for the new completion operation.}
+\label{fig:completion_operation_retro}
+\end{figure}

@@ -49,18 +49,18 @@ Given the nature of tries, the following conclusions can be made:
 When creating transitions for variables, we use the format outlined by Bachmair \textit{et al.} \cite{Bachmair-93},
 described in Section \ref{sec:variant_tabling}.
 
+Figure~\ref{fig:tries_use} shows a trie with three terms. First, in (a) the trie is represented by a \textit{root node} and has
+no terms. Next, in (b) the term \texttt{t(X,a)} is inserted and three nodes are created that represent each part of the term.
+In (c) a new term, \texttt{u(X,b,Y)} is inserted. This new term differs from the first one and a new distinct branch is created.
+Finally, in (d), the term \texttt{t(Y,1)} is inserted and only a new node needs to be created as this term shares
+two prefix nodes with \texttt{t(X,a)}.
+
 \begin{figure}[ht]
   \centering
     \includegraphics[scale=0.6]{tries.pdf}
   \caption{Using tries to represent terms.}
   \label{fig:tries_use}
 \end{figure}
-
-Figure~\ref{fig:tries_use} shows a trie with three terms. First, in (a) the trie is represented by a \textit{root node} and has
-no terms. Next, in (b) the term \texttt{t(X,a)} is inserted and three nodes are created that represent each part of the term.
-In (c) a new term, \texttt{u(X,b,Y)} is inserted. This new term differs from the first one and a new distinct branch is created.
-Finally, in (d), the input term is \texttt{t(Y,1)} is inserted and only a new node needs to be created as this term shares
-two prefix nodes with \texttt{t(X,a)}.
 
 Yap and XSB use two levels of tries to implement the table space (see Figure~\ref{fig:table_space_tries}):
 
