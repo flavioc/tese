@@ -1,0 +1,134 @@
+Logic programming is a very high level programming paradigm that allows the programmer
+to focus on the declarative aspects of the problem, instead of describing the specific steps
+needed to solve the problem. Arguably, the Prolog language is the most popular logic
+programming language. Part of the success of the Prolog language can be attribute to the
+development of a fast and very efficient sequential machine called the \emph{Warren Abstract Machine}
+(WAM) \cite{Warren-83}. The advances in WAM technology and optimization techniques enabled Prolog
+to be applied in real world problems in a wide range of fields such as Artificial Intelligence,
+Natural Language Processing, Machine Learning, Knowledge Based Systems, Database Management, or
+Expert Systems.
+
+While the declarative aspect of Prolog is based on mathematical logic and the predicate calculus,
+the Prolog language employs a relatively simple refutation strategy called \emph{Selective Linear Definite}
+(SLD) \cite{Lloyd-87}, which is a well defined evaluation method for logic programs that
+is particularly well suited to stack based machines.
+Furthermore, Prolog defines a few extra-logical constructs, such as the \emph{cut operator}
+that give the programmer more control over the evaluation. Both the SLD operational semantics
+and the cut operator make the programmer more aware of the actual evaluation process in detriment to the
+declarative aspect of the language that is naturally non-deterministic. It is possible to exploit
+the deterministic rules and extra-logical features of Prolog to speedup the execution of its execution,
+thus, for example, solve problems related to redundant sub-computations. Notwithstanding, standard Prolog has
+still some deficiencies. For instance, writing left-recursive programs can lead to infinite loops.
+
+There have been some attempts in making Prolog less prone to problems related to recursion
+and redundant sub-computations, in order to make Prolog more expressive and closer to mathematical logic.
+One of these attempts, which is particularly successful, is called \emph{tabling}
+(or \emph{tabulation} or \emph{memoization} \cite{Michie-68}). The tabling technique stems from one simple idea:
+store intermediate answers in a place called the \emph{table space} and reuse those answers when a
+\emph{similar call} appears during the resolution process. Tabling refines the SLD resolution method
+by distinguishing between first calls to \emph{tabled subgoals}, which are evaluated as usual through
+\emph{program resolution}, and similar calls to tabled subgoals that are evaluated through \emph{answer resolution}
+by consuming answers that are being stored in the table space by the corresponding similar subgoal, instead
+of being re-evaluated against the program clauses. Tabled evaluation is able to reduce the search space,
+avoid looping, and has better termination properties than traditional SLD resolution \cite{Chen-96}.
+The advantages of tabling have lead to its application in fields such as Deductive Databases \cite{Sagonas-94},
+Program Analysis \cite{RamakrishnanCR-00}, Knowledge Based Systems \cite{Yang-00}, Inductive Logic
+Programming \cite{Rocha-05b}, and Model Checking~\cite{RamakrishnanCR-00}.
+
+In tabling, \emph{call similarity} (or \emph{checks}) determines if a subgoal $A$ is similar to subgoal $B$,
+in other words, wether $A$ will generate its own answers or if it will consume from $B$. In general,
+we can distinguish between two main approaches for call similarity:
+
+\begin{itemize}
+   \item \emph{Variant-based tabling}: $A$ and $B$ are variants if they can be made identical
+   through variable renaming as proposed by Bachmair \textit{et al} \cite{Bachmair-93}.
+   For example, subgoals $p(X,1,Y)$ and $p(Y,1,Z)$ are \emph{variants},
+   because both can be transformed into $p(VAR_0,1,VAR_1)$;
+   \item \emph{Subsumption-based tabling} or \emph{tabling by call subsumption}: Subgoal $A$ is considered similar
+   to $B$ if $A$ is \emph{subsumed} by $B$ (or $B$ \emph{subsumes} $A$) if $A$ is more specific than $B$
+   (or an instance of). For example, subgoal $p(X,1,2)$ is subsumed by subgoal $p(Y,1,Z)$ because there
+   is a substitution $\{Y~=~X,~Z~=~2\}$ that makes $p(X,1,2)$ an instance of $p(Y,1,Z)$. Tabling by call
+   subsumption is based on the principle that if $A$ is subsumed by $B$ and $S_A$ and $S_B$ are the respective
+   answer sets, therefore $S_A \subseteq S_B$.
+\end{itemize}
+
+In general, subsumption-based tabling has the following advantages over variant-tabling:
+superior time performance, because less program resolution is required; and less space requirements,
+as it allows greater reuse of answers, since the answer sets for the subsumed subgoals are not stored.
+However, the mechanisms to efficiently support subsumption-based tabling are more complex and harder to
+implement, which makes the variant-based tabling approach more popular within the available tabling systems,
+such as YapTab \cite{Rocha-00a}, B-Prolog \cite{Zhou-00}, and ALS-Prolog \cite{Guo-01}.
+To the best of our knowledge, the SLG-WAM \cite{Sagonas-98} engine from XSB Prolog is the sole tabling system that supports
+subsumption-based tabling, initially by using an organization of the table space called
+\emph{Dynamic Threaded Sequential Automata (DTSA)}~\cite{Rao-96}, and later by using an alternative design called
+\emph{Time-Stamped Tries (TST)}~\cite{Johnson-99},.
+While the DTSA design was more efficient, it had bigger space requirements and thus is was replaced by the simpler
+TST approach which uses far less memory.
+
+\section{Thesis Purpose}
+
+In this thesis we address the design, implementation, integration and evaluation of two subsumption-based engines
+built on top of the YapTab tabling system. For the first system, we reused and integrated the Time-Stamped Trie
+approach from XSB Prolog into Yap Prolog. We attempted to reuse both code and data structures and then
+we integrated these new mechanisms into YapTab. We studied how subsumption-based and variant-based tabling were seamlessly
+integrated into the SLG-WAM engine. Consequently, we made minimal modifications to the YapTab engine
+that enabled it to support a mix of variant and subsumptive subgoals on the same program.
+Our performance results show that our integration efforts were successful, with comparable
+speedups when using subsumptive-tabling against variant-tabling.
+
+For the second system, we designed a novel extension for subsumptive-tabling called
+\emph{Retroactive Call Subsumption (RCS)}.
+This extension attempts to solve one major problem in traditional call subsumption: the order in
+which subgoals are called during a particular evaluation can greatly affect the success and applicability
+of the call by subsumption technique. For example, if more specific subgoals are called before
+the more general subgoal, no reuse will be employed, while if the more general subgoal is called first,
+reuse will happen. The RCS extends the original TST design by allowing full sharing of answers, independently
+of the order they are called. The basic idea is to selectively prune and restart the evaluation of generator
+subgoals that are subsumed by a new called subgoal in order to reuse the answers from the subsuming subgoal,
+instead of continuing to generate their own answers.
+
+To implement retroactive-based tabling we developed a few novel ideas: (1) a novel algorithm to efficiently
+traverse and retrieve running \emph{instances} of a subgoal; (2) a novel table space organization, based on
+the ideas of the \emph{common global trie} proposal~\cite{CostaJ-08}, where answers are represented only
+once; and (3) a new evaluation strategy capable of pruning and transforming generator nodes into consumer nodes.
+
+Our results show that the overhead of the new control mechanisms of RCS are low enough in programs that do not
+benefit from it, which, combined with considerable gains for programs that can take advantage of them, validates
+this new evaluation technique. In this in mind, we argue that Retroactive Call Subsumption makes tabling
+more adapted and useful for practical applications and is another great tool in the programmer's toolbox for
+writing tabled programs.
+
+\section{Thesis Outline}
+
+In the following list we describe each chapter of this thesis.
+
+\textbf{Chapter 1: Introduction.} Is this chapter.
+
+\textbf{Chapter 2: Logic Programming and Tabling.} Provides a overview of the main topics of this thesis.
+The subjects discussed are logic programming, Prolog, and tabling for logic programs. A brief description
+of the YapTab and SLG-WAM tabling engines is also presented.
+
+\textbf{Chapter 3: Table Space Organization.} Describes the table space organization for both variant and
+subsumption-based tabling engines. We start by describing the variant table space for both SLG-WAM and
+YapTab systems. We then give a brief overview about the table space organization for the DTSA and TST
+techniques that implement tabling with subsumptive checks.
+
+\textbf{Chapter 4: Time Stamped Tries.} Throughly presents the Time Stamped Tries approach to subsumption-based
+tabling. First, we describe the algorithm used to detect subsuming subgoals on the subgoal trie. Next,
+we give a detailed description of the data structures used in the table space that are used to speedup
+the identification of relevant answers for subsumed subgoals. Finally, we focus on the modifications we have
+made in the YapTab tabling engine in order to support tabling by call subsumption.
+
+\textbf{Chapter 5: Retroactive Call Subsumption.} We start with the motivations behind RCS, by showing the shortcomings
+of pure subsumption-based tabling. We next describe the rules for the new mechanism and the problems that arise
+when pruning execution branches. Finally, we discuss the novel table space called \emph{Single Time Stamped Trie}
+and then we throughly describe the new algorithm we developed to find executing subsumed subgoals of a subgoal on the
+table space.
+
+\textbf{Chapter 6: Experimental Results.} This chapter first presents the experimental results we achieve with
+the new YapTab engine that reuses the TST approach and how it compares to the SLG-WAM. We also present and
+discuss the overhead of the RCS mechanism on programs that do not benefit from it and the speedups we have
+achieve for programs that can take advantage of it.
+
+\textbf{Chapter 7: Conclusions.} Summarizes the work, enumerates the contributions and suggests directions for
+further work.
