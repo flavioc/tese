@@ -1,0 +1,94 @@
+
+In this chapter we summarize the work developed in this thesis. First, we list the various contributions
+present in the thesis, next we suggest problems for future research, and then we finish with a final
+remark.
+
+\section{Main Contributions}
+
+We can identify two main contributions of this thesis. The first, is the integration and design of a call
+subsumption engine into YapTab, originally a variant engine. The second main contribution is the design and implementation
+of a new tabling execution mechanism called Retroactive Call Subsumption, that maximizes the sharing of answers
+between subsumed/subsuming subgoals.
+In order to build these two systems we used the Time-Stamped Tries mechanisms from XSB to implement the
+subsumption algorithms and data structures. This process made us understand the differences between the
+YapTab and the SLG-WAM tabling engines.
+
+We next detail the most important aspects of the work developed during this thesis:
+
+\begin{description}
+   \item[Subsumption-based tabling engine.] Tabling evaluation by using subsumptive checks is now supported in Yap Prolog.
+   While we integrated the TST algorithms and data structures from SLG-WAM into YapTab, the modifications made to
+   to YapTab were minimal and show that it is possible to add support for subsumption-based tabling to a delaying-based
+   tabling engine that already supports variant checks by preserving its own tabling operations and main algorithms.
+   In addition, YapTab is also able to mix variant and subsumption-based tabling in the same program by defining
+   the evaluation model for each predicate.
+   
+   \item[Mechanisms to control retroactive-based execution.] This thesis innovates by presenting a novel execution model
+   that is able to prune the execution of specific subgoals when a more general subgoal appears. We developed rules
+   for pruning a range of choice points and presented the issues that arise and can lead to completion problems when
+   transforming consumer nodes into generators. We also developed an efficient mechanism to detect if a subgoal is
+   internal to the execution of another subgoal by building a subgoal dependency tree.
+   
+   \item[Algorithm to find subsumed subgoals in the table space.] We designed a novel and efficient algorithm that
+   can detect instances of a subgoal that are currently being evaluated. Our design takes advantage of the existing
+   WAM machinery and data areas. In order to prune the search space, we extended the subgoal trie data structure with
+   information about the status of the subgoals under a subgoal trie node.
+   
+   \item[Single Time Stamped Trie table space organization.] In the STST table space organization we have an answer
+   trie for each predicate. The answer is itself an time stamped trie and permits greater reuse of answers between
+   the subgoals of the same predicate, as answers are represented only once. The design facilitates the pruning of
+   subsumed subgoals because the subgoals can easily identify which answers have already been consumed or generated.
+   We also designed a new optimization, where we throw away the subgoal trie when the most general subgoal completes,
+   therefore saving memory.
+   
+   \item[Enhanced handling of incomplete subgoals.] The STST table space organization also permits that a certain
+   subgoal is able to immediately reuse answers already on the answer trie added by other subgoals. That means that if a
+   few subsumed subgoals execute and then a more general subgoal appears we can first load the answers already stored and
+   then execute the predicate clauses. This is a very efficient way of handling incomplete tables, because we are
+   not only restricted to an incomplete or complete answer set from a single subgoal but we are also able to use
+   answers from other subgoals, which is useful if the subgoal stops execution by the cut operator.
+   
+   \item[Support for mixed tabling checks.] Our final system is able to mix variant, subsumption and retroactive-based
+   tabling in the same program. This enables the programmer to choose the best evaluation strategy per predicate,
+   which we think greatly augments the power of tabling to be used in real world programming.
+   
+   \item[Performance Evaluation.] We evaluated the performance of our subsumption-based tabling engine against SLG-WAM
+   with very comparable results, which validates our integration efforts. For retroactive-based, we evaluated the overhead
+   of using the new control mechanism with programs that do not benefit from retroactive evaluation. For programs were
+   retroactive reuse happens, we validated our approach with good speedups over traditional call subsumption.
+   
+   FALAR DA AVALIACAO DOS PROGRAMAS PATH AQUI!
+   
+\end{description}
+
+
+\section{Further Work}
+
+While we made some valuable contributions with this thesis, much work is left to be done in the future.
+We next summarize further work that can and should be done:
+
+\begin{description}
+   
+   \item[Experimentation in real world applications.] Our retroactive-based tabling engine still needs more
+   experimentation and testing with real world data and applications, in order to refine the implementation.
+   More intensive experimentation may provide a deep analysis on the algorithms implemented and many opportunities
+   to make each algorithm more smart will sure arise.
+   
+   \item[More efficient algorithms in the table space.] While the algorithms we used for the STST table space
+   work pretty well for the majority of applications, there are certain programs were the overhead of various
+   subgoals inserting on the same answer trie is considerable. Newer algorithms should be developed in order to,
+   while preserving the good results for the majority of the cases, combat these deficiencies. In the other hand,
+   the system does not benefit from a compile answer trie until the most general subgoal completes. Novel mechanisms
+   must be developed in order to take advantage of the compiled tries optimization while inserting answers on the trie
+   at the same time.
+   
+   \item[Exploration of other execution models.] When using retroactive-based tabling, there are some cases where the
+   engine needs to call multiple subgoals of the same predicate in order to calculate the answers for the top subgoal.
+   Sometimes, it would be advantageous to \emph{abstract} the running subgoals into a more general subgoal and then
+   call it. After that, the top subgoal would use the answers generated by the more general subgoal. This mechanism
+   called \emph{call abstraction} was proposed by Johnson et al.~\cite{Johnson-99} and is based on the idea that it
+   may be useful for some programs to lose goal directness and generate the full set of answers and then select relevant
+   answers from that set. Retroactive-based tabling already includes all the machinery necessary to do that, which makes
+   it a good framework to further support call abstraction by devising various analysis techniques of call patterns.
+   
+\end{description}
