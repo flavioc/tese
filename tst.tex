@@ -989,7 +989,7 @@ hash table and then the match and unify chains are computed. If the match chain 
 a valid trie node, before we descend into the child node we must push the functor or list
 arguments into the term stack, so they can be unified with the next trie nodes.
 
-\begin{figure}[ht]
+\begin{figure}[h]
 \begin{Verbatim}
 unify_structured_term(term, node, ts) {
   if (is_hash_table(node))
@@ -1011,7 +1011,6 @@ unify_structured_term(term, node, ts) {
 \label{fig:unify_structured_term}
 \end{figure}
 
-\begin{samepage}
 When using the unify chain (procedure \texttt{search\_chain\_unify\_with\_structured\_term}),
 we also iterate the chain looking for valid time stamped nodes. For each valid node
 four situations may arise (Figure~\ref{fig:search_chain_unify_with_structured_term}):
@@ -1024,7 +1023,6 @@ four situations may arise (Figure~\ref{fig:search_chain_unify_with_structured_te
   is executed to check for a match and perform additional unifications;
   \item No match was found, the next alternative node is inspected.
 \end{enumerate}
-\end{samepage}
 
 \begin{figure}[ht]
 \begin{Verbatim}
@@ -1123,7 +1121,6 @@ which given the algorithm must be greater than 10.
 
 \subsection{Unification of Variable Terms}
 
-\begin{samepage}
 Variable unification is done when the next term to unify is a variable. In this case, trie branches are only pruned
 by using the time stamp as variables can unify with anything.
 Figure~\ref{fig:unify_variable_term} presents the procedure \texttt{unify\_variable\_term}. In this function, three
@@ -1139,9 +1136,8 @@ situations may arise:
   \item Current node is a simple sibling chain. Both the chain and the alternative chain are set by
    iterating over the node chain, looking for valid time stamps.
 \end{enumerate}
-\end{samepage}
 
-\begin{figure}[ht]
+\begin{figure}[h]
 \begin{Verbatim}
 unify_variable_term(variable, node, ts) {
   if (is_hash_table(node))
@@ -1173,8 +1169,6 @@ unify_variable_term(variable, node, ts) {
 \label{fig:unify_variable_term}
 \end{figure}
 
-\begin{samepage}
-
 Once the chains are set, we create a new choice point, run the variable unification algorithm
 and proceed into the next trie node.
 From the pseudo-code in Figure~\ref{fig:unify_with_variable}, unification with a term variable
@@ -1190,7 +1184,6 @@ is dictated by the type of trie symbol. It follows the following rules:
   was dereferenced from a trie variable using \texttt{trie\_deref}, \texttt{unify} chooses the binding direction,
   resulting in one of the variables being trailed.
 \end{itemize}
-\end{samepage}
 
 
 \begin{figure}[ht]
@@ -1303,9 +1296,9 @@ a subsumptive answer. The subsumptive subgoal is \texttt{p(X,Y,Z)} and the
 subsumed subgoal is \texttt{p(d,f(X),3)}. The answer to consume is \texttt{p(d,f(a),3)},
 which corresponds to the binding \texttt{\{X~=~a\}}.
 
-\begin{figure}[H]
+\begin{figure}[h]
   \centering
-    \includegraphics[scale=0.6]{consume_answer.pdf}
+    \includegraphics[scale=0.40]{consume_answer.pdf}
   \caption{Data structures related to answer consumption.}
   \label{fig:consume_answer}
 \end{figure}
@@ -1327,7 +1320,7 @@ The instruction set follows the standard WAM instruction style with \textit{try}
 with \textit{try} instructions and middle nodes with \textit{retry} instructions. Rightmost
 nodes use \textit{trust} instructions, while single nodes use \textit{do} instructions.
 
-\begin{figure}[H]
+\begin{figure}[h]
   \centering
     \includegraphics[scale=0.6]{compiled_trie.pdf}
   \caption{A compiled trie for subgoal \texttt{p(X,Y,Z)}.}
@@ -1371,7 +1364,7 @@ Thus, instead of removing hash tables, they must be kept on a subsumptive tablin
 To use the hash tables, we must extend the trie instruction set with a new instruction,
 \textit{do\_hash} (Figure~\ref{fig:compiled_hash}).
 
-\begin{figure}[H]
+\begin{figure}[h]
   \centering
     \includegraphics[scale=0.6]{compiled_hash.pdf}
   \caption{Compiled hash table.}
@@ -1458,7 +1451,7 @@ Figure~\ref{fig:subgoal_frames} illustrates a call trie for the predicate \textt
 with the following subgoals: \texttt{p(X,Y)}, as a generator subgoal; and \texttt{p(2,X)} and
 \texttt{p(3,X)} as consumer subgoals.
 
-\begin{figure}[H]
+\begin{figure}[h]
   \centering
     \includegraphics[scale=0.6]{subgoal_frames.pdf}
   \caption{Call trie with a subsumptive generator and two subsumed consumer subgoal frames.}
@@ -1822,7 +1815,7 @@ subsumptive generator subgoal frames.
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.7]{completion_space.pdf}
+    \includegraphics[scale=0.5]{completion_space.pdf}
   \caption{Subsumptive generator and consumers before completion.}
   \label{fig:completion_space}
 \end{figure}
