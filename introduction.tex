@@ -102,33 +102,37 @@ writing tabled programs.
 
 In the following list we describe each chapter of this thesis.
 
-\textbf{Chapter 1: Introduction.} Is this chapter.
+\begin{description}
 
-\textbf{Chapter 2: Logic Programming and Tabling.} Provides a overview of the main topics of this thesis.
-The subjects discussed are logic programming, Prolog, and tabling for logic programs. A brief description
-of the YapTab and SLG-WAM tabling engines is also presented.
-
-\textbf{Chapter 3: Table Space Organization.} Describes the table space organization for both variant and
-subsumption-based tabling engines. We start by describing the variant table space for both SLG-WAM and
-YapTab systems. We then give a brief overview about the table space organization for the DTSA and TST
-techniques that implement tabling with subsumptive checks.
-
-\textbf{Chapter 4: Time Stamped Tries.} Throughly presents the Time Stamped Tries approach to subsumption-based
-tabling. First, we describe the algorithm used to detect subsuming subgoals on the subgoal trie. Next,
-we give a detailed description of the data structures used in the table space that are used to speedup
-the identification of relevant answers for subsumed subgoals. Finally, we focus on the modifications we have
-made in the YapTab tabling engine in order to support tabling by call subsumption.
-
-\textbf{Chapter 5: Retroactive Call Subsumption.} We start with the motivations behind RCS, by showing the shortcomings
-of pure subsumption-based tabling. We next describe the rules for the new mechanism and the problems that arise
-when pruning execution branches. Finally, we discuss the novel table space called \emph{Single Time Stamped Trie}
-and then we throughly describe the new algorithm we developed to find executing subsumed subgoals of a subgoal on the
-table space.
-
-\textbf{Chapter 6: Experimental Results.} This chapter first presents the experimental results we achieve with
-the new YapTab engine that reuses the TST approach and how it compares to the SLG-WAM. We also present and
-discuss the overhead of the RCS mechanism on programs that do not benefit from it and the speedups we have
-achieve for programs that can take advantage of it.
-
-\textbf{Chapter 7: Conclusions.} Summarizes the work, enumerates the contributions and suggests directions for
-further work.
+   \item[Chapter 1: Introduction.] Is this chapter.
+   
+   \item[Chapter 2: Logic Programming and Tabling.] Provides a overview of the main topics of this thesis.
+   The subjects discussed are logic programming, Prolog, and tabling for logic programs. A brief description
+   of the YapTab and SLG-WAM tabling engines is also presented.
+   
+   \item[Chapter 3: Table Space Organization.] Describes the table space organization for both variant and
+   subsumption-based tabling engines. We start by describing the variant table space for both SLG-WAM and
+   YapTab systems. We then give a brief overview about the table space organization for the DTSA and TST
+   techniques that implement tabling with subsumptive checks.
+   
+   \item[Chapter 4: Time Stamped Tries.] Throughly presents the Time Stamped Tries approach to subsumption-based
+   tabling. First, we describe the algorithm used to detect subsuming subgoals on the subgoal trie. Next,
+   we give a detailed description of the data structures used in the table space that are used to speedup
+   the identification of relevant answers for subsumed subgoals. Finally, we focus on the modifications we have
+   made in the YapTab tabling engine in order to support tabling by call subsumption.
+   
+   \item[Chapter 5: Retroactive Call Subsumption.] We start with the motivations behind RCS, by showing the shortcomings
+   of pure subsumption-based tabling. We next describe the rules for the new mechanism and the problems that arise
+   when pruning execution branches. Finally, we discuss the novel table space called \emph{Single Time Stamped Trie}
+   and then we throughly describe the new algorithm we developed to find executing subsumed subgoals of a subgoal on the
+   table space.
+   
+   \item[Chapter 6: Experimental Results.] This chapter first presents the experimental results we achieve with
+   the new YapTab engine that reuses the TST approach and how it compares to the SLG-WAM. We also present and
+   discuss the overhead of the RCS mechanism on programs that do not benefit from it and the speedups we have
+   achieve for programs that can take advantage of it.
+   
+   \item[Chapter 7: Conclusions.] Summarizes the work, enumerates the contributions and suggests directions for
+   further work.
+   
+\end{description}
