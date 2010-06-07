@@ -1,180 +1,139 @@
-\section{Results}
+This chapter presents a detailed performance analysis of the two subsumption-based tabling engines
+that we have developed. We divided this chapter into four sections. The first section describes the
+set of tabled benchmark programs that we have used to assess the performance of execution. The second
+section evaluates the engine with traditional call subsumption that was implemented by integrating the
+Time-Stamped Tries algorithms and data structures from XSB into Yap. In the next section, we evaluate
+the retroactive-based tabling engine for programs that do not benefit from the new mechanisms and
+for programs that take advantage of the new evaluation method. The final, and fourth, section describes
+the advantages and disadvantages of the three engines, variant, subsumptive or retroactive to
+compute the the reachability between two nodes in a graph.
 
-\begin{table}[ht]
-\scriptsize{
-\begin{tabular}{c|c|c|c|c|c|c|c|c}
-   \hline
-   \multirow{2}{*}{Program} & \multicolumn{2}{c|}{\multirow{2}{*}{Data}} & \multicolumn{3}{c|}{SLG-WAM} & \multicolumn{3}{c}{YapTab} \\ \cline{4-6} \cline{7-9}
-   & \multicolumn{2}{c|}{} & Variant & Subsumptive & Speedup & Variant & Subsumptive & Speedup \\ \hline
+\section{Benchmark Programs}
+
+In order to assess the performance of our tabling engines we used various programs and data sets.
+The following list describes the programs used:
+
+\begin{description}
    
-   \multirow{20}{*}{path\_left\_first} &  \multirow{6}{*}{tree} &  1024 &  10 & 0 &  $\infty$  & 0 & 0 &  $\infty$ \\
-   &  &  2048 &  0 & 10 &  0.000  & 10 & 0 &  $\infty$ \\
-   &  &  4096 &  10 & 20 &  0.500  & 10 & 10 &  1.000 \\
-   &  &  8192 &  30 & 20 &  1.500  & 30 & 30 &  1.000 \\
-   &  &  16384 &  70 & 80 &  0.875  & 70 & 90 &  0.778 \\
-   &  &  32768 &  140 & 170 &  0.824  & 150 & 170 &  0.882 \\
-   \cline{2-9}
-   &  \multirow{4}{*}{pyramid} &  512 &  140 & 180 &  0.778  & 160 & 190 &  0.842 \\
-   &  &  1024 &  620 & 720 &  0.861  & 750 & 800 &  0.938 \\
-   &  &  2048 &  2580 & 3190 &  0.809  & 3140 & 3300 &  0.952 \\
-   &  &  4096 &  10400 & 15330 &  0.678  & 14040 & 14620 &  0.960 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{grid} &  16 &  40 & 50 &  0.800  & 30 & 40 &  0.750 \\
-   &  &  32 &  840 & 930 &  0.903  & 670 & 800 &  0.838 \\
-   &  &  64 &  14630 & 16760 &  0.873  & 11270 & 13970 &  0.807 \\
-   \cline{2-9}
-   &  \multirow{4}{*}{chain} &  1024 &  180 & 230 &  0.783  & 190 & 220 &  0.864 \\
-   &  &  2048 &  770 & 1010 &  0.762  & 770 & 760 &  1.013 \\
-   &  &  4096 &  3100 & 4300 &  0.721  & 3090 & 3130 &  0.987 \\
-   &  &  8192 &  13860 & 29850 &  0.464  & 13240 & 14490 &  0.914 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{cycle} &  1024 &  340 & 490 &  0.694  & 400 & 420 &  0.952 \\
-   &  &  2048 &  1520 & 2020 &  0.752  & 1730 & 1670 &  1.036 \\
-   &  &  4096 &  6470 & 12010 &  0.539  & 7530 & 7390 &  1.019 \\
-   \cline{2-9}
-   \hline
-   \multirow{19}{*}{path\_right\_first} &  \multirow{6}{*}{tree} &  1024 &  10 & 0 &  $\infty$  & 10 & 0 &  $\infty$ \\
-   &  &  2048 &  10 & 10 &  1.000  & 10 & 10 &  1.000 \\
-   &  &  4096 &  20 & 20 &  1.000  & 20 & 20 &  1.000 \\
-   &  &  8192 &  30 & 30 &  1.000  & 50 & 70 &  0.714 \\
-   &  &  16384 &  90 & 90 &  1.000  & 100 & 180 &  0.556 \\
-   &  &  32768 &  190 & 200 &  0.950  & 210 & 360 &  0.583 \\
-   \cline{2-9}
-   &  \multirow{4}{*}{pyramid} &  512 &  180 & 150 &  1.200  & 150 & 280 &  0.536 \\
-   &  &  1024 &  700 & 670 &  1.045  & 790 & 1130 &  0.699 \\
-   &  &  2048 &  2970 & 2590 &  1.147  & 3230 & 4400 &  0.734 \\
-   &  &  4096 &  11500 & CRASHED &  -  & 13590 & 17740 &  0.766 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{grid} &  16 &  70 & 70 &  1.000  & 60 & 70 &  0.857 \\
-   &  &  32 &  1280 & 1050 &  1.219  & 1050 & 1300 &  0.808 \\
-   &  &  64 &  20250 & 17300 &  1.171  & 18800 & 20570 &  0.914 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{chain} &  1024 &  210 & 180 &  1.167  & 240 & 340 &  0.706 \\
-   &  &  2048 &  780 & 790 &  0.987  & 980 & 1250 &  0.784 \\
-   &  &  4096 &  3170 & 3160 &  1.003  & 3970 & 5400 &  0.735 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{cycle} &  1024 &  440 & 520 &  0.846  & 480 & 670 &  0.716 \\
-   &  &  2048 &  1720 & 2000 &  0.860  & 2090 & 2700 &  0.774 \\
-   &  &  4096 &  6790 & 7980 &  0.851  & 8600 & 10600 &  0.811 \\
-   \cline{2-9}
-   \hline
-\end{tabular}
-}
-\caption{Results table 1}
-\end{table}
-
-\begin{table}
-\scriptsize{
-\begin{tabular}{c|c|c|c|c|c|c|c|c}
-   \hline
-   \multirow{2}{*}{Program} & \multicolumn{2}{c|}{\multirow{2}{*}{Data}} & \multicolumn{3}{c|}{SLG-WAM} & \multicolumn{3}{c}{YapTab} \\ \cline{4-6} \cline{7-9}
-   & \multicolumn{2}{c|}{} & Variant & Subsumptive & Speedup & Variant & Subsumptive & Speedup \\ \hline
-   \multirow{10}{*}{path\_double\_last} &  \multirow{6}{*}{tree} &  2048 &  30 & 30 &  1.000  & 30 & 40 &  0.750 \\
-   &  &  4096 &  70 & 70 &  1.000  & 50 & 100 &  0.500 \\
-   &  &  8192 &  150 & 170 &  0.882  & 130 & 240 &  0.542 \\
-   &  &  16384 &  370 & 450 &  0.822  & 310 & 520 &  0.596 \\
-   &  &  32768 &  920 & 1110 &  0.829  & 820 & 1410 &  0.582 \\
-   &  &  65536 &  1960 & 2930 &  0.669  & 1970 & 4260 &  0.462 \\
-   \cline{2-9}
-   &  \multirow{4}{*}{chain} &  128 &  80 & 60 &  1.333  & 60 & 60 &  1.000 \\
-   &  &  256 &  740 & 470 &  1.574  & 480 & 460 &  1.043 \\
-   &  &  512 &  5890 & 3829 &  1.538  & 4310 & 3560 &  1.211 \\
-   &  &  1024 &  47470 & 31400 &  1.512  & 44450 & 28380 &  1.566 \\
-   \cline{2-9}
-   \hline
-   \multirow{20}{*}{path\_left\_last} &  \multirow{6}{*}{tree} &  1024 &  0 & 0 &  $\infty$  & 0 & 0 &  $\infty$ \\
-   &  &  2048 &  0 & 0 &  $\infty$  & 0 & 10 &  0.000 \\
-   &  &  4096 &  10 & 20 &  0.500  & 10 & 10 &  1.000 \\
-   &  &  8192 &  30 & 40 &  0.750  & 40 & 30 &  1.333 \\
-   &  &  16384 &  60 & 100 &  0.600  & 60 & 90 &  0.667 \\
-   &  &  32768 &  150 & 180 &  0.833  & 140 & 200 &  0.700 \\
-   \cline{2-9}
-   &  \multirow{4}{*}{pyramid} &  512 &  150 & 190 &  0.789  & 180 & 200 &  0.900 \\
-   &  &  1024 &  640 & 760 &  0.842  & 760 & 780 &  0.974 \\
-   &  &  2048 &  2530 & 3130 &  0.808  & 3250 & 3300 &  0.985 \\
-   &  &  4096 &  10240 & 15440 &  0.663  & 13980 & 14930 &  0.936 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{grid} &  16 &  30 & 50 &  0.600  & 30 & 50 &  0.600 \\
-   &  &  32 &  840 & 960 &  0.875  & 630 & 810 &  0.778 \\
-   &  &  64 &  14310 & 16760 &  0.854  & 11850 & 13670 &  0.867 \\
-   \cline{2-9}
-   &  \multirow{4}{*}{chain} &  1024 &  180 & 220 &  0.818  & 190 & 200 &  0.950 \\
-   &  &  2048 &  790 & 990 &  0.798  & 760 & 770 &  0.987 \\
-   &  &  4096 &  3160 & 4180 &  0.756  & 3060 & 3200 &  0.956 \\
-   &  &  8192 &  13190 & 30100 &  0.438  & 13180 & 14480 &  0.910 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{cycle} &  1024 &  370 & 510 &  0.725  & 400 & 430 &  0.930 \\
-   &  &  2048 &  1480 & 2040 &  0.725  & 1750 & 1690 &  1.036 \\
-   &  &  4096 &  6310 & 11970 &  0.527  & 7590 & 7690 &  0.987 \\
-   \cline{2-9}
-   \hline
-\end{tabular}
-}
-\caption{Results table 2}
-\end{table}
-
-\begin{table}
-\scriptsize{
-\begin{tabular}{c|c|c|c|c|c|c|c|c}
-   \hline
-   \multirow{2}{*}{Program} & \multicolumn{2}{c|}{\multirow{2}{*}{Data}} & \multicolumn{3}{c|}{SLG-WAM} & \multicolumn{3}{c}{YapTab} \\ \cline{4-6} \cline{7-9}
-   & \multicolumn{2}{c|}{} & Variant & Subsumptive & Speedup & Variant & Subsumptive & Speedup \\ \hline
+   \item[path:] The \texttt{path/2} program computes the reachability between two nodes in a graph.
+   Connections between two nodes are represented by \texttt{edge/2} facts.
+   We used the following graph configurations in our tests: \textbf{tree}, graph is a
+   binary tree; \textbf{chain}, graph is chain of nodes; \textbf{cycle}, graph is a chain, but
+   last node on the chain connects with the first node; \textbf{pyramid}, a pyramid configuration;
+   and \textbf{grid}, where nodes are connected in a grid-like fashion.
+   For the \texttt{path/2} program itself, we used 6 different versions: \texttt{path\_left\_first},
+   \texttt{path\_left\_last}, \texttt{path\_right\_first}, \texttt{path\_right\_last},
+   \texttt{path\_double\_first}, and \texttt{path\_double\_last}.
+    
+   \item[samegen:] The \texttt{samegen/2} predicate solves the same generation problem.
+   For this test, we used the same data sets of the \texttt{path/2} program.
    
-   \multirow{11}{*}{sg} &  \multirow{4}{*}{tree} &  1024 &  130 & 150 &  0.867  & 100 & 160 &  0.625 \\
-   &  &  2048 &  510 & 610 &  0.836  & 350 & 590 &  0.593 \\
-   &  &  4096 &  1970 & 2480 &  0.794  & 1350 & 2520 &  0.536 \\
-   &  &  8192 &  8089 & 9590 &  0.843  & 5490 & 9710 &  0.565 \\
-   \cline{2-9}
-   &  \multirow{7}{*}{chain} &  1024 &  30 & 10 &  3.000  & 0 & 0 &  $\infty$ \\
-   &  &  2048 &  110 & 0 &  $\infty$  & 0 & 0 &  $\infty$ \\
-   &  &  4096 &  410 & 0 &  $\infty$  & 0 & 0 &  $\infty$ \\
-   &  &  8192 &  1620 & 0 &  $\infty$  & 10 & 10 &  1.000 \\
-   &  &  16384 &  6450 & 20 &  322.500  & 20 & 40 &  0.500 \\
-   &  &  32768 &  25790 & 30 &  859.667  & 50 & 80 &  0.625 \\
-   &  &  65536 &  CRASHED & 0 &  -  & 0 & 0 &  $\infty$ \\
-   \cline{2-9}
-   \hline
-   \multirow{10}{*}{genome} &  \multirow{5}{*}{tree} &  2048 &  170 & 0 &  $\infty$  & 190 & 0 &  $\infty$ \\
-   &  &  4096 &  690 & 10 &  69.000  & 710 & 0 &  $\infty$ \\
-   &  &  8192 &  2770 & 10 &  277.000  & 3000 & 10 &  300.000 \\
-   &  &  16384 &  11530 & 10 &  1153.000  & 12760 & 30 &  425.333 \\
-   &  &  32768 &  44460 & 30 &  1482.000  & 50450 & 60 &  840.833 \\
-   \cline{2-9}
-   &  \multirow{5}{*}{chain} &  1024 &  40 & 0 &  $\infty$  & 80 & 0 &  $\infty$ \\
-   &  &  2048 &  180 & 10 &  18.000  & 290 & 0 &  $\infty$ \\
-   &  &  4096 &  700 & 0 &  $\infty$  & 1190 & 0 &  $\infty$ \\
-   &  &  8192 &  2900 & 10 &  290.000  & 5430 & 10 &  543.000 \\
-   &  &  16384 &  11220 & 10 &  1122.000  & 21960 & 20 &  1098.000 \\
-   \cline{2-9}
-   \hline
-   \multirow{19}{*}{path\_right\_last} &  \multirow{6}{*}{tree} &  2048 &  10 & 10 &  1.000  & 0 & 10 &  0.000 \\
-   &  &  4096 &  20 & 20 &  1.000  & 20 & 30 &  0.667 \\
-   &  &  8192 &  20 & 50 &  0.400  & 50 & 70 &  0.714 \\
-   &  &  16384 &  80 & 130 &  0.615  & 100 & 240 &  0.417 \\
-   &  &  32768 &  190 & 410 &  0.463  & 250 & 590 &  0.424 \\
-   &  &  65536 &  410 & 1350 &  0.304  & 470 & 1740 &  0.270 \\
-   \cline{2-9}
-   &  \multirow{4}{*}{pyramid} &  512 &  190 & 170 &  1.118  & 210 & 290 &  0.724 \\
-   &  &  1024 &  780 & 650 &  1.200  & 780 & 1150 &  0.678 \\
-   &  &  2048 &  3010 & 2800 &  1.075  & 3330 & 4530 &  0.735 \\
-   &  &  4096 &  12010 & 10740 &  1.118  & 15540 & 17920 &  0.867 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{grid} &  16 &  80 & 50 &  1.600  & 60 & 70 &  0.857 \\
-   &  &  32 &  1240 & 930 &  1.333  & 1120 & 1140 &  0.982 \\
-   &  &  64 &  20390 & 14790 &  1.379  & 21890 & 17890 &  1.224 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{chain} &  1024 &  190 & 160 &  1.188  & 240 & 350 &  0.686 \\
-   &  &  2048 &  840 & 730 &  1.151  & 1010 & 1300 &  0.777 \\
-   &  &  4096 &  3260 & 3160 &  1.032  & 4530 & 5380 &  0.842 \\
-   \cline{2-9}
-   &  \multirow{3}{*}{cycle} &  1024 &  460 & 500 &  0.920  & 490 & 650 &  0.754 \\
-   &  &  2048 &  1760 & 1990 &  0.884  & 2210 & 2710 &  0.815 \\
-   &  &  4096 &  6960 & 8190 &  0.850  & 9450 & 10750 &  0.879 \\
-   \cline{2-9}
-   \hline
-\end{tabular}
-}
-\caption{Results table 3}
-\end{table}
+   \item[genome:] This program computes the set of nodes that are reached by node 1 and node 2.
+   This is an interesting problem, since it creates lots of subsumed consumers when using
+   call subsumption. We also used the same data sets of the \texttt{path/2} program.
+   To compute reachability this program uses the \texttt{path\_left\_last} program.
+   
+   \item[reach:] The \texttt{reach/2} computes the reachability in a relation graph for a set of
+   specifications. The benchmark is actually a set of programs originally taken from the
+   XMC project~\cite{system-xmc,RamakrishnanCR-00}, which is a model checker implemented
+   atop the XSB system. We used two variants of the \texttt{reach/2} predicate,
+   \texttt{reach\_left\_first} and \texttt{reach\_left\_last}.
+   The following relation graphs are used:
+   
+      \begin{description}
+         
+         \item[sieve:] \emph{sieve} specification defined for 5 processes and 4 overflow prime numbers.
+         
+         \item[leader:] \emph{leader election} specification defined for 5 processes.
+         
+         \item[iproto:] \emph{i-protocol} specification defined for a correct version with a huge window size.
 
-Text goes here...
+      \end{description}
+\end{description}
+
+Note that the code for these programs is presented in Appendix~\ref{app:code}.
+
+In the next tables, execution time is measured in milliseconds and all benchmarks
+are executed to find all solutions for the problem at hand. The scheduling strategy used
+by default is batched scheduling.
+The environment for our experiments was an Intel Core(TM) 2 Quad 2.66 GHz with 4 GBytes of
+memory and running the Linux kernel 2.6.31 with YapTab 6.0.3 and XSB Prolog 3.2.
+
+\section{Performance Evaluation for YapTab\_TST}
+
+In order to evaluate the YapTab\_TST tabling engine we used the following programs:
+
+\begin{itemize}
+   \item The \texttt{path/2} program with the query `\texttt{?-~path(X,Y)}' with all the combinations of
+   versions and data sets.
+   \item The \texttt{genome/1} program with different data sets. The query used was `\texttt{?-~genome(X)}'.
+   
+   \item The query `\texttt{?-~samegen(X,Y)}' in the \texttt{samegen/2} program. All \texttt{path/2} data
+   sets were used.
+   
+   \item The two versions of the \texttt{reach/2} program with the following queries for the relation graphs:
+
+   \begin{itemize}
+      \item sieve: `\texttt{?-~reach(sieve\_0(5,4,27,end),Y)}'.
+      \item leader: `\texttt{?-~reach(systemLeader\_0(5,end),Y)}'.
+      \item iproto: `\texttt{?-~reach(iproto\_0(\_,\_,end),Y)}'.
+   \end{itemize}
+
+\end{itemize}
+
+We compared the performance of the SLG-WAM and YapTab with traditional call subsumption.
+For each benchmark, we used variant-based tabling and then subsumption-based tabling.
+Next, we compared the values of each engine and calculated the speedup ($T_{variant} / T_{subsumptive}$) for
+each engine. Given that YapTab\_TST uses a great deal of code from XSB to implement the subsumption mechanisms,
+we expect the speedups to be very similar. Some potential differences between them will arise because
+of certain characteristics, namely: the way they implement the tabling algorithms, the WAM engine itself,
+the compiled trie code, and the handling of answer templates.
+
+Tables \ref{tbl:result_path_left_first},
+\ref{tbl:result_path_left_last},
+\ref{tbl:result_path_right_first},
+\ref{tbl:result_path_right_last},
+\ref{tbl:result_path_double_first},
+\ref{tbl:result_path_double_last},
+\ref{tbl:result_samegen},
+\ref{tbl:result_genome},
+\ref{tbl:result_reach_left_first},
+and \ref{tbl:result_reach_left_last} show the performance tests for SLG-WAM and YapTab.
+The first thing we note is that, in 4 benchmarks (Tables \ref{tbl:result_path_left_first},
+\ref{tbl:result_path_left_last}, \ref{tbl:result_path_right_last} and \ref{tbl:result_genome})
+YapTab has a better speedup than SLG-WAM, while in 6 of them SLG-WAM wins. While SLG-WAM wins here,
+the speedups for the two engines are very similar, which proves that our integration
+efforts of the Time-Stamped Tries approach to subsumption-based tabling in YapTab was largely successful.
+There is one benchmark were this observation does not hold, which is the \texttt{samegen}
+benchmark (Table~\ref{tbl:result_samegen}).
+The SLG-WAM engine has a speedup of 201.722 and YapTab only 1.868 because the performance
+of the variant-based version of SLG-WAM performs very poorly against YapTab which explains such big differences.
+
+The programs \texttt{path\_left\_first} and \texttt{path\_left\_last} (Tables~\ref{tbl:result_path_left_first}
+and \ref{tbl:result_path_left_last}) do not generate any subsumed consumer,
+therefore they are good benchmarks to assess the overhead of using subsumption mechanisms. For YapTab,
+the overhead is minimal with a speedup of 0.998 for the \texttt{path\_left\_first}. Surprisingly, for the
+\texttt{path\_left\_last} program the speedup is bigger than 1. SLG-WAM has more overhead, with 0.775 and 0.765.
+
+The programs \texttt{path\_right\_first} and \texttt{path\_right\_last} do generate subsumed consumers,
+as many as \texttt{edge/2} facts. Notably, only the SLG-WAM with the \texttt{path\_right\_first} program
+achieves a speedup bigger than 1. Why there are no speedups for these programs is that simple facts
+are faster to evaluate than to use the time stamped trie to collect relevant answers.
+
+For the \texttt{path\_double\_first} and \texttt{path\_double\_last} (Tables~\ref{tbl:result_path_double_first}
+and \ref{tbl:result_path_double_last}) we have attained speedups over 1.2-1.3
+for each configuration. These benchmarks are more computationally expensive given that they create more
+dependencies. These dependencies diminish in subsumption-based tabling because only new consumers are created
+and code is not executed.
+
+The \texttt{genome} program (Table~\ref{tbl:result_genome}) attained very good speedup results, with
+389.905 for YapTab. In this program, the subgoal \texttt{path(2,X)} and \texttt{path(1,X)} are called
+very early in the evaluation and further subgoals calls to \texttt{path/2} that are subsumed by these
+goals are consumers.
+
+For the model checking programs (Tables \ref{tbl:result_reach_left_first} and \ref{tbl:result_reach_left_last}),
+the results were not so good for subsumption-based evaluation with identical speedups for YapTab and SLG-WAM.
+
+\input{tables_path}
+
+\input{tables_model_checking}
