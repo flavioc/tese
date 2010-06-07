@@ -88,7 +88,7 @@ During execution, two matching methods are considered: the first tries to match 
 the second method uses trie variables instead of exact symbols and is employed when the first method fails.
 When a trie node match succeeds, matching defaults to the first method, which means
 that exact matches are always tried before variables when a new \textit{trie level} is reached and variables are usually attempted
-when backtracking. A trie level represents a set of nodes that are linked by \texttt{sibling} links or that are
+when backtracking. A trie level represents a set of nodes that are linked by \textbf{sibling} links or that are
 in the same hash table.
 
 The process starts by pushing the $G$ subgoal arguments, $X1, X2, ...Xn$ into the term stack, so that $X1$ is at the top
@@ -230,7 +230,7 @@ match_constant_term(constant, parent, node, var_chain, match_mode, path_type) {
 \end{figure}
 
 The procedure \texttt{find\_matching\_node} iterates over a linked list and locates a trie node that matches the
-\texttt{constant} symbol. When successful, we conditionally push a new call choice frame on the stack
+\textbf{constant} symbol. When successful, we conditionally push a new call choice frame on the stack
 with the first node from the variable chain that contains a trie variable
 (\texttt{conditionally\_push\_call\_choice\_point\_frame}).
 Note that only trie variables can be explored next as there is at most one node with the previously
@@ -445,7 +445,7 @@ exists, then the found subgoal frame $S$ can be either:
 
 \begin{enumerate}
   \item a generator subgoal frame: the answer template is built using
-  the variable bindings vector as shown in procedure \texttt{construct\_answer\_template\_from\_lookup}
+  the variable bindings vector as shown in procedure \textbf{construct\_answer\_template\_from\_lookup}
   (Figure~\ref{fig:construct_answer_template_from_lookup});
   
   \item a consumer subgoal frame: the answer template is reconstructed by using the generator
@@ -502,9 +502,9 @@ construct_answer_template_from_generator(subgoal_call, generator_sf) {
 \section{Time Stamped Answer Trie}
 
 A time stamped node extends an answer trie node with time stamp information.
-Each node contains the following fields: \texttt{symbol}, \texttt{child}, \texttt{parent}, \texttt{sibling}
-and \texttt{timestamp}. For implementation and algorithmic purposes, each node also needs a bit field,
-\texttt{status}, that defines some node properties that will be described shortly.
+Each node contains the following fields: \textbf{symbol}, \textbf{child}, \textbf{parent}, \textbf{sibling}
+and \textbf{timestamp}. For implementation and algorithmic purposes, each node also needs a bit field,
+\textbf{status}, that defines some node properties that will be described shortly.
 
 Insertion of an answer $S$ into a TST can be divided into two steps:
 
@@ -544,8 +544,8 @@ a reference to these nodes, in decreasing order of their time stamp values in a 
 called the \textit{time stamped index}.
 Besides the double linked list pointers, each index node contains a pointer to the corresponding
 answer node and the value of its time stamp. Each answer node indexed in the hash table has a different use
-for the \texttt{timestamp} field: instead of containing a positive integer, contains a pointer
-to the respective index node. The trie node field \texttt{status} distinguishes
+for the \textbf{timestamp} field: instead of containing a positive integer, contains a pointer
+to the respective index node. The trie node field \textbf{status} distinguishes
 both cases. Figure~\ref{fig:hash_table_tst} illustrates an hash table with a time stamp index.
 
 \begin{figure}[ht]
@@ -602,7 +602,7 @@ time stamp indexing (see Figure~\ref{fig:tst_chain_insert}), inserting a new nod
 because hash tables index nodes by time stamp.
 Figure~\ref{fig:hash_table_insert}
 illustrates the insertion of a symbol (\texttt{25}) and the creation of the respective
-index node. Note that the \texttt{index head} field was changed to point to the new index node,
+index node. Note that the \textbf{index\_head} field was changed to point to the new index node,
 which is always the node with the greatest time stamp.
 
 \begin{figure}[ht]
@@ -629,7 +629,7 @@ root node.
 If the current node is an hashed node with time stamp indexes,
 its index node is moved to the head of
 the index's double linked list. We can test whether an answer node is indexed by
-an hash table by inspecting its \texttt{status} field.
+an hash table by inspecting its \textbf{status} field.
 Figure~\ref{fig:update_timestamps} contains the pseudo-code for procedure \texttt{update\_timestamps}.
 
 \begin{figure}[ht]
@@ -652,11 +652,11 @@ update_timestamps(trie_root, leaf) {
 \label{fig:update_timestamps}
 \end{figure}
 
-When moving an index node $N$, the \texttt{index\_head} field of the hash table must be updated
+When moving an index node $N$, the \textbf{index\_head} field of the hash table must be updated
 to point to $N$. Moreover, if $N$ was at the end of the chain,
-the \texttt{index\_tail} field must be also updated to the \texttt{previous} field of $N$.
-Previous pointers of the \texttt{next} node of $N$ and the next pointer of
-the \texttt{previous} node of $N$ must
+the \textbf{index\_tail} field must be also updated to the \textbf{previous} field of $N$.
+Previous pointers of the \textbf{next} node of $N$ and the next pointer of
+the \textbf{previous} node of $N$ must
 also be updated to keep the chain consistent.
 Figure~\ref{fig:hash_table_promote} illustrates the relocation of an index node, after
 its time stamp be updated from 5 to 7.
@@ -673,8 +673,8 @@ its time stamp be updated from 5 to 7.
 Time stamped indexes are only created when a consumer subgoal is first called.
 We must iterate over all the hash tables present on the trie to create the time stamp index.
 To efficiently locate all hash tables in an answer trie, we chain these hash tables
-using the \texttt{next} field and the start of this chain is stored
-in the \texttt{sibling} field of the root node.
+using the \textbf{next} field and the start of this chain is stored
+in the \textbf{sibling} field of the root node.
 
 Creating the index for an hash table amounts to iterating over the hashed nodes
 and orderly inserting new index nodes on the index chain.
@@ -1571,10 +1571,10 @@ and terms from the arguments.
   \label{fig:structural_copy}
 \end{figure}
 
-The field \texttt{cons\_cp} of the consumer subgoal frame is set to point to the first call
+The field \textbf{cons\_cp} of the consumer subgoal frame is set to point to the first call
 of the consumer subgoal and will be used to access the value of \texttt{H} stored on the choice point.
 This value of \texttt{H} points to the top of the heap during the choice point creation which corresponds
-to the answer template copied before. The field \texttt{answer\_template} points to \texttt{H}
+to the answer template copied before. The field \textbf{answer\_template} points to \texttt{H}
 and is used to avoid accessing the choice point, thus it must be recalculated during garbage collection.
 
 This differs from XSB \cite{Johnson-00} where a \textit{non-structural copy} of the answer template
