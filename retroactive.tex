@@ -1618,22 +1618,22 @@ functor argument is popped from the term stack and is made to point to the index
 variable enumerator vector, because the trie symbol is the \texttt{VAR0} trie variable.
 We then descend into node $n6$, where matching succeeds and then we arrive at node $n7$.
 Figure~\ref{fig:data_structs2} presents the configuration of the auxiliary data structures
-at this point. Notice that the variable at the 12th cell now points to a variable enumerator
-position and that the HB register points to the 11th cell on the heap, which corresponds to
-the value of the H register when we pushed the top choice point frame on the choice point
-stack (node $n12$).
+at this point. Notice that the variable at the $12^{th}$ cell now points to a variable
+enumerator position and that the HB register points to the $11^{th}$ cell on the heap, which
+corresponds to the value of the H register when we pushed the top choice point frame on the
+choice point stack (node $n12$).
 
 \begin{figure}
    \centering
-   \subfloat[][Before descending in node $n2$]{%
+   \subfloat[][Before descending in node $n2$.]{%
       \label{fig:data_structs1}%
       \includegraphics[scale=0.6]{data_structs1.pdf}}%
    \qquad
-   \subfloat[][After descending in node $n7$]{%
+   \subfloat[][After descending in node $n7$.]{%
       \label{fig:data_structs2}%
       \includegraphics[scale=0.6]{data_structs2.pdf}} \\
 
-   \caption{Auxiliary data structures configuration}
+   \caption{Auxiliary data structures configuration.}
    \label{fig:data_structs}
 \end{figure}
 
