@@ -1,0 +1,328 @@
+\begin{table}[ht]
+\centering
+\footnotesize{
+  \begin{tabular}{cc|c|cc|cc}
+   \hline
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+   \hline
+   \hline
+
+\multirow{3}{*}{\textbf{tree}} &  8192 &  32 &  0.875  &  1.000  &  0.875 & 0.875 \\
+&  16384 &  60 &  1.000  &  1.267  &  0.867 & 0.867 \\
+&  32768 &  152 &  0.921  &  1.079  &  0.816 & 0.868 \\
+\hline
+\multirow{3}{*}{\textbf{pyramid}} &  1024 &  676 &  0.864  &  1.024  &  1.030 & 0.911 \\
+&  2048 &  2788 &  0.836  &  1.056  &  1.024 & 0.961 \\
+&  4096 &  13936 &  0.685  &  1.084  &  0.984 & 1.066 \\
+\hline
+\multirow{3}{*}{\textbf{grid}} &  16 &  36 &  1.222  &  1.444  &  0.778 & 1.000 \\
+&  32 &  716 &  1.045  &  1.263  &  0.788 & 0.911 \\
+&  64 &  12960 &  1.070  &  1.444  &  0.781 & 1.065 \\
+\hline
+\multirow{3}{*}{\textbf{chain}} &  1024 &  204 &  0.784  &  1.039  &  0.765 & 0.765 \\
+&  2048 &  632 &  1.044  &  1.437  &  1.006 & 0.981 \\
+&  4096 &  2552 &  1.077  &  1.511  &  1.039 & 0.953 \\
+\hline
+\multirow{3}{*}{\textbf{cycle}} &  1024 &  304 &  1.105  &  1.842  &  1.066 & 1.000 \\
+&  2048 &  1300 &  1.055  &  1.431  &  1.154 & 0.960 \\
+&  4096 &  7252 &  0.930  &  1.265  &  0.943 & 0.823 \\
+\hline
+\hline
+\multicolumn{2}{c}{\textit{Average}} & & 0.968 & 1.279 & 0.928 & 0.934 \\ 
+\hline
+\hline
+\end{tabular}
+}
+\caption{Results for the program \texttt{path\_left\_first}.}
+\label{tbl:prefix_path_left_first}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\footnotesize{
+  \begin{tabular}{cc|c|cc|cc}
+   \hline
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+   \hline
+   \hline
+
+\multirow{3}{*}{\textbf{tree}} &  8192 &  280 &  0.500  &  0.500  &  0.386 & 0.757 \\
+&  16384 &  652 &  0.497  &  0.589  &  0.454 & 0.865 \\
+&  32768 &  1616 &  0.485  &  0.594  &  0.441 & 0.859 \\
+\hline
+\multirow{3}{*}{\textbf{pyramid}} &  128 &  208 &  1.558  &  1.096  &  1.077 & 0.846 \\
+&  256 &  1616 &  1.715  &  1.116  &  1.131 & 0.834 \\
+&  512 &  15644 &  1.293  &  1.094  &  1.120 & 0.862 \\
+\hline
+\multirow{3}{*}{\textbf{grid}} &  4 &  1 &  1.000  &  1.000  &  1.000 & 4.000 \\
+&  8 &  36 &  1.556  &  1.000  &  1.222 & 0.889 \\
+&  16 &  2292 &  1.764  &  1.124  &  1.089 & 0.794 \\
+\hline
+\multirow{3}{*}{\textbf{chain}} &  128 &  48 &  1.583  &  1.000  &  1.250 & 0.917 \\
+&  256 &  420 &  1.495  &  1.038  &  1.038 & 0.781 \\
+&  512 &  2920 &  1.738  &  1.207  &  1.230 & 0.875 \\
+\hline
+\multirow{3}{*}{\textbf{cycle}} &  128 &  276 &  1.725  &  1.087  &  1.101 & 0.826 \\
+&  256 &  2096 &  1.859  &  1.548  &  1.239 & 0.863 \\
+&  512 &  17205 &  1.784  &  1.524  &  1.774 & 0.873 \\
+\hline
+\hline
+\multicolumn{2}{c}{\textit{Average}} & & 1.370 & 1.034 & 1.037 & 1.056 \\ 
+\hline
+\hline
+\end{tabular}
+}
+\caption{Results for the program \texttt{path\_double\_first}.}
+\label{tbl:prefix_path_double_first}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\footnotesize{
+  \begin{tabular}{cc|c|cc|cc}
+   \hline
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+   \hline
+   \hline
+
+\multirow{3}{*}{\textbf{tree}} &  8192 &  36 &  0.889  &  1.000  &  0.889 & 1.222 \\
+&  16384 &  120 &  0.667  &  0.700  &  0.700 & 0.833 \\
+&  32768 &  212 &  0.774  &  0.868  &  0.906 & 1.113 \\
+\hline
+\multirow{3}{*}{\textbf{pyramid}} &  1024 &  668 &  0.994  &  0.892  &  0.982 & 1.018 \\
+&  2048 &  2696 &  0.966  &  0.912  &  0.973 & 1.067 \\
+&  4096 &  13368 &  0.782  &  0.756  &  0.855 & 0.980 \\
+\hline
+\multirow{3}{*}{\textbf{grid}} &  16 &  48 &  1.417  &  0.917  &  1.083 & 1.083 \\
+&  32 &  864 &  1.292  &  1.083  &  1.019 & 0.986 \\
+&  64 &  17641 &  1.169  &  0.867  &  0.889 & 0.816 \\
+\hline
+\multirow{3}{*}{\textbf{chain}} &  1024 &  252 &  0.714  &  0.714  &  0.730 & 0.857 \\
+&  2048 &  752 &  0.931  &  0.920  &  1.043 & 1.128 \\
+&  4096 &  4204 &  0.685  &  0.680  &  0.770 & 0.807 \\
+\hline
+\multirow{3}{*}{\textbf{cycle}} &  1024 &  400 &  1.070  &  1.050  &  0.880 & 1.040 \\
+&  2048 &  1544 &  1.251  &  1.142  &  1.036 & 1.132 \\
+&  4096 &  7656 &  0.960  &  0.920  &  0.857 & 0.852 \\
+\hline
+\hline
+\multicolumn{2}{c}{\textit{Average}} & & 0.971 & 0.895 & 0.907 & 0.996 \\ 
+\hline
+\hline
+\end{tabular}
+}
+\caption{Results for the program \texttt{path\_right\_first}.}
+\label{tbl:prefix_path_right_first}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\footnotesize{
+  \begin{tabular}{cc|c|cc|cc}
+   \hline
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+   \hline
+   \hline
+
+\multirow{3}{*}{\textbf{tree}} &  8192 &  12 &  213.333  &  0.333  &  220.667 & 1.000 \\
+&  16384 &  32 &  315.750  &  0.500  &  338.500 & 0.875 \\
+&  32768 &  56 &  723.036  &  0.500  &  960.339 & 0.929 \\
+\hline
+\multirow{3}{*}{\textbf{pyramid}} &  1024 &  4 &  32.000  &  0.250  &  32.000 & 0.250 \\
+&  2048 &  4 &  124.000  &  1.000  &  130.000 & 1.000 \\
+&  4096 &  8 &  243.500  &  0.500  &  317.500 & 1.000 \\
+\hline
+\multirow{3}{*}{\textbf{grid}} &  16 &  1 &  5.000  &  1.000  &  8.000 & 1.000 \\
+&  32 &  4 &  14.000  &  1.000  &  24.000 & 1.000 \\
+&  64 &  16 &  67.250  &  0.500  &  90.750 & 1.000 \\
+\hline
+\multirow{3}{*}{\textbf{chain}} &  4096 &  4 &  146.000  &  1.000  &  257.000 & 1.000 \\
+&  8192 &  12 &  195.000  &  0.667  &  447.667 & 1.000 \\
+&  16384 &  24 &  397.000  &  0.667  &  942.708 & 0.500 \\
+\hline
+\multirow{3}{*}{\textbf{cycle}} &  2048 &  1 &  153.000  &  1.000  &  256.000 & 4.000 \\
+&  4096 &  8 &  72.500  &  0.500  &  130.500 & 0.500 \\
+&  8192 &  12 &  199.667  &  1.000  &  395.667 & 0.667 \\
+\hline
+\hline
+\multicolumn{2}{c}{\textit{Average}} & & 193.402 & 0.694 & 303.420 & 1.048 \\ 
+\hline
+\hline
+\end{tabular}
+}
+\caption{Results for the program \texttt{genome}.}
+\label{tbl:prefix_genome}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\footnotesize{
+  \begin{tabular}{cc|c|cc|cc}
+   \hline
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+   \hline
+   \hline
+
+\multirow{3}{*}{\textbf{tree}} &  8192 &  240 &  0.550  &  0.617  &  0.467 & 0.783 \\
+&  16384 &  648 &  0.506  &  0.562  &  0.451 & 0.870 \\
+&  32768 &  1852 &  0.419  &  0.512  &  0.393 & 0.747 \\
+\hline
+\multirow{3}{*}{\textbf{pyramid}} &  128 &  196 &  1.653  &  1.143  &  1.143 & 1.184 \\
+&  256 &  1724 &  1.462  &  1.035  &  1.056 & 0.787 \\
+&  512 &  12160 &  1.669  &  1.162  &  1.438 & 1.050 \\
+\hline
+\multirow{3}{*}{\textbf{grid}} &  4 &  1 &  1.000  &  1.000  &  1.000 & 1.000 \\
+&  8 &  36 &  1.556  &  1.000  &  1.333 & 0.889 \\
+&  16 &  2180 &  1.851  &  1.189  &  1.213 & 0.839 \\
+\hline
+\multirow{3}{*}{\textbf{chain}} &  128 &  44 &  1.727  &  1.091  &  1.364 & 1.000 \\
+&  256 &  484 &  1.273  &  0.934  &  0.884 & 0.686 \\
+&  512 &  2908 &  1.708  &  1.230  &  1.275 & 0.875 \\
+\hline
+\multirow{3}{*}{\textbf{cycle}} &  128 &  268 &  1.746  &  1.075  &  1.134 & 0.866 \\
+&  256 &  2804 &  1.418  &  0.916  &  0.924 & 0.645 \\
+&  512 &  20713 &  1.469  &  0.993  &  1.473 & 0.733 \\
+\hline
+\hline
+\multicolumn{2}{c}{\textit{Average}} & & 1.334 & 0.964 & 1.037 & 0.864 \\ 
+\hline
+\hline
+\end{tabular}
+}
+\caption{Results for the program \texttt{path\_double\_last}.}
+\label{tbl:prefix_path_double_last}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\footnotesize{
+  \begin{tabular}{cc|c|cc|cc}
+   \hline
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+   \hline
+   \hline
+
+\multirow{3}{*}{\textbf{tree}} &  8192 &  30 &  0.933  &  0.933  &  0.933 & 0.933 \\
+&  16384 &  72 &  0.833  &  1.000  &  0.778 & 0.722 \\
+&  32768 &  164 &  0.829  &  1.049  &  0.756 & 0.805 \\
+\hline
+\multirow{3}{*}{\textbf{pyramid}} &  512 &  164 &  0.878  &  0.976  &  0.902 & 0.854 \\
+&  1024 &  712 &  0.809  &  1.011  &  0.966 & 0.899 \\
+&  2048 &  2844 &  0.821  &  1.030  &  1.014 & 0.942 \\
+\hline
+\multirow{3}{*}{\textbf{grid}} &  16 &  40 &  0.900  &  1.300  &  0.700 & 1.000 \\
+&  32 &  704 &  1.034  &  1.273  &  0.932 & 0.926 \\
+&  64 &  14696 &  0.904  &  1.359  &  0.734 & 0.914 \\
+\hline
+\multirow{3}{*}{\textbf{chain}} &  1024 &  164 &  0.976  &  1.244  &  0.951 & 0.927 \\
+&  2048 &  644 &  1.068  &  1.491  &  1.031 & 0.925 \\
+&  4096 &  2552 &  1.102  &  1.514  &  1.047 & 0.967 \\
+\hline
+\multirow{3}{*}{\textbf{cycle}} &  1024 &  308 &  1.078  &  1.727  &  1.000 & 0.974 \\
+&  2048 &  1376 &  1.003  &  1.372  &  1.052 & 0.933 \\
+&  4096 &  7712 &  0.908  &  1.205  &  0.883 & 0.788 \\
+\hline
+\hline
+\multicolumn{2}{c}{\textit{Average}} & & 0.938 & 1.232 & 0.912 & 0.901 \\ 
+\hline
+\hline
+\end{tabular}
+}
+\caption{Results for the program \texttt{path\_left\_last}.}
+\label{tbl:prefix_path_left_last}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\footnotesize{
+  \begin{tabular}{cc|c|cc|cc}
+   \hline
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+   \hline
+   \hline
+
+\multirow{3}{*}{\textbf{tree}} &  2048 &  452 &  0.991  &  1.212  &  0.619 & 1.035 \\
+&  4096 &  1896 &  \scriptsize{crashed}  &  1.131  &  0.620 & 0.998 \\
+&  8192 &  7136 &  1.006  &  1.251  &  0.641 & 1.067 \\
+\hline
+\multirow{3}{*}{\textbf{pyramid}} &  1024 &  4 &  36.000  &  2.000  &  1.000 & 1.000 \\
+&  2048 &  12 &  46.667  &  0.667  &  1.000 & 1.000 \\
+&  4096 &  28 &  79.286  &  0.571  &  0.571 & 0.714 \\
+\hline
+\multirow{3}{*}{\textbf{grid}} &  8 &  4 &  2.000  &  1.000  &  2.000 & 2.000 \\
+&  16 &  72 &  1.833  &  1.111  &  1.167 & 0.889 \\
+&  32 &  1216 &  1.822  &  1.141  &  1.194 & 0.908 \\
+\hline
+\multirow{3}{*}{\textbf{chain}} &  8192 &  8 &  184.000  &  0.500  &  1.500 & 1.500 \\
+&  16384 &  40 &  146.600  &  0.400  &  0.500 & 0.800 \\
+&  32768 &  64 &  365.516  &  0.375  &  0.750 & 1.000 \\
+\hline
+\multirow{3}{*}{\textbf{cycle}} &  4096 &  1 &  380.000  &  4.000  &  1.000 & 1.000 \\
+&  8192 &  1 &  1516.000  &  4.000  &  16.000 & 1.000 \\
+&  16384 &  36 &  202.667  &  0.333  &  0.889 & 0.778 \\
+\hline
+\hline
+\multicolumn{2}{c}{\textit{Average}} & & 197.693 & 1.313 & 1.963 & 1.046 \\ 
+\hline
+\hline
+\end{tabular}
+}
+\caption{Results for the program \texttt{sg}.}
+\label{tbl:prefix_sg}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\footnotesize{
+  \begin{tabular}{cc|c|cc|cc}
+   \hline
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+   \hline
+   \hline
+
+\multirow{3}{*}{\textbf{tree}} &  16384 &  132 &  0.606  &  0.939  &  0.697 & 1.182 \\
+&  32768 &  428 &  0.411  &  0.879  &  0.439 & 1.243 \\
+&  65536 &  1396 &  0.258  &  0.877  &  0.309 & 0.934 \\
+\hline
+\multirow{3}{*}{\textbf{pyramid}} &  1024 &  680 &  0.965  &  0.918  &  0.994 & 1.065 \\
+&  2048 &  2728 &  0.972  &  0.903  &  1.045 & 1.012 \\
+&  4096 &  12900 &  0.808  &  0.776  &  1.222 & 0.889 \\
+\hline
+\multirow{3}{*}{\textbf{grid}} &  16 &  56 &  1.214  &  0.857  &  0.786 & 0.857 \\
+&  32 &  768 &  1.474  &  1.115  &  1.229 & 0.932 \\
+&  64 &  12620 &  1.410  &  1.054  &  1.433 & 0.955 \\
+\hline
+\multirow{3}{*}{\textbf{chain}} &  1024 &  184 &  0.935  &  1.022  &  1.087 & 1.109 \\
+&  2048 &  860 &  0.819  &  0.833  &  0.963 & 0.977 \\
+&  4096 &  3580 &  0.817  &  0.762  &  1.040 & 1.003 \\
+\hline
+\multirow{3}{*}{\textbf{cycle}} &  1024 &  372 &  1.032  &  1.237  &  1.108 & 1.118 \\
+&  2048 &  2048 &  0.766  &  0.879  &  0.820 & 0.807 \\
+&  4096 &  7312 &  0.940  &  0.969  &  1.017 & 0.904 \\
+\hline
+\hline
+\multicolumn{2}{c}{\textit{Average}} & & 0.895 & 0.935 & 0.946 & 0.999 \\ 
+\hline
+\hline
+\end{tabular}
+}
+\caption{Results for the program \texttt{path\_right\_last}.}
+\label{tbl:prefix_path_right_last}
+\end{table}
+
