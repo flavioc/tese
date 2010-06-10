@@ -7,7 +7,7 @@ The author of this thesis may be contacted for the full benchmark set.
 
 \section{Programs}
 
-\subsubsection*{path\_left\_first}
+\subsubsection*{left\_first}
 
 \begin{Verbatim}
 :- table path/2.
@@ -16,7 +16,7 @@ path(X, Z) :- path(X, Y), edge(Y, Z).
 path(X, Z) :- edge(X, Z).
 \end{Verbatim}
 
-\subsubsection*{path\_left\_last}
+\subsubsection*{left\_last}
 
 \begin{Verbatim}
 :- table path/2.
@@ -25,7 +25,7 @@ path(X, Z) :- edge(X, Z).
 path(X, Z) :- path(X, Y), edge(Y, Z).
 \end{Verbatim}
 
-\subsubsection*{path\_right\_first}
+\subsubsection*{right\_first}
 
 \begin{Verbatim}
 :- table path/2.
@@ -34,7 +34,7 @@ path(X, Z) :- edge(X, Y), path(Y, Z).
 path(X, Z) :- edge(X, Z).
 \end{Verbatim}
 
-\subsubsection*{path\_right\_last}
+\subsubsection*{right\_last}
 
 \begin{Verbatim}
 :- table path/2.
@@ -43,7 +43,7 @@ path(X, Z) :- edge(X, Z).
 path(X, Z) :- edge(X, Y), path(Y, Z).
 \end{Verbatim}
 
-\subsubsection*{path\_double\_last}
+\subsubsection*{double\_last}
 
 \begin{Verbatim}
 :- table path/2.
@@ -73,7 +73,7 @@ path(X, Z) :- path(X, Y), edge(Y, Z).
 genome(X) :- path(1, X), path(2, X).
 \end{Verbatim}
 
-\subsubsection*{reach\_left\_first}
+\subsubsection*{reach\_first}
 
 \begin{Verbatim}   
 :- table reach/2.
@@ -82,7 +82,7 @@ reach(X, Z) :- reach(X, Y), trans(Y, _, Z).
 reach(X, Z) :- trans(X, _, Z).
 \end{Verbatim}
 
-\subsubsection*{reach\_left\_last}
+\subsubsection*{reach\_last}
 
 \begin{Verbatim}
 :- table reach/2.

@@ -1,54 +1,25 @@
 \begin{table}[ht]
 \centering
 \footnotesize{
-  \begin{tabular}{c|ccc|ccc}
+  \begin{tabular}{cc|ccc|ccc}
    \hline
     \hline
-    \multicolumn{1}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \multicolumn{3}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{3}{c}{\small{\textbf{YapTab}}} \\
-     \multicolumn{1}{c|}{} & \textbf{\textit{Variant}} & \textbf{\textit{Subsumptive}} & \textbf{\textit{Speedup}} & \textbf{\textit{Variant}} & \textbf{\textit{Subsumptive}} & \textbf{\textit{Speedup}} \\
+    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \multicolumn{3}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{3}{c}{\small{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \textbf{\textit{Var}} & \textbf{\textit{Sub}} & \textbf{\textit{Speedup}} & \textbf{\textit{Var}} & \textbf{\textit{Sub}} & \textbf{\textit{Speedup}} \\
    \hline
    \hline
 
-\multirow{1}{*}{\textbf{iproto}} &  2940 & 2536 &  1.159  & 1188 & 1440 &  0.825 \\
+\multirow{3}{*}{\textbf{reach\_first}} &  \scriptsize{iproto}  &  2940 & 2536 &  1.16  & 1188 & 1440 &  0.82 \\
+&  \scriptsize{leader}  &  5844 & 6040 &  0.97  & 2176 & 2420 &  0.90 \\
+&  \scriptsize{sieve}  &  16637 & 23413 &  0.71  & 14224 & 15064 &  0.94 \\
 \hline
-\multirow{1}{*}{\textbf{leader}} &  5844 & 6040 &  0.968  & 2176 & 2420 &  0.899 \\
-\hline
-\multirow{1}{*}{\textbf{sieve}} &  16637 & 23413 &  0.711  & 14224 & 15064 &  0.944 \\
-\hline
-\hline
-\multicolumn{1}{c|}{\textit{Average}} & \multicolumn{2}{}{} & 0.946 & \multicolumn{2}{}{} & 0.889 \\ 
+\multirow{3}{*}{\textbf{reach\_last}} &  \scriptsize{iproto}  &  2296 & 2576 &  0.89  & 1172 & 1452 &  0.81 \\
+&  \scriptsize{leader}  &  5796 & 5992 &  0.97  & 2160 & 2412 &  0.90 \\
+&  \scriptsize{sieve}  &  20653 & 19309 &  1.07  & 16861 & 14740 &  1.14 \\
 \hline
 \hline
 \end{tabular}
 }
-\caption{Results for the program \texttt{reach\_left\_first}.}
-\label{tbl:result_reach_left_first}
+\caption{Detailed benchmarks for call subsumption in SLG-WAM and YapTab.}
+\label{tbl:result_model_detail}
 \end{table}
-
-\begin{table}[ht]
-\centering
-\footnotesize{
-  \begin{tabular}{c|ccc|ccc}
-   \hline
-    \hline
-    \multicolumn{1}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \multicolumn{3}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{3}{c}{\small{\textbf{YapTab}}} \\
-     \multicolumn{1}{c|}{} & \textbf{\textit{Variant}} & \textbf{\textit{Subsumptive}} & \textbf{\textit{Speedup}} & \textbf{\textit{Variant}} & \textbf{\textit{Subsumptive}} & \textbf{\textit{Speedup}} \\
-   \hline
-   \hline
-
-\multirow{1}{*}{\textbf{iproto}} &  2296 & 2576 &  0.891  & 1172 & 1452 &  0.807 \\
-\hline
-\multirow{1}{*}{\textbf{leader}} &  5796 & 5992 &  0.967  & 2160 & 2412 &  0.896 \\
-\hline
-\multirow{1}{*}{\textbf{sieve}} &  20653 & 19309 &  1.070  & 16861 & 14740 &  1.144 \\
-\hline
-\hline
-\multicolumn{1}{c|}{\textit{Average}} & \multicolumn{2}{}{} & 0.976 & \multicolumn{2}{}{} & 0.949 \\ 
-\hline
-\hline
-\end{tabular}
-}
-\caption{Results for the program \texttt{reach\_left\_last}.}
-\label{tbl:result_reach_left_last}
-\end{table}
-

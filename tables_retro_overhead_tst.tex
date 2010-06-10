@@ -1,0 +1,77 @@
+\begin{table}[ht]
+\centering
+\footnotesize{
+  \begin{tabular}{cc|c|cc|cc}
+   \hline
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+   \hline
+   \hline
+
+\multirow{5}{*}{\textbf{double\_first}} &  chain &  2940 &  1.69  &  1.20  &  1.24 & 0.86 \\
+&  cycle &  20489 &  1.51  &  1.26  &  1.76 & 0.73 \\
+&  grid &  2108 &  1.84  &  1.30  &  1.18 & 0.87 \\
+&  pyramid &  12036 &  1.69  &  1.18  &  1.77 & 1.12 \\
+&  tree &  1568 &  0.50  &  0.63  &  0.46 & 0.88 \\
+\hline
+\multirow{5}{*}{\textbf{double\_last}} &  chain &  2896 &  1.76  &  1.22  &  1.27 & 1.05 \\
+&  cycle &  22505 &  1.36  &  0.90  &  1.35 & 0.67 \\
+&  grid &  2128 &  1.83  &  1.22  &  1.17 & 0.86 \\
+&  pyramid &  12004 &  1.68  &  1.18  &  1.46 & 0.89 \\
+&  tree &  1564 &  0.50  &  0.62  &  0.45 & 0.87 \\
+\hline
+\multirow{5}{*}{\textbf{left\_first}} &  chain &  2544 &  1.12  &  1.54  &  1.02 & 0.95 \\
+&  cycle &  6876 &  0.87  &  1.36  &  0.98 & 0.88 \\
+&  grid &  11832 &  1.14  &  1.33  &  0.86 & 0.96 \\
+&  pyramid &  12672 &  0.76  &  1.07  &  1.01 & 1.18 \\
+&  tree &  140 &  0.97  &  1.14  &  0.86 & 1.03 \\
+\hline
+\multirow{5}{*}{\textbf{left\_last}} &  chain &  2512 &  1.08  &  1.59  &  1.04 & 0.99 \\
+&  cycle &  6996 &  0.88  &  1.39  &  0.98 & 0.87 \\
+&  grid &  11948 &  1.12  &  1.31  &  0.85 & 0.96 \\
+&  pyramid &  2780 &  0.86  &  1.05  &  1.04 & 0.97 \\
+&  tree &  164 &  0.78  &  0.95  &  0.71 & 0.83 \\
+\hline
+\hline
+\end{tabular}
+}
+\caption{Detailed overhead results.}
+\label{tbl:overhead_detail_tst1}
+\end{table}
+
+
+\begin{table}[ht]
+\centering
+\footnotesize{
+  \begin{tabular}{cc|c|cc|cc}
+   \hline
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+   \hline
+   \hline
+\multirow{5}{*}{\textbf{right\_first}} &  chain &  3160 &  0.90  &  0.90  &  1.06 & 1.08 \\
+&  cycle &  8148 &  0.78  &  0.87  &  0.82 & 0.85 \\
+&  grid &  14852 &  1.22  &  1.03  &  1.06 & 1.22 \\
+&  pyramid &  10836 &  1.12  &  0.90  &  1.09 & 1.06 \\
+&  tree &  204 &  0.78  &  0.90  &  0.84 & 1.10 \\
+\hline
+\multirow{5}{*}{\textbf{right\_last}} &  chain &  3152 &  0.89  &  0.91  &  1.17 & 1.16 \\
+&  cycle &  6196 &  1.03  &  1.13  &  1.21 & 1.06 \\
+&  grid &  12284 &  1.61  &  1.09  &  1.48 & 1.16 \\
+&  pyramid &  10952 &  0.95  &  0.96  &  1.19 & 1.04 \\
+&  tree &  1344 &  \scriptsize{crashed}  &  0.93  &  0.31 & 0.99 \\
+\hline
+\multirow{5}{*}{\textbf{samegen}} &  chain &  72 &  324.79  &  0.39  &  0.61 & 0.83 \\
+&  cycle &  32 &  193.00  &  0.38  &  1.00 & 0.88 \\
+&  grid &  1160 &  1.92  &  1.17  &  1.24 & 0.92 \\
+&  pyramid &  28 &  79.29  &  0.71  &  0.71 & 0.86 \\
+&  tree &  7124 &  1.00  &  1.24  &  0.64 & 1.07 \\
+\hline
+\hline
+\end{tabular}
+}
+\caption{Detailed overhead results.}
+\label{tbl:overhead_detail_tst2}
+\end{table}
