@@ -21,7 +21,7 @@ thus, for example, solve problems related to redundant sub-computations. Notwith
 still some deficiencies. For instance, writing left-recursive programs can lead to infinite loops.
 
 There have been some attempts in making Prolog less prone to problems related to recursion
-and redundant sub-computations, in order to make Prolog more expressive and closer to mathematical logic.
+and redundant sub-computations, in order to make the language more expressive and closer to mathematical logic.
 One of these attempts, which is particularly successful, is called \emph{tabling}
 (or \emph{tabulation} or \emph{memoization} \cite{Michie-68}). The tabling technique stems from one simple idea:
 store intermediate answers in a place called the \emph{table space} and reuse those answers when a
@@ -49,7 +49,7 @@ we can distinguish between two main approaches for call similarity:
    (or an instance of). For example, subgoal $p(X,1,2)$ is subsumed by subgoal $p(Y,1,Z)$ because there
    is a substitution $\{Y~=~X,~Z~=~2\}$ that makes $p(X,1,2)$ an instance of $p(Y,1,Z)$. Tabling by call
    subsumption is based on the principle that if $A$ is subsumed by $B$ and $S_A$ and $S_B$ are the respective
-   answer sets, therefore $S_A \subseteq S_B$.
+   answer sets, then $S_A \subseteq S_B$.
 \end{itemize}
 
 In general, subsumption-based tabling has the following advantages over variant-tabling:
@@ -61,7 +61,7 @@ such as YapTab \cite{Rocha-00a}, B-Prolog \cite{Zhou-00}, and ALS-Prolog \cite{G
 To the best of our knowledge, the SLG-WAM \cite{Sagonas-98} engine from XSB Prolog is the sole tabling system that supports
 subsumption-based tabling, initially by using an organization of the table space called
 \emph{Dynamic Threaded Sequential Automata (DTSA)}~\cite{Rao-96}, and later by using an alternative design called
-\emph{Time-Stamped Tries (TST)}~\cite{Johnson-99},.
+\emph{Time-Stamped Tries (TST)}~\cite{Johnson-99}.
 While the DTSA design was more efficient, it had bigger space requirements and thus is was replaced by the simpler
 TST approach which uses far less memory.
 
@@ -94,7 +94,7 @@ once; and (3) a new evaluation strategy capable of pruning and transforming gene
 
 Our results show that the overhead of the new control mechanisms of RCS are low enough in programs that do not
 benefit from it, which, combined with considerable gains for programs that can take advantage of them, validates
-this new evaluation technique. In this in mind, we argue that Retroactive Call Subsumption makes tabling
+this new evaluation technique. With this in mind, we argue that Retroactive Call Subsumption makes tabling
 more adapted and useful for practical applications and is another great tool in the programmer's toolbox for
 writing tabled programs.
 
@@ -127,12 +127,14 @@ In the following list we describe each chapter of this thesis.
    and then we throughly describe the new algorithm we developed to find executing subsumed subgoals of a subgoal on the
    table space.
    
-   \item[Chapter 6: Experimental Results.] This chapter first presents the experimental results we achieve with
-   the new YapTab engine that reuses the TST approach and how it compares to the SLG-WAM. We also present and
-   discuss the overhead of the RCS mechanism on programs that do not benefit from it and the speedups we have
-   achieve for programs that can take advantage of it.
+   \item[Chapter 6: Experimental Results.] This chapter first presents the experimental results we achieved with
+   the new YapTab engine that reuses the TST approach and how it compares to the SLG-WAM. We also make a space
+   analysis comparison between call subsumption and variant-based tabling.
+   Next, we present and discuss the overhead of the RCS mechanism on programs that do not benefit from it and
+   the speedups we have achieved for programs that can take advantage of it. Finally, we present an analysis of
+   the STST table organization by experimenting with programs that stress the nature of this table space.
    
    \item[Chapter 7: Conclusions.] Summarizes the work, enumerates the contributions and suggests directions for
-   further work.
+   future work.
    
 \end{description}

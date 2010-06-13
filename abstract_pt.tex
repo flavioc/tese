@@ -9,16 +9,16 @@ Na tabulação por variantes, $A$ é similar a $B$ quando eles são iguais por r
 Na tabulação por subsumpção, $A$ é similar a $B$ quando $A$ é mais específico que $B$ (ou $B$ é mais geral que $A$).
 Isto surge através de um simples princípio: quando $A$ é mais específico que $B$ e $S_A$ e $S_B$ são os respectivos
 conjuntos de rrespostas, então $S_A \subseteq S_B$.
-Embora a tabulação por subsumpção consegue atingir maiores ganhos em termos de tempo de execução, devido
-a aumentar o nível de partilha de respostas, implementar os mecanismos necessários de forma eficiente é bastante
+Embora a tabulação por subsumpção se consiga atingir maiores ganhos em termos de tempo de execução, devido
+ao aumento da partilha de respostas, implementar os mecanismos necessários de forma eficiente é bastante
 mais difícil em comparação com tabulação por variantes, o que faz com que este último seja muito mais popular
 nos motores de tabulação disponíveis.
 
-Esta tese descreve o desenho e integração do mecanismo do Time-Stamped Tries do XSB Prolog no motor de tabulação
+Esta tese descreve o desenho e integração do mecanismo de Time-Stamped Tries do motor SLG-WAM no motor de tabulação
 YapTab. Os resultados obtidos mostram que os nossos esforços de integração foram bem sucedidos, com \emph{speedups}
 comparavéis entre tabulação por variantes e tabulação por subsumpção.
 
-Na segunda parte desta tese apresenta-se o desenho e avaliação de uma nova extensão de baseada na tabulação
+Na segunda parte desta tese apresenta-se o desenho e avaliação de uma nova extensão baseada na tabulação
 por subsumpção chamada Tabulação por Subsumpção Retroactiva (TSR). Esta resolve algumas limitações da tradicional
 tabulação por subsumpção, nomeadamente, o facto de a ordem da chamada dos subgolos poderem afectar o seu sucesso e
 aplicação. A TSR permite uma partilha completa e bidireccional de respostas entre subgolos, independentemente da

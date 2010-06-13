@@ -2,12 +2,12 @@ This chapter presents a detailed performance analysis of the two subsumption-bas
 that we have developed. We divided this chapter into four sections. The first section describes the
 set of tabled benchmark programs that we have used to assess the performance of execution. The second
 section evaluates the engine with traditional call subsumption that was implemented by integrating the
-Time-Stamped Tries algorithms and data structures from XSB into Yap. Next, the memory gains of call subsumption
-by measuring the size of the answer tries and comparing it to variant-based tabling.
-In the second section, we evaluate the retroactive-based tabling engine for programs that do not benefit
+Time-Stamped Tries algorithms and data structures from XSB into Yap. Next, we analyze the memory gains
+of call subsumption by measuring the size of the answer tries and comparing it to variant-based tabling.
+In the third section, we evaluate the retroactive-based tabling engine for programs that do not benefit
 from the new mechanisms and
 for programs that take advantage of the new evaluation method. Finally, we evaluate the STST table space
-overhead in the bad scenario, where the operations of loading and storing stores are more expensive than
+overhead in a bad scenario, where the operations of loading and storing stores are more expensive than
 usual.
 
 \section{Benchmark Programs}
@@ -36,7 +36,7 @@ The following list describes the programs used:
    To compute reachability this program uses the \texttt{left\_last} program.
    
    \item[reach:] The \texttt{reach/2} computes the reachability in a relation graph for a set of
-   specifications. The benchmark is actually a set of programs originally taken from the
+   model specifications. The benchmark is actually a set of programs originally taken from the
    XMC project~\cite{system-xmc,RamakrishnanCR-00}, which is a model checker implemented
    atop the XSB system. We used two variants of the \texttt{reach/2} predicate,
    \texttt{reach\_first} and \texttt{reach\_last}.
@@ -56,11 +56,9 @@ The following list describes the programs used:
                development environment known as FLORA-2 \cite{Yang-00} \footnote{http://flora.sourceforge.net}.
 \end{description}
 
-Note that the code for these programs is presented in Appendix~\ref{app:code}.
+Note that parts of the code for these programs is presented in Appendix~\ref{app:code}.
 
-In the next tables, execution time is measured in milliseconds and all benchmarks
-are executed to find all solutions for the problem at hand. The scheduling strategy used
-by default is batched scheduling.
+The scheduling strategy used by default is batched scheduling.
 The environment for our experiments was an Intel Core(TM) 2 Quad 2.66 GHz with 4 GBytes of
 memory and running the Linux kernel 2.6.31 with YapTab 6.0.3 and XSB Prolog 3.2.
 
@@ -93,7 +91,6 @@ In order to compare the YapTab\_TST tabling engine with the SLG-WAM we used the 
    \end{itemize}
 
 \end{itemize}
-
 
 We compared the performance of the SLG-WAM and YapTab with traditional call subsumption.
 For each benchmark, we used variant-based tabling and then subsumption-based tabling.
@@ -138,13 +135,13 @@ The first thing we note is that, in 4 benchmarks
 YapTab has a better speedup than SLG-WAM, while in 6 of them SLG-WAM wins. While SLG-WAM wins here,
 the speedups for the two engines are very similar, which proves that our integration
 efforts of the Time-Stamped Tries approach to subsumption-based tabling in YapTab was largely successful.
-There is one benchmark were this observation does not hold, which is the \texttt{samegen} benchmark.
+There is one benchmark were the speedups are not very similar at all, which is the \texttt{samegen} benchmark.
 The SLG-WAM engine has an average speedup of 292.66 and YapTab only 0.93 because the performance
-of the variant-based version of SLG-WAM performs very poorly against YapTab which explains such big differences.
+of the variant-based version of SLG-WAM performs very poorly against YapTab, which explains such big differences.
 
 The programs \texttt{left\_first} and \texttt{left\_last} do not generate any subsumed consumer,
 therefore they are good benchmarks to assess the overhead of using subsumption mechanisms. For YapTab,
-the overhead is minimal with a speedup of 0.95 for the \texttt{left\_first}. Surprisingly, for the
+the overhead is minimal with a speedup of 0.95 for the \texttt{left\_first} program. Surprisingly, for the
 \texttt{left\_last} program the speedup is equal to 1, that is, both variant-based and subsumptive-based
 engines have the same execution time. SLG-WAM has more overhead, with 0.76 for both programs.
 
@@ -154,13 +151,16 @@ achieves a speedup bigger than 1. Why there are no speedups for these programs i
 are faster to evaluate than to use the time stamped trie to collect relevant answers.
 In YapTab, the binary tree graph configuration with the \texttt{right\_last} program has a very poor speedup
 of 0.31 when compared to a speedup of 0.77 when used with the \texttt{right\_first} program.
-In the \texttt{right\_first} benchmark, the time-stamped indices are created right at
-the beginning of the program when the time-stamped trie is still empty, but, in the case of the \texttt{right\_last}
-program, the indices are only created when the recursive clause is executed, when the trie already contains
-a considerable amount of answers. We modified the subsumptive engine to create time-stamped indices from the
-beginning, and the \texttt{right\_last} program had considerable better results. Therefore, we argue that the
-lazy creation of time-stamped indices can affect considerably the execution time. For programs where subsumption
-happens, the benchmarks may perform worse if a consumer appears when the answer trie already contains lots of answers.
+In the \texttt{right\_first} benchmark, the time stamped index is created right at
+the beginning of the program when the time stamped trie is still empty and maintained thereafter, but,
+in the case of the \texttt{right\_last} program, the indices are only created when the recursive
+clause is executed, when the trie already contains a considerable amount of answers. We modified the subsumptive
+engine to create the time stamp index from the beginning, and the \texttt{right\_last} program had considerable
+better results. Therefore, we argue that the lazy creation of the time stamped index can affect considerably the
+execution time. For programs where subsumption happens, the benchmarks may perform worse if a consumer appears
+when the answer trie already contains lots of answers. The operation of creating the time stamped index
+and sorting each trie node at each trie level is a very costly operation when a high number of nodes exist.
+Sometimes, it is more efficient to maintaing the index as the answer trie is being expanded.
 
 For the \texttt{double\_first} and \texttt{double\_last} we have attained speedups between 1.25 and 1.46
 for each configuration. These benchmarks are more computationally expensive given that they create more
@@ -195,22 +195,24 @@ For this, we used the following benchmarks:
    \item The \texttt{flora} benchmark.
 \end{itemize}
 
-Table~\ref{tbl:results_detail_space_sub} presents the results we obtained.  For some programs where
-no subsumed subgoals are called, the number of answer trie nodes created is exactly same when compared
-to variant-based tabling. For example, in the programs \texttt{genome/1} and \texttt{left\_first}
-we can observe this behavior.
+Table~\ref{tbl:results_detail_space_sub} presents the results we obtained. From the table, we see that,
+for some programs where no subsumed subgoals are called, the number of answer trie nodes created is
+exactly same when compared to variant-based tabling. For example, in the programs \texttt{genome/1} and
+\texttt{left\_first} we can observe this behavior. Please notice that, while the number of trie nodes is
+the same, the size of the nodes in subsumption-based tabling (they have a \textbf{timestamp} field) make
+the time stamped answer trie more costly in terms of memory used.
 
 In the programs \texttt{right\_first} and \texttt{double\_first}, the number of answer trie nodes
 is reduced in half. Using variant-based tabling, these programs generate a large number of subgoals,
-that in subsumption-based tabling are consumers of the first subgoal called, thus creating more
+that in subsumption-based tabling are consumers of the first called subgoal, thus creating more
 answer tries for each one of these subgoals, and thus more answer trie nodes. As one would expect,
 using subsumption-based tabling can reduce substantially the table space.
 
 The \texttt{samegen/2} program presents a curious behavior for the \texttt{cycle} and \texttt{chain}
 data sets. In these cases, the program generates an answer that subsumes all the other answers and
 every other subgoal call is subsumed by the top subgoal, resulting in only 3 answer trie nodes created,
-the root node, and the two terms for the general solution. Compared to tabling with variant checks, this
-result in very good space savings.
+the root node, and the two nodes for the two terms of the general solution. Compared to tabling with
+variant checks, this result in very good space savings.
 
 The \texttt{flora} benchmark also shows a reduced table space size, which shows that subsumption-based
 tabling can be successfully applied to complex programs, resulting in a largely reduced
@@ -232,7 +234,7 @@ order to assess the advantages of the new mechanism.
 To measure the overhead, we executed programs where general subgoals are always called before
 subsumed subgoals (or not at all), therefore we can estimate the impact in the execution time
 because the pruning techniques of RCS are not employed.
-We use the following benchmarks:
+We used the following benchmarks:
 
 \begin{itemize}
    \item Every combination of versions and data sets for the \texttt{path/2} program with the query `\texttt{?-~path(X,Y)}'.
@@ -250,7 +252,7 @@ We use the following benchmarks:
 \end{itemize}
 
 We timed the execution of the benchmarks for the RCS engine and then the execution time
-for the subsumptive-based engines of both YapTab and SLG-WAM. In the next tables,
+for the subsumptive and variant-based engines of both YapTab and SLG-WAM. In the next tables,
 we present the execution time of the RCS engine in milliseconds and the relative time
 of the other engines by computing the value $T_{engine} / T_{RCS}$.
 If the value is lesser than 1.0 then RCS performs worse, otherwise if the value is greater than
@@ -258,17 +260,17 @@ If the value is lesser than 1.0 then RCS performs worse, otherwise if the value 
 each engine.
 
 Tables~\ref{tbl:overhead_detail_tst1}, \ref{tbl:overhead_detail_tst2} and \ref{tbl:overhead_detail_model}
-shows the detailed results for the programs we use to measure the overhead.
+show the detailed results for the programs we use to measure the overhead.
 Table~\ref{tbl:overhead_overview} shows the average values computed for each benchmark program
 for call subsumption in the SLG-WAM and in the YapTab engine.
-By analyzing the results we can see that YapTab+RCS performs worse
+By analyzing the results we can see that YapTab with RCS performs worse
 than YapTab with subsumptive-based tabling in most cases, only the
 programs \texttt{right\_first} and the \texttt{right\_last} program show better results,
 while the \texttt{left\_first} program has comparable execution times.
 In theory, these benchmarks should not run faster, but cache effects and other
 conditions could affect positively the execution time of these programs.
 
-The average values show that
+The average values presented in Table~\ref{tbl:overhead_overview} show that
 RCS is very competitive against XSB, because it is, in average, 21\% slower than RCS. More
 importantly, when comparing RCS to YapTab with traditional call subsumption, RCS performs 5\% slower,
 which shows that RCS adds a very small overhead when executing programs that do not benefit from the
@@ -312,8 +314,9 @@ can benefit from it, i.e., programs where some general subgoal is called after a
 The programs we used for these experiments are the following:
 
 \begin{itemize}
-   \item The query goal `\texttt{?-~path(X,1)}' with the programs \texttt{left\_first}, \texttt{left\_last},
-   \texttt{double\_first} and \texttt{double\_last}. When calling the subgoal \texttt{path(X,1)}, the subgoal
+   \item The programs \texttt{left\_first}, \texttt{left\_last},
+   \texttt{double\_first} and \texttt{double\_last} with the query goal `\texttt{?-~path(X,1)}'.
+   When calling the subgoal \texttt{path(X,1)}, the subgoal
    \texttt{path(X,Y)} is called, which prunes the first subgoal.
    
    \item The two versions of the \texttt{reach/2} program with the following pair of queries/relation graphs:
@@ -374,9 +377,9 @@ of the \texttt{path/2} program, for example, does not show improvements because 
 execution of simple \texttt{edge/2} facts does not offset the cost of using the STST to retrieve relevant answers
 for the subsumed subgoal and
 the cost of pruning the computation itself. In other words, using subsumptive-based tabling for this program is
-advantageous because the cost of executing predicate clauses is less than maintaining the time-stamped indices.
-Therefore, the time that would be wasted by executing pruned code should be bigger than the time wasted on manipulating
-the STST.
+advantageous because the cost of executing predicate clauses is less than maintaining the time stamped index.
+Therefore, the time that would be wasted by executing pruned code should be bigger than the time wasted
+on manipulating the STST.
 
 The model checking programs, \texttt{reach\_left} and \texttt{reach\_last}, are much more complex than the \texttt{path/2}
 programs, and thus show much larger improvements. For the \texttt{reach\_last} program with the \texttt{leader} model,
@@ -404,7 +407,7 @@ to use a functor term in each argument, instead of simple integers. For example,
 \texttt{edge(3,4)} fact is transformed into \texttt{edge(f(3), f(4))}. The updated version
 of the \texttt{left\_first} program is exemplified in Figure~\ref{fig:converted_path}.
 We experimented the query goal `\texttt{?-~path(f(X),f(Y))}' with all the combinations of
-the \texttt{path/2} program and its data sets.
+the \texttt{path/2} versions and the graph data sets.
 
 \begin{figure}[ht]
 \begin{Verbatim}
@@ -419,7 +422,7 @@ path(f(X),f(Y)) :- edge(f(X),f(Y)).
 
 Table~\ref{tbl:results_detail_stst} present the detailed results concerning execution time for each
 program and data set.
-The average results are presented in Table~\ref{tbl:results_average_stst} compared to traditional
+The average results are presented in Table~\ref{tbl:results_average_stst} and compare the STST to
 tabling with variant and subsumptive checks. From the results,
 we see that, in average, the STST table space has an overhead of 20\%, which is considerable when
 compared to the overhead of 5\% found early on this chapter.
@@ -430,7 +433,7 @@ worst overhead are \texttt{double\_first} and \texttt{double\_last}, with 33\% a
 against traditional call subsumption. These programs also create the higher number of consumers,
 both variant consumers and subsumed consumers than any other benchmark in this experiment.
 The \texttt{right\_first} and \texttt{right\_last} are the only programs where only subsumed
-consumers are created, they have an overhead of 7\% and 11\%, respectively, which are the lowest
+consumers are created, and they have an overhead of 7\% and 11\%, respectively, which are the lowest
 overhead values. In the programs \texttt{left\_first} and \texttt{left\_last}, only one variant
 consumer is allocated, however they perform worse than the \texttt{right} versions.
 
@@ -481,8 +484,8 @@ graph configurations with different sizes.
 
 Table~\ref{tbl:results_average_stst_space} presents the average results of RCS against variant and
 subsumptive-based engines. From these results we can see that the STST table space is 89\% more efficient
-than the variant table space. In the \texttt{double} program, these differences are augmented because the
-variant engine because there are more tabled subgoal calls and thus more answer tries are created.
+than the variant table space. In the \texttt{double} program, these differences are augmented because in the
+variant engine there are more generator subgoal calls and thus more answer tries are created.
 
 When comparing to the subsumptive-based engine, the STST table space only stores 4.2\% more trie nodes,
 even if the \texttt{f/1} functor terms need to be stored. This is easily understandable because

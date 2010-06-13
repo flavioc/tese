@@ -1,7 +1,7 @@
 
 In this chapter we summarize the work developed in this thesis. First, we list the various contributions
-present in the thesis, next we suggest problems for future research, and then we finish with a final
-remark.
+present in the thesis. Finally, we suggest problems for future research that involve the work
+developed in this thesis.
 
 \section{Main Contributions}
 
@@ -35,7 +35,7 @@ We next detail the most important aspects of the work developed during this thes
    information about the status of the subgoals under a subgoal trie node.
    
    \item[Single Time Stamped Trie table space organization.] In the STST table space organization we have an answer
-   trie for each predicate. The answer is itself an time stamped trie and permits greater reuse of answers between
+   trie for each predicate. The answer trie is itself an time stamped trie and permits greater reuse of answers between
    the subgoals of the same predicate, as answers are represented only once. The design facilitates the pruning of
    subsumed subgoals because the subgoals can easily identify which answers have already been consumed or generated.
    We also designed a new optimization, where we throw away the subgoal trie when the most general subgoal completes,
@@ -72,7 +72,7 @@ We next summarize further work that can and should be done:
    \item[Experimentation in real world applications.] Our retroactive-based tabling engine still needs more
    experimentation and testing with real world data and applications in order to refine the implementation.
    More intensive experimentation may provide a deep analysis on the algorithms implemented and many opportunities
-   to make each algorithm more smart will sure arise.
+   to make each algorithm more smart will certainly arise.
    
    \item[More efficient algorithms in the table space.] While the algorithms we used for the STST table space
    work pretty well for the majority of applications, there are certain programs were the overhead of various
