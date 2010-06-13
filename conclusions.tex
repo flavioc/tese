@@ -52,12 +52,12 @@ We next detail the most important aspects of the work developed during this thes
    tabling in the same program. This enables the programmer to choose the best evaluation strategy per predicate,
    which we think greatly augments the power of tabling to be used in real world programming.
    
-   \item[Performance Evaluation.] We evaluated the performance of our subsumption-based tabling engine against SLG-WAM
-   with very comparable results, which validates our integration efforts. For retroactive-based, we evaluated the overhead
-   of using the new control mechanism with programs that do not benefit from retroactive evaluation. For programs were
-   retroactive reuse happens, we validated our approach with good speedups over traditional call subsumption.
-   
-   FALAR DA AVALIACAO DOS PROGRAMAS PATH AQUI!
+   \item[Performance Evaluation.] We evaluated the performance of our subsumption-based tabling engine
+   against SLG-WAM with very comparable results, which validates our integration efforts. We also verified
+   that using call subsumption can potentially cut down on execution time and waste less memory.
+   For retroactive-based, we evaluated the overhead of using the new control mechanism with programs that do
+   not benefit from retroactive evaluation. For programs were retroactive reuse happens, we validated our
+   approach with good speedups over traditional call subsumption.
    
 \end{description}
 
@@ -70,7 +70,7 @@ We next summarize further work that can and should be done:
 \begin{description}
    
    \item[Experimentation in real world applications.] Our retroactive-based tabling engine still needs more
-   experimentation and testing with real world data and applications, in order to refine the implementation.
+   experimentation and testing with real world data and applications in order to refine the implementation.
    More intensive experimentation may provide a deep analysis on the algorithms implemented and many opportunities
    to make each algorithm more smart will sure arise.
    

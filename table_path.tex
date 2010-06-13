@@ -1,0 +1,107 @@
+\section{Evaluation Models and Reachability}
+
+Consider the \texttt{path/2} predicate which computes the reachability between two nodes in a graph.
+This predicate can be defined in six different ways, namely: \texttt{left\_first}, \texttt{left\_last},
+\texttt{right\_first}, \texttt{right\_last}, \texttt{double\_first}, and \texttt{double\_last}.
+The six versions are presented in Figure~\ref{fig:path_versions}.
+
+\begin{figure}[ht]
+\begin{Verbatim}
+% left_first
+path(X, Y) :- path(X, Z), edge(Z, Y).
+path(X, Y) :- edge(Z, Y).
+
+% left_last
+path(X, Y) :- edge(X, Y).
+path(X, Y) :- path(X, Z), edge(Z, Y).
+
+% right_first
+path(X, Y) :- edge(X, Z), path(Z, Y).
+path(X, Y) :- edge(X, Y).
+
+% right_last
+path(X, Y) :- edge(X, Y).
+path(X, Y) :- edge(X, Z), path(Z, Y).
+
+% double_first
+path(X, Y) :- path(X, Z), path(Z, Y).
+path(X, Y) :- edge(X, Y).
+
+% double_last
+path(X, Y) :- edge(X, Y).
+path(X, Y) :- path(X, Z), path(Z, Y).
+\end{Verbatim}
+\caption{Six versions of the \texttt{path/2} program.}
+\label{fig:path_versions}
+\end{figure}
+
+Given the a database of facts about the connectivity of the graph, we may want to know the
+execution modes, either variant, subsumptive or retroactive, and the \texttt{path/2} version
+that are best suited to compute a specific problem. In the next list we discuss each problem
+and the most efficient manner to solve it. For the benchmarks, we use the \texttt{grid} graph,
+which is the most complex graph configuration we have available, and can easily generalize
+the conclusions for the other types of graphs. The grid size is 32.
+
+\begin{description}
+   \item[all the pairs of connected nodes:] This is the problem of finding all solutions of the predicate.
+   To solve this we use the query goal `\texttt{?-~path(X,Y)}'.
+   
+   Clearly, the best way to approach this problem is to use either the \texttt{left\_first} or
+   the \texttt{left\_last} programs, because only one consumer is allocated. All the other
+   versions will generate more than one consumer for the most interesting graphs.
+   In terms of execution modes, the best to use is the variant-based model, as the allocated consumer
+   is variant of the called subgoal, therefore, there is no need to use subsumption mechanisms.
+   The results presented in Table~\ref{fig:result_path_xy} validate our claims.
+   
+   \input{table_path_xy}
+   
+   \item[the set of nodes that can be reached by starting in a specific node:] Starting in node $n1$, which
+   nodes can be reached? In Prolog we write this as `\texttt{?-~path($n1$,X)}'.
+   
+   For this situation, the \texttt{left\_first} or \texttt{left\_last} will attain the best results,
+   because, as for the first problem, only one consumer is stored. All the other versions, will create
+   multiple consumers, which will slow down the computation. Like the first problem, the best execution
+   model is variant-based tabling, because the consumer is variant of the subgoal \texttt{?-~path($n1$,X)}.
+   
+   Table~\ref{fig:result_path_1x} present the results for the query goal `\texttt{?-~path(1,X)}'.
+   For this benchmark, all evaluation models performed equally good on the \texttt{left} programs.
+   
+   \input{table_path_1x}
+   
+   \item[the set of nodes from which a specific node can be reached:] Ending in node $n1$,
+   we want to know the nodes that are connected to $n1$. In Prolog: `\texttt{?-~path(X,$n1$)}'.
+   
+   In variant-based tabling, for the \texttt{double\_first} and \texttt{double\_last} programs, we call the
+   subgoal \texttt{path(X,Y)} as a generator, followed by multiple generators with the all arguments instantiated.
+   If using subsumption-based tabling the subgoal \texttt{path(X,Y)} is called, followed by multiple consumers.
+   For the \texttt{right\_first} and \texttt{right\_last} programs, with variant checks, we will create multiply
+   generators with all the arguments instantiated or multiple generators using subsumptive checks.
+   For the \texttt{left\_first} or \texttt{left\_last} programs, with either variant or subsumptive checks,
+   the subgoal \texttt{path(X,Y)} will be called.
+   
+   Using retroactive tabling we can do better by using the \texttt{left\_first} program version.
+   In this version, we will call a more subgoal, \texttt{path(X,Y)}, that will prune the subgoal
+   \texttt{path(X,$n1$)}, and \texttt{path(X,$n1$)} will consume answers from \texttt{path(X,Y)}.
+   Using the \texttt{left\_last} version is worse, because the subsumed subgoal will execute the first
+   clause, and only then call the subsuming subgoal, thus diminishing what we will gain from pruning
+   the execution.
+   
+   \item{table_path_x1}
+   
+   \item[if two nodes are connected:] Given two nodes $n1$ and $n2$ of the graph, we want to know if
+   they are connected. In Prolog, we write this as: `\texttt{?-~path($n1$,$n2$)}'.
+   
+   Using variant-based tabling, the \texttt{right} or \texttt{double} versions, execution will generate multiple
+   generators. For the \texttt{left} versions, evaluation creates a generator for the subgoal
+   \texttt{path($n1$,Z)}, followed by a consumer of this subgoal.
+   
+   For subsumption-based tabling, both the \texttt{right} and \texttt{double} versions will create multiple
+   generators, because subsumed subgoals are called before more general subgoals. For the \texttt{left} version,
+   we have the same situation as for variant-based tabling.
+   
+   As for the previous problem, retroactive-based tabling is also best suited for this problem when using the
+   \texttt{left\_first} program. Here, we call the subgoal \texttt{path($n1$,Z)} that will subsumed the query
+   subgoal and prune it, thus saving time executing unnecessary code. Like the previous problem,
+   the basic idea is to generate all the answers for a more general subgoal, and then use those answers to solve
+   the initial problem. 
+\end{description}

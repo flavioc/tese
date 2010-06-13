@@ -1,0 +1,53 @@
+\begin{table}[ht]
+\centering
+\footnotesize{
+  \begin{tabular}{cc|c|cc}
+   \hline
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+   \hline
+   \hline
+
+\multirow{5}{*}{\textbf{double\_first}} &  chain &  1696 &  0.25 & 0.58 \\
+&  cycle &  2916 &  0.93 & 0.54 \\
+&  grid &  3920 &  0.66 & 0.69 \\
+&  pyramid &  6804 &  0.27 & 0.65 \\
+&  tree &  708 &  0.50 & 0.91 \\
+\hline
+\multirow{5}{*}{\textbf{double\_last}} &  chain &  1880 &  0.23 & 0.50 \\
+&  cycle &  2924 &  0.92 & 0.54 \\
+&  grid &  3928 &  0.65 & 0.69 \\
+&  pyramid &  6808 &  0.27 & 0.66 \\
+&  tree &  724 &  0.50 & 0.87 \\
+\hline
+\multirow{5}{*}{\textbf{left\_first}} &  chain &  792 &  0.87 & 0.81 \\
+&  cycle &  1712 &  0.96 & 0.79 \\
+&  grid &  16913 &  0.75 & 0.99 \\
+&  pyramid &  836 &  0.89 & 0.82 \\
+&  tree &  556 &  0.86 & 0.88 \\
+\hline
+\multirow{5}{*}{\textbf{left\_last}} &  chain &  1060 &  0.64 & 0.61 \\
+&  cycle &  1744 &  0.93 & 0.78 \\
+&  grid &  19545 &  0.64 & 0.73 \\
+&  pyramid &  828 &  0.92 & 0.86 \\
+&  tree &  588 &  0.79 & 0.85 \\
+\hline
+\multirow{5}{*}{\textbf{right\_first}} &  chain &  4004 &  0.82 & 0.82 \\
+&  cycle &  7300 &  0.92 & 1.08 \\
+&  grid &  1140 &  0.80 & 0.76 \\
+&  pyramid &  3156 &  0.86 & 0.99 \\
+&  tree &  288 &  0.85 & 1.00 \\
+\hline
+\multirow{5}{*}{\textbf{right\_last}} &  chain &  3612 &  1.06 & 0.92 \\
+&  cycle &  9492 &  0.80 & 0.75 \\
+&  grid &  1000 &  1.18 & 0.97 \\
+&  pyramid &  3176 &  0.90 & 0.90 \\
+&  tree &  532 &  0.67 & 0.92 \\
+\hline
+\hline
+\end{tabular}
+}
+\caption{Detailed execution time for the query goal `\texttt{?-~path(f(X),f(Y))}'.}
+\label{tbl:results_detail_stst}
+\end{table}

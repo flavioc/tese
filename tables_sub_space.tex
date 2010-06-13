@@ -1,0 +1,74 @@
+\begin{table}[ht]
+\centering
+\footnotesize{
+  \begin{tabular}{cc|c|cc}
+   \hline
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Sub / Var}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \scriptsize{\textit{ratio}} & \textbf{\textit{\scriptsize{Variant}}} & \textbf{\textit{\scriptsize{Subsumptive}}} \\
+   \hline
+   \hline
+
+\multirow{5}{*}{\textbf{double\_first}} &  chain (512) &  0.50098 &  262144 & 131328
+\\
+&  cycle (512) &  0.50000 &  525313 & 262657
+\\
+&  grid (16) &  0.50000 &  131585 & 65793
+\\
+&  pyramid (512) &  0.50065 &  786944 & 393984
+\\
+&  tree (32768) &  0.50943 &  868356 & 442370
+\\
+\hline
+\multirow{5}{*}{\textbf{genome}} &  chain (16384) &  1.00000 &  16383 & 16383
+\\
+&  cycle (8192) &  1.00000 &  8193 & 8193
+\\
+&  grid (64) &  1.00000 &  4097 & 4097
+\\
+&  pyramid (4096) &  1.00000 &  4096 & 4096
+\\
+&  tree (32768) &  1.00000 &  16383 & 16383
+\\
+\hline
+\multirow{5}{*}{\textbf{left\_first}} &  chain (4096) &  1.00000 &  8390656 & 8390656
+\\
+&  cycle (4096) &  1.00000 &  16781313 & 16781313
+\\
+&  grid (64) &  1.00000 &  16781313 & 16781313
+\\
+&  pyramid (4096) &  1.00000 &  25171968 & 25171968
+\\
+&  tree (32768) &  1.00000 &  442370 & 442370
+\\
+\hline
+\multirow{5}{*}{\textbf{right\_first}} &  chain (4096) &  0.50012 &  16777216 & 8390656
+\\
+&  cycle (4096) &  0.50000 &  33562625 & 16781313
+\\
+&  grid (64) &  0.50000 &  33562625 & 16781313
+\\
+&  pyramid (4096) &  0.50008 &  50335744 & 25171968
+\\
+&  tree (32768) &  0.50943 &  868356 & 442370
+\\
+\hline
+\multirow{5}{*}{\textbf{samegen}} &  chain (32768) &  0.00002 &  131071 & 3
+\\
+&  cycle (16384) &  0.00005 &  65539 & 3
+\\
+&  grid (32) &  0.49903 &  1050627 & 524291
+\\
+&  pyramid (4096) &  0.33335 &  49147 & 16383
+\\
+&  tree (8192) &  0.79965 &  27974313 & 22369623
+\\
+\hline
+\multicolumn{2}{c|}{\textbf{flora}} & 0.36173 & 83564 & 30228 \\
+\hline
+\hline
+\end{tabular}
+}
+\caption{Detailed comparison between variant and subsumption-based tabling for stored answer trie nodes.}
+\label{tbl:results_detail_space_sub}
+\end{table}
