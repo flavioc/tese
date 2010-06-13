@@ -1843,3 +1843,18 @@ variable bucket for case 2.
 The second field, \textbf{final\_bucket}, helps differentiate between
 case 1 and 2, as in case 2 its value is NULL. In case 1 points to the final hash table bucket,
 hence it is easy to know when to remove the choice point.
+
+\section{Chapter Summary}
+
+This chapter throughly explained the algorithms and data structures behind the Time Stamped Tries
+technique to implement call by subsumption in a tabling engine. We discussed how the answer trie
+was extended with time stamp information and explained the need for a time stamp index to efficiently
+collect relevant answers for subsumed subgoals.
+
+We discussed how the YapTab engine was extended with the Time Stamped Tries mechanisms to
+provide tabling by call subsumption. We also showed how the core algorithms in YapTab were minimally
+affected.
+
+In the next chapter, we will present a new tabling extension called Retroactive Call Subsumption (RCS),
+that improves upon call subsumption by enabling bidirectional sharing of answers, that is, answers will
+be shared even if a subsumed subgoal is called before a subsuming subgoal.

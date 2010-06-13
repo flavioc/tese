@@ -489,3 +489,21 @@ For DTSAs, the space used is at least double, but in the worst
 case can be quadratic. DTSA is at advantage in terms of speed, because it supports identification of answers and
 unification in one step, thus answers can share some elementary unifications. In TSTs, identifying answers
 and doing answer unification is a two step process, thus it takes more time to construct all answers. 
+
+\section{Chapter Summary}
+
+In this chapter we explored how the table space is efficiently designed to support
+the tabling operations in a variant or a subsumption-based engine.
+For the variant engine, we presented the YapTab's table space that is based on two levels
+of tries, the subgoal trie and the answer trie.
+
+Next, we discussed the two most well-known table space organizations to implement call subsumption.
+The first technique is the Dynamic Threaded Sequential Automata (DTSA). This method creates a special data
+structure based on tries to efficiently collect the relevant answers for a subsumed subgoal.
+The second technique is the Time Stamped Trie (TST). It improves upon the previous technique by
+being simpler and having reduced space needs.
+
+In the next chapter we will discuss the algorithms and data structures used in the TST technique,
+covering the algorithm used to discover subsuming subgoals and the algorithm to collect relevant
+answers. Finally, we will explain how the TST is integrated into the YapTab tabling engine to enable
+call by subsumption.

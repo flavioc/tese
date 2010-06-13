@@ -456,11 +456,14 @@ The variant approach is widely used in tabling systems, but other approaches do 
 In other words, we verify if there is a more general subgoal than the one being called. For example
 \texttt{path(b,Z)} is subsumed by the subgoal \texttt{path(X,Z)}.
 
-In this approach, instead of creating
-a new generator node at step 3, we create a consumer node that would consume answers stored in the subgoal \texttt{path(X,Z)}.
-For correct results, it should be clear that the answers used from the table space must unify with \texttt{path(b,Z)}.
-Like variant tabling, those new consumer nodes do not expand by using the program clauses, hence the search tree for this new
-method will be greatly reduced. This new approach will be throughly explored in the next chapter.
+In this approach, instead of creating a new generator node at step 3, we create a consumer node that would consume
+answers stored in the subgoal \texttt{path(X,Z)}. For correct results, it should be clear that the answers used
+from the table space must unify with \texttt{path(b,Z)}. Like variant tabling, those new consumer nodes do not expand
+by using the program clauses, hence the search tree for this new method will be greatly reduced.
+
+Variant and subsumption-based tabling define the \emph{call similarity} property of the tabling engine. In
+a nutshell, when a subgoal $A$ is declared to be \emph{similar} to subgoal $B$, we say that $A$ consumes from
+$B$ ($A$ is a consumer) and $B$ generates its own answers.
 
   \subsection{Yap and XSB}
   
@@ -568,3 +571,16 @@ method will be greatly reduced. This new approach will be throughly explored in 
   points to the leader node at creation time; and the \textbf{back\_leader} field that changes during
   evaluation, pointing to the leader node where we performed the last unsuccessful completion operation.
   A new global register, called \textbf{TOP\_DF}, always points to the youngest dependency frame.
+
+\section{Chapter Summary}
+
+In this chapter we introduced logic programming and Prolog. We discussed the shortcomings of the
+SLD resolution and then we presented tabling, which is a technique that solves these problems.
+
+Next, we discussed how tabled programs are evaluated, by introducing the concepts of generator,
+consumer, scheduling strategies, such as batched scheduling and local scheduling, and
+the call similarity property in variant and subsumption-based tabling engines.
+We also discussed two of the most widely known Prolog systems that implement tabling, Yap and XSB Prolog.
+
+In the next chapter we will throughly discuss and analyze how the table space is organized to efficiently
+implement variant-based tabling and then subsumption-based tabling.

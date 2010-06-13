@@ -1874,3 +1874,22 @@ completion(generator) {
 \caption{Pseudo-code for the new completion operation.}
 \label{fig:completion_operation_retro}
 \end{figure}
+
+\section{Chapter Summary}
+
+In this chapter we demonstrated the shortcomings of tabling by call subsumption and presented a
+new extension that overcomes these limitations. The new extension is called Retroactive Call Subsumption (RCS)
+and enables full sharing of answers, independently of the order the subgoals are called.
+
+We presented the concept of pruning the execution of a subsumed subgoal by transforming its state from
+generator to consumer and then pruning its current execution. We also discussed two main types of pruning:
+internal pruning, for internal subgoals; and external pruning, for external subgoals.
+We gave examples demonstrating the issues that arise when pruning a range of choice points, followed
+by our proposed solutions.
+We also presented new mechanisms to support RCS: a novel table space called Single Time Stamped Trie (STST),
+where answers are represented only once; and a novel algorithm to find executing subsumed subgoals in a subgoal
+trie.
+
+In the next chapter, we will analyze the performance of the two tabling engines we implemented for this thesis.
+First, we will experiment with YapTab\_TST, the engine that implements traditional call subsumption, and then
+with the engine that supports RCS. We will also do some analysis on the table space organization of each engine.
