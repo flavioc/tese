@@ -98,7 +98,7 @@ Figure~\ref{fig:table_space_tries} shows the table space organization after eval
 The figure shows how the subgoals \texttt{path(X,Z)}, \texttt{path(b,Z)} and \texttt{path(a,Z)} are
 stored in the \texttt{path/2} subgoal trie and how the answer trie for \texttt{path(a,Z)} is represented.
 Notice that by using substitution factoring for the answer trie, only the substitutions
-\texttt{\{VAR0 = b\}} and \texttt{\{VAR0 = a\}} need to be stored.
+\texttt{\{VAR0~=~b\}} and \texttt{\{VAR0~=~a\}} need to be stored.
 
 \subsection{Subgoal Frames}
 
@@ -297,14 +297,14 @@ The first applicable transition is $s1 \rightarrow s2$ because it unifies with t
 $s1 \rightarrow s5$ can not be pushed into the continuation stack because it does not unify, but $s1 \rightarrow s8$ does.
 In state $s2$ only one transition is available, thus nothing is pushed into the stack.
 Transition $s2 \rightarrow s3$ unifies with symbol $a$ and we move to state $s3$. Here, the variable \texttt{VAR0} (that represents \texttt{V})
-can unify with $a$, thus we can get to state $s4$, arriving at a leaf state and a new answer, \texttt{\{V = a\}}.
+can unify with $a$, thus we can get to state $s4$, arriving at a leaf state and a new answer, \texttt{\{V~=~a\}}.
 
 Next, the process must use the continuation stack to retrieve more answers. Transition $s1 \rightarrow s8$ is popped from the stack
 and we arrive at state $s8$ with 3 available transitions. Using the previous rules, a new answer is retrieved,
-\texttt{\{V = c\}} and the continuation stack contains the transition $s8 \rightarrow s13$.
+\texttt{\{V~=~c\}} and the continuation stack contains the transition $s8 \rightarrow s13$.
 
 Finally, once states $s13$ and $s14$ are visited, the process arrives at a leaf state and a new answer,
-\texttt{\{V = d\}}, is retrieved. The process finishes and every answer that is specific to \texttt{p(a,a,V)} is found.
+\texttt{\{V~=~d\}}, is retrieved. The process finishes and every answer that is specific to \texttt{p(a,a,V)} is found.
 
 \subsubsection{Threaded Sequential Automata}
 
@@ -445,8 +445,8 @@ works by navigating the TST and unifying the answers against the answer template
 If we wanted to retrieve answers to the subgoal \texttt{p(a,a,X)} from the TST in Figure~\ref{fig:tst_2},
 during the subgoal call we determine the answer template relative to \texttt{path(X,Y,Z)}:
 \texttt{\{X~=~a,~Y~=~a,~Z~=~VAR0\}},
-and store it under the choice point. Then, the terms $[a, a, VAR0]$ are unified
-with the trie symbols, thus locating answers that are specific to $G$.
+and store it under the choice point. Then, the terms \texttt{[a,~a,~VAR0]} are unified
+with the trie symbols, thus finding answers that are specific to $G$.
 
 Like tries, TSTs only store substitutions for variables, thus we must unify
 the first sub-term $a$, then $a$ again and then the variable, which unifies with any symbol.

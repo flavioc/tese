@@ -278,7 +278,7 @@ Goal \texttt{path(b,Z)} is then resolved against the first clause of \texttt{pat
 Ñext, \texttt{edge(b,Y)} fails against the first clause but succeeds with \texttt{\{Y~=~a\}} for
 the second clause. A new tabled subgoal \texttt{path(a,Z)} is registered in the tabled space (step 6)
 and resolved against the first clause of \texttt{path/2} (step 7). This time the \texttt{edge/2}
-subgoal matches with the first clause with \texttt{\{Y = b\}}. This originates a repeated tabled subgoal
+subgoal matches with the first clause with \texttt{\{Y~=~b\}}. This originates a repeated tabled subgoal
 call to \texttt{path(b,Z)} and the first consumer node is allocated (step 8). As we have no answers for \texttt{path(b,Z)}
 in the table space, the current evaluation point is \textit{suspended}. Later on, this node can be resumed to
 consume new answers.
