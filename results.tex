@@ -409,7 +409,9 @@ The \textbf{fib} program shows a considerable average speedup of 2.19 for YapTab
 We can see that, for different parameters, the speedup is maintained because the execution time of the pruned subsumed
 subgoal is more or less equal to that of the subsuming subgoal. For the \textbf{big} program, where multiple
 subsumed subgoals are pruned, we can see that, as the number of pruned subsumed subgoals increase, the speedup
-also increases, reaching a maximum of 21.29 for YapTab.
+also increases, reaching a maximum of 21.29 for YapTab. An interesting observation for the \textbf{big} program is
+that the execution time for retroactive-tabling stays the same, even if the number of subsumed subgoals to prune
+increase.
 
 Even if the \texttt{path/2} programs, in average, do not show improvements, for some data sets
 these programs can obtain good speedups. For example, the binary tree configuration can reach speedups of 1.62 and 1.63. The grid configuration can reach speedups of 1.10 for the \texttt{left\_first} benchmark, and the \texttt{genome/1}
