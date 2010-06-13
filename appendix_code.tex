@@ -152,6 +152,51 @@ reach(X, Z) :- reach(X, Y), trans(Y, _, Z).
 ....
 \end{Verbatim}
 
+\subsubsection*{fib}
+
+\begin{Verbatim}
+fib(0, 1) :- !.
+fib(1, 1) :- !.
+fib(X, V) :-
+  X > 1,
+  X1 is X - 1,
+  X2 is X - 2,
+  fib(X1, V1),
+  fib(X2, V2),
+  V is V1 + V2.
+     
+do_fib(X) :- fib_fact(T), fib(T, X).
+
+:- table p/2.
+
+a(X) :- p(1,X).
+
+p(1,2).
+p(1,X) :- do_fib(X).
+\end{Verbatim}
+
+\subsubsection*{big}
+
+\begin{Verbatim}
+fib(0, 1) :- !.
+fib(1, 1) :- !.
+fib(X, V) :-
+  X > 1,
+  X1 is X - 1,
+  X2 is X - 2,
+  fib(X1, V1),
+  fib(X2, V2),
+  V is V1 + V2.
+  
+b(X) :- big_fact(Max), between_num(1, Max, X).
+
+a(2) :- b(X), p(X).
+a(2).
+a(2) :- p(_).
+
+p(_) :- a(_), do_fib(32).
+\end{Verbatim}
+
 \section{Facts}
 
 \subsubsection*{chain}

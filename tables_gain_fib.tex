@@ -1,0 +1,26 @@
+\begin{table}[ht]
+\centering
+\footnotesize{
+  \begin{tabular}{cc|c|cc|cc}
+   \hline
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+   \hline
+   \hline
+
+\multirow{3}{*}{\textbf{big}} & 5 &  580 &  8.27  &  8.26  &  5.92 & 6.17 \\
+&  10 &  584 &  14.88  &  15.05  &  10.90 & 13.35 \\
+&  20 &  584 &  33.76  &  28.23  &  20.59 & 21.29 \\
+\hline
+\multirow{4}{*}{\textbf{fib}} &  30 &  220 &  4.04  &  4.00  &  1.98 & 2.25 \\
+&  32 &  580 &  \scriptsize{crashed}  &  \scriptsize{crashed}  &  1.97 & 1.98 \\
+&  35 &  2632 &  \scriptsize{crashed}  &  \scriptsize{crashed}  &  1.86 & 1.86 \\
+&  36 &  3916 &  \scriptsize{crashed}  &  \scriptsize{crashed}  &  2.02 & 2.68 \\
+\hline
+\hline
+\end{tabular}
+}
+\caption{Detailed gain results: \texttt{fib} and \texttt{big} programs.}
+\label{tbl:results_detail_gain_fib}
+\end{table}
