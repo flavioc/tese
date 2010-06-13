@@ -82,19 +82,19 @@ checks.
 In order to compare the YapTab\_TST tabling engine with the SLG-WAM we used the following programs:
 
 \begin{itemize}
-   \item The \texttt{path/2} program with the query `\texttt{?-~path(X,Y)}' with all the combinations of
+   \item The \texttt{path/2} program with the query `\texttt{?-~path(X,Y).}' with all the combinations of
    versions and data sets.
-   \item The \texttt{genome/1} program with different data sets. The query used was `\texttt{?-~genome(X)}'.
+   \item The \texttt{genome/1} program with different data sets. The query used was `\texttt{?-~genome(X).}'.
    
-   \item The query `\texttt{?-~samegen(X,Y)}' in the \texttt{samegen/2} program. All \texttt{path/2} data
+   \item The query `\texttt{?-~samegen(X,Y).}' in the \texttt{samegen/2} program. All \texttt{path/2} data
    sets were used.
    
    \item The two versions of the \texttt{reach/2} program with the following queries for the relation graphs:
 
    \begin{itemize}
-      \item sieve: `\texttt{?-~reach(sieve\_0(5,4,27,end),Y)}'.
-      \item leader: `\texttt{?-~reach(systemLeader\_0(5,end),Y)}'.
-      \item iproto: `\texttt{?-~reach(iproto\_0(\_,\_,end),Y)}'.
+      \item sieve: `\texttt{?-~reach(sieve\_0(5,4,27,end),Y).}'.
+      \item leader: `\texttt{?-~reach(systemLeader\_0(5,end),Y).}'.
+      \item iproto: `\texttt{?-~reach(iproto\_0(\_,\_,end),Y).}'.
    \end{itemize}
 
 \end{itemize}
@@ -192,7 +192,7 @@ As a metric, we use the number of allocated answer trie nodes across all answer 
 For this, we used the following benchmarks:
 
 \begin{itemize}
-   \item The programs \texttt{left\_first}, \texttt{right\_first} and \texttt{double\_first} with the query `\texttt{?-~path(X,Y)}'. Note that there is no need to use
+   \item The programs \texttt{left\_first}, \texttt{right\_first} and \texttt{double\_first} with the query `\texttt{?-~path(X,Y).}'. Note that there is no need to use
    the \texttt{last} versions of these programs, because they will result in the same number of answer trie nodes.
    
    \item The \texttt{genome/1} program.
@@ -243,17 +243,17 @@ because the pruning techniques of RCS are not employed.
 We used the following benchmarks:
 
 \begin{itemize}
-   \item Every combination of versions and data sets for the \texttt{path/2} program with the query `\texttt{?-~path(X,Y)}'.
+   \item Every combination of versions and data sets for the \texttt{path/2} program with the query `\texttt{?-~path(X,Y).}'.
    
-   \item The query `\texttt{?-~samegen(X,Y)}' in the \texttt{samegen/2} program. All \texttt{path/2} data
+   \item The query `\texttt{?-~samegen(X,Y).}' in the \texttt{samegen/2} program. All \texttt{path/2} data
    sets were used.
    
    \item The two versions of the \texttt{reach/2} program with the following queries for the relation graphs:
 
    \begin{itemize}
-      \item sieve: `\texttt{?-~reach(sieve\_0(5,4,27,end),Y)}'.
-      \item leader: `\texttt{?-~reach(systemLeader\_0(5,end),Y)}'.
-      \item iproto: `\texttt{?-~reach(iproto\_0(\_,\_,end),Y)}'.
+      \item sieve: `\texttt{?-~reach(sieve\_0(5,4,27,end),Y).}'.
+      \item leader: `\texttt{?-~reach(systemLeader\_0(5,end),Y).}'.
+      \item iproto: `\texttt{?-~reach(iproto\_0(\_,\_,end),Y).}'.
    \end{itemize}
 \end{itemize}
 
@@ -321,25 +321,27 @@ The programs we used for these experiments are the following:
 
 \begin{itemize}
    \item The programs \texttt{left\_first}, \texttt{left\_last},
-   \texttt{double\_first} and \texttt{double\_last} with the query goal `\texttt{?-~path(X,1)}'.
+   \texttt{double\_first} and \texttt{double\_last} with the query goal `\texttt{?-~path(X,1).}'.
    When calling the subgoal \texttt{path(X,1)}, the subgoal
    \texttt{path(X,Y)} is called, which prunes the first subgoal.
    
-   \item The \texttt{genome/1} program with the query goal `\texttt{?-~genome(X)}'.
+   \item The \texttt{genome/1} program with the query goal `\texttt{?-~genome(X).}'.
    
    \item The two versions of the \texttt{reach/2} program with the following pair of queries/relation graphs:
 
    \begin{itemize}
-      \item sieve: `\texttt{?-~reach(sieve\_0(5,4,27,end),~par(A,~B,~C,~D))}'.
-      \item leader: `\texttt{?-~reach(systemLeader\_0(5,end),~par(D,~E,~A,~B))}'.
-      \item iproto: `\texttt{?-~reach(iproto\_0(\_,\_,end),imain\_7\_0(A,~B,~C,~D,~E))}'.
+      \item sieve: `\texttt{?-~reach(sieve\_0(5,4,27,end),~par(A,~B,~C,~D)).}'.
+      \item leader: `\texttt{?-~reach(systemLeader\_0(5,end),~par(D,~E,~A,~B)).}'.
+      \item iproto: `\texttt{?-~reach(iproto\_0(\_,\_,end),imain\_7\_0(A,~B,~C,~D,~E)).}'.
    \end{itemize}
    
-   \item The \textbf{flora} program with the query goal `\texttt{?-~\'\_\$\_\$\_flora\_isa\_rhs\'(\_,direct)}'.
+   \item The \textbf{flora} program with the query goal `\texttt{?-~\'\_\$\_\$\_flora\_isa\_rhs\'(\_,direct).}'.
    
-   \item The \textbf{fib} program with the following parameters: 30, 32, 35, and 36.
+   \item The \textbf{fib} program with the following parameters: 30, 32, 35, and 36. We use the following
+   query goal: `\texttt{?-~a(X),~p(Y,~Z).}'.
    
    \item The \textbf{big} program with the following parameters (number of subgoals to prune): 5, 10, and 20.
+   We use the query goal `\texttt{?-~a(X).}'
 \end{itemize}
 
 As the tables of the previous section, we present the results with the execution time of the retroactive-based
