@@ -309,7 +309,7 @@ Finally, once states $s13$ and $s14$ are visited, the process arrives at a leaf 
 \subsubsection{Threaded Sequential Automata}
 
 A \textit{Threaded Sequential Automata} extends the SFA with a concept called
-\textit{equivalent states}. One state $S1$ is equivalent to state $S2$ if when $S1$ is taken, $S2$ is also
+\textit{equivalent states}. One state $S_1$ is equivalent to state $S_2$ if when $S_1$ is taken, $S_2$ is also
 guaranteed to be visited. For example, in Figure~\ref{fig:sfa_example}, whenever states $s2$ and $s3$ are
 visited, states $s8$ and $s9$ are also guaranteed to be visited, as they denote the same path.
 
@@ -466,12 +466,12 @@ been added since the last time a search operation was done by using the time sta
 The table space in this technique extends the variant table space by
 using TSTs instead of answer tries for subsuming goals.
  
-Each subsumed subgoal in a call trie stores the last search time stamp $t$. The process of
+Each subsumed subgoal in a subgoal trie stores the last search time stamp $t$. The process of
 incrementally searching for new answers in a TST will use $t$ and update it after the process completes.
 When a subsumed subgoal is first called $t$ is set to $0$, thus initially allowing the retrieval of all
 relevant answers.
 
-The subgoal in the call trie also stores an answer return list. Each time new answers are identified, they are appended
+The subgoal in the subgoal trie also stores an answer return list. Each time new answers are identified, they are appended
 to this linked list. The original subsumptive consumer and its variant subgoals will then consume answers from it. If no
 new answers can be retrieved from the list, the TST process is employed to identify more answers from the subsuming TST,
 inserting them into the list.

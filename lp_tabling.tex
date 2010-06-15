@@ -567,7 +567,7 @@ $B$ ($A$ is a consumer) and $B$ generates its own answers.
 
   YapTab reduces the size of consumer choice points by using dependency frames. Each frame contains the
   following fields: \textbf{last\_answer} field that stores the last answer consumed by the choice point;
-  the \textbf{cons\_cp} field that points to the consumer choice point; the \textbf{leader} field which
+  the \textbf{consumer\_cp} field that points to the consumer choice point; the \textbf{leader} field which
   points to the leader node at creation time; and the \textbf{back\_leader} field that changes during
   evaluation, pointing to the leader node where we performed the last unsuccessful completion operation.
   A new global register, called \textbf{TOP\_DF}, always points to the youngest dependency frame.

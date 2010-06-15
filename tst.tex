@@ -13,11 +13,11 @@ and on the table space.
 
 \section{Finding General Subgoals}\label{sec:lookup_subsuming}
 
-The problem of finding on a call trie $C$ a subgoal $G'$ that subsumes $G$ 
+The problem of finding on a subgoal trie $C$ a subgoal $G'$ that subsumes $G$ 
 is an important part of a subsumptive tabling engine, as it makes possible to
 identify a subsumptive relation between $G'$ and $G$.
 
-In the SLG-WAM, the search is performed by recursively backtracking through the call trie $C$, trying
+In the SLG-WAM, the search is performed by recursively backtracking through the subgoal trie $C$, trying
 to match the node symbols with subterms from $G$. The process stops once a leaf node is reached.
 
 The matching process gives priority to match non-variable terms from $G$
@@ -38,11 +38,11 @@ not be paired to the same trie variable.
 \begin{figure}[ht]
   \centering
     \includegraphics[scale=0.6]{sub_call_search.pdf}
-  \caption{Call trie for a tabled predicate \texttt{p/3}.}
+  \caption{Subgoal trie for a tabled predicate \texttt{p/3}.}
   \label{fig:sub_call_search}
 \end{figure}
 
-For illustration purposes, Figure~\ref{fig:sub_call_search} shows a call trie for a tabled predicate \texttt{p/3}.
+For illustration purposes, Figure~\ref{fig:sub_call_search} shows a subgoal trie for a tabled predicate \texttt{p/3}.
 The first subgoal called was \texttt{p(X,2,X)}, followed by \texttt{p(X,f(Y),a(Z))} and finally \texttt{p(X,Y,Z)}.
 
 If the subgoal \texttt{p(X,2,X)} is called again, the algorithm described above
@@ -57,9 +57,9 @@ and a subsuming subgoal would be found, as \texttt{p(VAR0,2,VAR1)} subsumes \tex
 In this case, a variant path could be created by resuming the insert operation at node $n2$ to insert
 a \texttt{VAR0} node.
 
-For a more complex example, let the subgoal \texttt{p(2,f(X),a(2))} now be called for the same call trie. First,
+For a more complex example, let the subgoal \texttt{p(2,f(X),a(2))} now be called for the same subgoal trie. First,
 the algorithm searches for a trie node with the symbol \texttt{2}, and as it does not find one, no variant path
-exists in this call trie. Next, the algorithm tries to unify with bound variables, but as the process
+exists in this subgoal trie. Next, the algorithm tries to unify with bound variables, but as the process
 has just started, only unbound variables are found, and \texttt{VAR0} (node $n1$) is unified with \texttt{2}.
 The functor term \texttt{f/1} is the next term on the subgoal and node $n4$ matches with it.
 The next term is \texttt{X} and it can unify with \texttt{VAR1} (node $n5$).
@@ -112,10 +112,10 @@ by backtracking, forcing variable matching.
 
 \begin{figure}[ht]
 \begin{Verbatim}
-lookup_subsuming_call(call_trie, subgoal_call) {
+lookup_subsuming_call(subgoal_trie, subgoal_call) {
   match_mode = MATCH_EXACTLY
   path_type = VARIANT_PATH
-  parent = trie_root(call_trie)
+  parent = trie_root(subgoal_trie)
   node = child(parent)
   var_chain = NULL
   push_arguments(term_stack, subgoal_call)
@@ -172,17 +172,17 @@ the top of the term log stack (\texttt{term\_log\_stack\_top}),
 and the top of the trail stack (\texttt{trail\_stack\_top}).
 
 When popping a frame from the call choice point stack, the state of the auxiliary stacks and the other data
-structures is restored. Consider a computational state $S1$ pushed onto the stack
-as frame $F1$. Given that we are at state $S2$ and we need to backtrack to the previous state,
-first we need to remove $F1$ from the stack and then we use the frame's information to restore $S1$.
+structures is restored. Consider a computational state $S_1$ pushed onto the stack
+as frame $F1$. Given that we are at state $S_2$ and we need to backtrack to the previous state,
+first we need to remove $F1$ from the stack and then we use the frame's information to restore $S_1$.
 
-Any terms that were popped from the term stack from $S1$ to $S2$, which were
+Any terms that were popped from the term stack from $S_1$ to $S_2$, which were
 stored in the term log stack must be restored back into the term stack.
-Then, any bindings made from $S1$ to $S2$ must be untrailed, which is
+Then, any bindings made from $S_1$ to $S_2$ must be untrailed, which is
 accomplished by \textit{unwinding} the trail stack. The unwind process untrails
 the trie variables bound to the variable bindings vector
 and the term variables which may have been made to point to the variable enumerator
-vector. The node associated with state $S2$ and its successors are never visited again and
+vector. The node associated with state $S_2$ and its successors are never visited again and
 the process continues until a leaf node is reached or the call choice point stack
 is exhausted.
 
@@ -243,7 +243,7 @@ constructed and to mark the \texttt{path\_type} as \texttt{SUBSUMPTIVE\_PATH}.
 Phase 2 of \texttt{match\_constant\_term} can be reached by a failed exact match or by backtracking
 (remember that the match mode changes to \texttt{MATCH\_TRIE\_VARS} when backtracking). In this step
 we call \texttt{find\_bound\_trie\_var} that will iterate over the \texttt{node} chain to look for
-\textit{bound trie variables}. When traversing the call trie, each new trie variable
+\textit{bound trie variables}. When traversing the subgoal trie, each new trie variable
 along a path is marked, so it is easy to check for old variables, which have already been bound
 to some term before arriving at the current node. The variable binding can be retrieved by
 checking the variable bindings vector for the position corresponding to this variable
@@ -375,7 +375,7 @@ match_variable_term(variable, parent, node, var_chain, match_mode, path_type) {
 \subsection{Variant Continuations}
 
 A \textit{variant continuation} is built when the algorithm detects that a variant path of the
-called subgoal cannot be found on the call trie during the search process.
+called subgoal cannot be found on the subgoal trie during the search process.
 A variant continuation stores all the needed information to later resume
 the algorithm that creates the variant path. This includes the node from where the rest of the variant
 path is created (i.e., the last node from where the search for a variant path was still valid),
@@ -439,7 +439,7 @@ the generator variables, \texttt{X} and \texttt{Y}, with the terms in the consum
   \label{fig:answer_template_consumer}
 \end{figure}
 
-The construction of answer templates is done when searching the call trie for a more general goal.
+The construction of answer templates is done when searching the subgoal trie for a more general goal.
 If no subsuming subgoal is found, then a generator answer template is built. If a subsuming subgoal
 exists, then the found subgoal frame $S$ can be either:
 
@@ -1409,7 +1409,7 @@ which forces the predicate to use variant tabling and \textbf{subsumptive} to us
 
 \subsubsection{Trie Nodes}
 
-YapTab uses two types of trie nodes: subgoal trie nodes, for call tries; and answer trie nodes, for
+YapTab uses two types of trie nodes: subgoal trie nodes, for subgoal tries; and answer trie nodes, for
 answer tries. In terms of hash tables, the same data structures are used for both subgoal and answer
 hash tables. \textit{YapTab\_TST} extends the answer and subgoal trie nodes with a \textbf{status}
 bit field and implements the time stamped trie nodes as answer trie nodes extended with a \textbf{timestamp} field.
@@ -1436,7 +1436,7 @@ as a chain link to the subsumed subgoal frames of the generator subgoal.
 The subsumptive consumer subgoal frame does not extend the variant subgoal frame, because
 some variant fields are not needed.
 The consumer frame contains the following fields: \textbf{state}, the state of execution;
-\textbf{producer}, a pointer to the subsumptive generator subgoal frame; \textbf{cons\_cp},
+\textbf{generator}, a pointer to the subsumptive generator subgoal frame; \textbf{consumer\_cp},
 a pointer to the first consumer choice point; \textbf{first\_answer} and \textbf{last\_answer},
 as the answer return list; \textbf{ts}, the consumer time stamp;
 \textbf{next}, a pointer to the next evaluating consumer subgoal frame; \textbf{answer\_template},
@@ -1447,14 +1447,14 @@ Each subgoal frame was also extended with a \textbf{type} field, which identifie
 The variant subgoal frame now uses an answer return list instead of using the \textbf{child} field of
 each trie node to link answers.
 
-Figure~\ref{fig:subgoal_frames} illustrates a call trie for the predicate \texttt{p/2}
+Figure~\ref{fig:subgoal_frames} illustrates a subgoal trie for the predicate \texttt{p/2}
 with the following subgoals: \texttt{p(X,Y)}, as a generator subgoal; and \texttt{p(2,X)} and
 \texttt{p(3,X)} as consumer subgoals.
 
 \begin{figure}[h]
   \centering
     \includegraphics[scale=0.6]{subgoal_frames.pdf}
-  \caption{Call trie with a subsumptive generator and two subsumed consumer subgoal frames.}
+  \caption{Subgoal trie with a subsumptive generator and two subsumed consumer subgoal frames.}
   \label{fig:subgoal_frames}
 \end{figure}
 
@@ -1477,7 +1477,7 @@ else we use the leader of the dependency frame that satisfied the previous condi
 \begin{figure}[ht]
 \begin{Verbatim}
 tabled_subgoal_call(table_entry, arguments) {
-  subgoal_frame = subgoal_search(call_trie(table_entry), arguments)
+  subgoal_frame = subgoal_search(subgoal_trie(table_entry), arguments)
   
   if (state(subgoal_frame) == READY)
     // new generator
@@ -1502,8 +1502,8 @@ tabled_subgoal_call(table_entry, arguments) {
 
 \textit{YapTab\_TST} extends the tabled subgoal call operation to deal with either subsumptive and variant subgoals,
 and if a predicate uses call by subsumption, we call the \texttt{subsumptive\_subgoal\_search} procedure
-(Figure~\ref{fig:subsumptive_subgoal_search}) to look on the call trie for subsuming subgoals.
-If no subsuming path is found, we insert the subgoal path on the call trie and create a new generator
+(Figure~\ref{fig:subsumptive_subgoal_search}) to look on the subgoal trie for subsuming subgoals.
+If no subsuming path is found, we insert the subgoal path on the subgoal trie and create a new generator
 subgoal frame. If some path is found and the subgoal frame is a generator it can be either
 a variant of our subgoal or a more general subgoal. For both cases
 we use \texttt{construct\_answer\_template\_from\_lookup}, which constructs the right answer template for us.
@@ -1516,10 +1516,10 @@ to create a consumer subgoal frame.
 \begin{figure}[ht]
 \begin{Verbatim}
 subsumptive_subgoal_search(table_entry, arguments) {
-  (path, leaf) = lookup_subsuming_call(call_trie(table_entry), arguments)
+  (path, leaf) = lookup_subsuming_call(subgoal_trie(table_entry), arguments)
   
   if (path == NO_PATH)
-    leaf = insert_with_variant_continuation(call_trie)
+    leaf = insert_with_variant_continuation(subgoal_trie)
     local_stack = construct_answer_template_from_insertion(local_stack)
     return create_generator_subgoal_frame(leaf)
   else
@@ -1529,7 +1529,7 @@ subsumptive_subgoal_search(table_entry, arguments) {
       subsumer_sf = found_sf
       local_stack = construct_answer_template_from_lookup(local_stack)
     else
-      subsumer_sf = producer(found_sf)
+      subsumer_sf = generator(found_sf)
       local_stack = construct_answer_template_from_generator(subsumer_sf, local_stack)
     
     if (path_type == VARIANT_PATH)
@@ -1538,7 +1538,7 @@ subsumptive_subgoal_search(table_entry, arguments) {
     // subsumptive path
     if (state(subsumer_sf) == EVALUATING)
       // create variant path
-      leaf = insert_with_variant_continuation(call_trie)
+      leaf = insert_with_variant_continuation(subgoal_trie)
       copy_answer_template_to_heap(local_stack)
       return create_consumer_subgoal_frame(leaf, subsumer_sf)
     else
@@ -1571,7 +1571,7 @@ and terms from the arguments.
   \label{fig:structural_copy}
 \end{figure}
 
-The field \textbf{cons\_cp} of the consumer subgoal frame is set to point to the first call
+The field \textbf{consumer\_cp} of the consumer subgoal frame is set to point to the first call
 of the consumer subgoal and will be used to access the value of \texttt{H} stored on the choice point.
 This value of \texttt{H} points to the top of the heap during the choice point creation which corresponds
 to the answer template copied before. The field \textbf{answer\_template} points to \texttt{H}
@@ -1601,12 +1601,12 @@ subgoal operation.
 \begin{figure}[ht]
 \begin{Verbatim}
 tabled_subgoal_call(table_entry, arguments) {
-  call_trie = call_trie(table_entry)
+  subgoal_trie = subgoal_trie(table_entry)
   
   if(method(table_entry) == VARIANT)
-    subgoal_frame = variant_subgoal_search(call_trie, arguments)
+    subgoal_frame = variant_subgoal_search(subgoal_trie, arguments)
   else
-    subgoal_frame = subsumptive_subgoal_search(call_trie, arguments)
+    subgoal_frame = subsumptive_subgoal_search(subgoal_trie, arguments)
   
   if (is_new_generator_call(subgoal_frame)) // CHANGED
     store_generator_node(table_entry, arguments, subgoal_frame)
@@ -1618,7 +1618,7 @@ tabled_subgoal_call(table_entry, arguments) {
     // NEW
     if ((type(subgoal_frame) == SUBSUMED_CONSUMER) and (state(subgoal_frame) == READY))
       recompute_answer_template(subgoal_frame)
-      cons_cp(subgoal_frame) = B
+      consumer_cp(subgoal_frame) = B
       add_to_consumer_stack(subgoal_frame)
     jump_to_answer_resolution()
   else
@@ -1669,7 +1669,7 @@ is_new_consumer_call(subgoal_frame) {
     return state(subgoal_frame) == READY
   
   // consumer subgoal frames
-  return state(producer(subgoal_frame)) == EVALUATING
+  return state(generator(subgoal_frame)) == EVALUATING
 }
 \end{Verbatim}
 \caption{Pseudo-code for function \texttt{is\_new\_consumer\_call}.}
@@ -1687,7 +1687,7 @@ find_dependency_node(subgoal_frame) {
   if (type(subgoal_frame) == VARIANT or type(subgoal_frame) == SUBSUMPTIVE_GENERATOR)
     return generator_cp(subgoal_frame)
   else
-    return generator_cp(producer(subgoal_frame))
+    return generator_cp(generator(subgoal_frame))
 }
 \end{Verbatim}
 \caption{Pseudo-code for the new \texttt{find\_dependency\_node} procedure.}
@@ -1695,7 +1695,7 @@ find_dependency_node(subgoal_frame) {
 \end{figure}
 
 If the subsumed subgoal is called for the first time, we copy the answer template to the heap
-and the \texttt{cons\_cp} is made to point to the current choice point. The subgoal frame is
+and the \texttt{consumer\_cp} is made to point to the current choice point. The subgoal frame is
 also pushed into the consumer subgoal frame stack in order to be completed in the completion operation
 (see next section for more details).
 
@@ -1735,7 +1735,7 @@ get_next_answer_continuation(dependency_frame) {
   
   // must collect new available answers, if any
   consumer_ts = timestamp(sg_fr)
-  generator = producer(sg_fr)
+  generator = generator(sg_fr)
   generator_ts = timestamp(answer_trie(generator))
       
   if (generator_ts == consumer_ts)
@@ -1779,12 +1779,12 @@ using the devised abstractions.
 completion(generator) {
   if (is_leader_node(generator))
     df = TOP_DEP_FR
-    while (younger_than(cons_cp(df), generator))
+    while (younger_than(consumer_cp(df), generator))
       cont = get_next_answer_continuation(dep_fr) // CHANGED
       if (cont)
         // unconsumed answers
         back_cp(df) = generator
-        consumer = cons_cp(df)
+        consumer = consumer_cp(df)
         restore_bindings(CP_TR(generator), CP_TR(consumer))
         goto answer_resolution(consumer)
       df = next(df)
@@ -1806,7 +1806,7 @@ stack is iterated until the leader subgoal frame is reached. We used this stack 
 variant and subsumptive generator subgoal frames.
 
 Subsumed consumer subgoal frames are pushed into a stack called \textit{consumer subgoal frame stack}.
-During completion, the subgoal frames with a consumer choice point (\texttt{cons\_cp})
+During completion, the subgoal frames with a consumer choice point (\texttt{consumer\_cp})
 younger than the completion point are completed. Figure~\ref{fig:completion_space} illustrates the
 subgoal frame stack, the consumer subgoal frame stack and the dependency space.
 
