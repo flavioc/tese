@@ -1,28 +1,28 @@
-A tabulação é um método de resolução particularmente bem sucedido que resolve algumas limitações
-do método de avaliação SLD encontrado em sistemas Prolog, tais como a recursão e computação redundantes.
-Na tabulação, as primeiras chamadas a subgolos são avaliadas normalmente através da avalição do código do
-programa, enquanto que \emph{chamadas similares} são avaliadas através do consumo de respostas guardadas
-numa tabela pelo subgolo similar correspondente.
-Em geral, podemos distinguir entre duas maneiras para determinar se o subgolo $A$ é similar ao subgolo $B$:
+A tabulação é um método de resolução particularmente bem sucedido que resolve algumas das limitações
+do método de avaliação SLD encontrado em sistemas Prolog, no tratamento de computações recursivas e/ou redundantes.
+Na tabulação, as primeiras chamadas a subgolos tabelados são avaliadas normalmente através da execução do código do
+programa, enquanto que \emph{chamadas similares} são avaliadas através do consumo das respostas geradas
+pelo subgolo similar correspondente.
+Em geral, podemos distinguir entre duas formas de determinar se um subgolo $A$ é similar a um subgolo $B$:
 \emph{tabulação por variantes} e \emph{tabulação por subsumpção}.
 Na tabulação por variantes, $A$ é similar a $B$ quando eles são iguais por renomeação das variáveis.
-Na tabulação por subsumpção, $A$ é similar a $B$ quando $A$ é mais específico que $B$ (ou $B$ é mais geral que $A$).
-Isto surge através de um simples princípio: quando $A$ é mais específico que $B$ e $S_A$ e $S_B$ são os respectivos
-conjuntos de rrespostas, então $S_A \subseteq S_B$.
-Embora a tabulação por subsumpção se consiga atingir maiores ganhos em termos de tempo de execução, devido
-ao aumento da partilha de respostas, implementar os mecanismos necessários de forma eficiente é bastante
-mais difícil em comparação com tabulação por variantes, o que faz com que este último seja muito mais popular
-nos motores de tabulação disponíveis.
+Na tabulação por subsumpção, $A$ é similar a $B$ quando $A$ é mais específico do que $B$ (ou $B$ é mais geral do que $A$).
+Isto acontece pelo simpes princípio de que se $A$ é mais específico do que $B$ e $S_A$ e $S_B$ são os respectivos
+conjuntos de respostas, então $S_A \subseteq S_B$.
+Embora a tabulação por subsumpção consiga atingir maiores ganhos em termos do tempo de execução, devido
+à maior partilha de respostas, a implementação eficiente dos mecanismos necessários para seu suporte é bastante
+mais difícil em comparação com tabulação por variantes, o que faz com que este último seja bastante mais popular
+entre os motores de tabulação disponíveis.
 
-Esta tese descreve o desenho e integração do mecanismo de Time-Stamped Tries do motor SLG-WAM no motor de tabulação
-YapTab. Os resultados obtidos mostram que os nossos esforços de integração foram bem sucedidos, com \emph{speedups}
-comparavéis entre tabulação por variantes e tabulação por subsumpção.
+Esta tese descreve a migração e integração do mecanismo de \emph{Time-Stamped Tries} do motor de tabulação
+SLG-WAM no motor de tabulação YapTab. Os resultados obtidos mostram que os nossos esforços de integração foram
+bem sucedidos, com desempenhos comparavéis aos da SLG-WAM na execução entre tabulação por variantes e tabulação
+por subsumpção.
 
-Na segunda parte desta tese apresenta-se o desenho e avaliação de uma nova extensão baseada na tabulação
-por subsumpção chamada Tabulação por Subsumpção Retroactiva (TSR). Esta resolve algumas limitações da tradicional
-tabulação por subsumpção, nomeadamente, o facto de a ordem da chamada dos subgolos poderem afectar o seu sucesso e
+Na segunda parte desta tese apresenta-se o desenho, implementação e avaliação de uma nova extensão baseada na tabulação
+por subsumpção chamada \emph{Tabulação por Subsumpção Retroactiva} (TSR). A TSR resolve algumas limitações da
+tabulação por subsumpção tradicional, nomeadamente, o facto de a ordem da chamada dos subgolos poder afectar o seu sucesso e
 aplicação. A TSR permite uma partilha completa e bidireccional de respostas entre subgolos, independentemente da
 sua ordem de chamada através do corte da avaliação dos golos mais específicos.
-Os nossos resultados mostram ganhos consideráveis para programas que podem tomar vantagem do novo mecanismo,
-enquanto que programas que não podem beneficiar mostram um overhead mínimo em relação à tabulação por subsumpção
-normal.
+Os nossos resultados mostram ganhos consideráveis para os programas que conseguem tirar partido do novo mecanismo,
+enquanto que o custo associado aos programas que dele não conseguem beneficiar é quase insignificante.

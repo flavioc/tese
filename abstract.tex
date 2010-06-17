@@ -1,11 +1,11 @@
 Tabling is a particularly successful resolution mechanism that overcomes some limitations
-of the SLD resolution method found in Prolog systems, namely, dealing with recursion and redundant
+of the SLD resolution method found in Prolog systems, namely, in dealing with recursion and redundant
 sub-computations. In tabling, first calls to tabled subgoals are evaluated through
 program resolution, while \emph{similar calls} are evaluated by consuming answers stored
 in the table space by the corresponding similar subgoal.
-In general, we can distinguish between two main approaches to determine if subgoal $A$ is
-similar to subgoal $B$: \emph{variant-based tabling} and \emph{subsumption-based tabling}
-(or call by subsumption). In variant-based tabling, $A$ is similar to $B$ if they are the same
+In general, we can distinguish between two main approaches to determine if a subgoal $A$ is
+similar to a subgoal $B$: \emph{variant-based tabling} and \emph{subsumption-based tabling}.
+In variant-based tabling, $A$ is similar to $B$ if they are the same
 up to variable renaming. In subsumption-based tabling, $A$ is similar to $B$ when $A$ is subsumed
 by $B$ (or $B$ subsumes $A$). This stems from a simple principle: if $A$ is subsumed by $B$ and
 $S_A$ and $S_B$ are the respective answer sets, then $S_A \subseteq S_B$.
@@ -13,13 +13,13 @@ While subsumption-based tabling can yield superior time performance by allowing 
 reuse, its efficient implementation is harder than variant-based tabling, which makes tabling engines
 with variant checks much more popular in the logic community.
 
-This thesis first addresses the design and integration of the Time-Stamped Tries mechanism
-from SLG-WAM tabling engine into the YapTab tabling engine. Our performance results show that our
-integration efforts were successful, with comparable speedups when using subsumptive-tabling agains
+This thesis first addresses the porting and integration of the \emph{Time-Stamped Tries} mechanism
+from the SLG-WAM tabling engine into the YapTab tabling engine. Our performance results show that our
+integration efforts were successful, with comparable speedups when using subsumptive-tabling against
 variant-tabling.
 
-In the second part of this thesis we present the design and evaluation of a novel extension
-based on subsumption-based tabling called Retroactive Call Subsumption (RCS). It overcomes some limitations
+In the second part of this thesis we present the design, implementation, and evaluation of a novel extension
+based on subsumption-based tabling called \emph{Retroactive Call Subsumption} (RCS). RCS overcomes some limitations
 of traditional call subsumption, namely, the fact that the call order of the subgoals can greatly affect its
 success and applicability. RCS allows full sharing of answers,
 independently of the order they are called by selectively pruning and restarting the evaluation of subsumed
