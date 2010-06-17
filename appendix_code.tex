@@ -2,8 +2,8 @@
 
 This appendix describes the programs used to benchmark the tabling engines
 explored in this thesis. The program rules will be fully presented here and
-the facts will be shortly described, because these are too big to fit here.
-The author of this thesis may be contacted for the full benchmark set.
+the facts will be shortly described, as they are too big to fit here.
+The author may be contacted for the full benchmark set.
 
 \section{Programs}
 
@@ -129,24 +129,6 @@ reach(X, Z) :- reach(X, Y), trans(Y, _, Z).
 '_$_$_flora_mvd'(O,M)    :- '_$_$_flora_mvd_dyn'(O,M).
 '_$_$_flora_imvd'(O,M)   :- '_$_$_flora_imvd_dyn'(O,M).
 
-'_$_$_flora_tag'(noquery).
-
-?- '_$_$_flora_tag'(query), !,
-   ( current_predicate('_$_$_flora_print_all'/2) ->
-       true
-     ;
-       ( package_configuration(dir(flora),D) ->
-           true
-         ;
-           bootstrap_package(flora,flora),
-           package_configuration(dir(flora),D)
-       ),
-       slash(S),
-       fmt_write_string(Lib,'%s%slib%sflrdisplay',f(D,S,S)),
-       consult(Lib)
-   ),
-   !.
-
 ...
 % other predicates
 ....
@@ -164,7 +146,10 @@ fib(X, V) :-
   fib(X1, V1),
   fib(X2, V2),
   V is V1 + V2.
-     
+
+% input parameter  
+% fib_fact(Number).
+    
 do_fib(X) :- fib_fact(T), fib(T, X).
 
 :- table p/2.
@@ -187,14 +172,26 @@ fib(X, V) :-
   fib(X1, V1),
   fib(X2, V2),
   V is V1 + V2.
-  
-b(X) :- big_fact(Max), between_num(1, Max, X).
 
-a(2) :- b(X), p(X).
-a(2).
-a(2) :- p(_).
+between_num(Num, Num, Num) :- !.
+between_num(Num, Num, Max).
+between_num(Num, Min, Max) :-
+   Min1 is Min + 1,
+   between_num(Num, Min1, Max).
 
-p(_) :- a(_), do_fib(32).
+% input parameter:
+% big_fact(Number).
+   
+b(X) :- big_fact(Max), between_num(X, 1, Max).
+
+:- table p/1.
+:- table a/1.
+
+a(0) :- b(X), p(X).
+a(0).
+a(0) :- p(_).
+
+p(_) :- a(_), fib(32, X).
 \end{Verbatim}
 
 \section{Facts}
@@ -202,8 +199,7 @@ p(_) :- a(_), do_fib(32).
 \subsubsection*{chain}
 
 A set of graph nodes in a chain configuration.
-
-An example with 4 nodes:
+An example with 4 nodes is:
 
 \begin{Verbatim}
 edge(1, 2).
@@ -214,8 +210,7 @@ edge(3, 4).
 \subsubsection*{cycle}
 
 A set of graph nodes in a chain configuration, but the last node connects to the first node.
-
-An example with four nodes:
+An example with four nodes is:
 
 \begin{Verbatim}
 edge(1, 2).
@@ -227,8 +222,7 @@ edge(4, 1).
 \subsubsection*{pyramid}
 
 A set of graph nodes forming a pyramid configuration.
-
-An example with four nodes (depth 2):
+An example with four nodes (depth 2) is:
 
 \begin{Verbatim}
 edge(1,2).
@@ -240,8 +234,7 @@ edge(3,4).
 \subsubsection*{tree}
 
 A set of graph nodes forming a binary tree configuration.
-
-An example with seven nodes (depth 3):
+An example with seven nodes (depth 3) is:
 
 \begin{Verbatim}
 edge(1,2).
@@ -255,8 +248,7 @@ edge(3,7).
 \subsubsection*{grid}
 
 A set of graph nodes forming a grid configuration.
-
-An example with two nodes:
+An example with two nodes is:
 
 \begin{Verbatim}
 edge(1,2).
