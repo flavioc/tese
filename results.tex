@@ -1,12 +1,12 @@
-This chapter presents a detailed performance analysis of our two subsumption-based tabling engines
-that we have developed. We divided this chapter into four sections. The first section describes the
+This chapter presents a detailed performance analysis of our two subsumption-based tabling engines.
+We divided this chapter into four sections. The first section describes the
 set of tabled benchmark programs used. The second
 section evaluates the engine supporting traditional call subsumption that was implemented by integrating the
 Time-Stamped Tries algorithms and data structures from XSB into Yap. This includes analyzing the memory gains
 of call subsumption by measuring the size of the answer tries and comparing it to variant-based tabling.
 In the third section, we evaluate the retroactive-based tabling engine for programs that do not benefit
 from the new mechanisms and for programs that can take advantage of this new evaluation method. Finally,
-in the fourth section we evaluate the STST table space overhead in a potentially not so good scenario,
+in the fourth section, we evaluate the STST table space overhead in a potentially not so good scenario,
 where the operations of loading and storing answers are more expensive than usual.
 
 \section{Benchmark Programs}

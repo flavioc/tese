@@ -1603,19 +1603,19 @@ subgoal operation.
 tabled_subgoal_call(table_entry, arguments) {
   subgoal_trie = subgoal_trie(table_entry)
   
-  if(method(table_entry) == VARIANT)
+  if(mode_flag(table_entry) == VARIANT)
     subgoal_frame = variant_subgoal_search(subgoal_trie, arguments)
   else
     subgoal_frame = subsumptive_subgoal_search(subgoal_trie, arguments)
   
-  if (is_new_generator_call(subgoal_frame)) // CHANGED
+  if (is_new_generator_call(subgoal_frame))                 // CHANGED
     store_generator_node(table_entry, arguments, subgoal_frame)
     jump_to_predicate_code()
-  else if (is_new_consumer_call(subgoal_frame)) // CHANGED
+  else if (is_new_consumer_call(subgoal_frame))             // CHANGED
     dependency = find_dependency_node(subgoal_frame)
     leader = find_leader_node(subgoal_frame, dependency)
     store_consumer_node(table_entry, subgoal_frame, leader)
-    // NEW
+                                                            // NEW
     if ((type(subgoal_frame) == SUBSUMED_CONSUMER) and (state(subgoal_frame) == READY))
       recompute_answer_template(subgoal_frame)
       consumer_cp(subgoal_frame) = B
