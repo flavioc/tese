@@ -8,19 +8,26 @@
      \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
    \hline
    \hline
+   
+   \multirow{5}{*}{\textbf{genome}} &  chain  (16384)  &  24 &  383.50  &  0.58  &  799.96 &  0.50 \\
+   &  cycle  (8192)  &  13 &  180.92  &  0.69  &  400.00 &  0.62 \\
+   &  grid  (64)  &  12 &  91.17  &  0.67  &  127.08 &  \textbf{1.08} \\
+   &  pyramid  (4096)  &  12 &  162.50  &  0.67  &  194.00 &  0.67 \\
+   &  tree  (32768)  &  60 &  752.52  &  0.47  &  730.60 &  0.83 \\
+   \hline
 
-\multirow{3}{*}{\textbf{reach\_first}} &  iproto &  2120 &  2.30  &  2.46  &  1.10 & 1.35 \\
-&  leader &  2644 &  4.37  &  4.54  &  1.84 & 1.81 \\
-&  sieve &  16801 &  2.19  &  2.85  &  2.12 & 1.72 \\
-\hline
-\multirow{3}{*}{\textbf{reach\_last}} &  iproto &  1848 &  2.63  &  2.85  &  1.27 & 1.55 \\
-&  leader &  2772 &  4.23  &  4.77  &  1.59 & 2.03 \\
-&  sieve &  16053 &  2.06  &  2.14  &  1.76 & 1.98 \\
-\hline
-\multicolumn{2}{c|}{\textbf{flora}} & 72 & 2.5 & 0.29 & 3.17 & 1.17 \\
+   \multirow{3}{*}{\textbf{reach\_first}} &  iproto  &  1920 &  2.52  &  2.92  &  1.57 &  \textbf{1.49} \\
+   &  leader  &  2644 &  4.41  &  4.90  &  4.70 &  \textbf{1.82} \\
+   &  sieve  &  16191 &  2.27  &  2.73  &  1.36 &  \textbf{1.97} \\
+   \hline
+   \multirow{3}{*}{\textbf{reach\_last}} &  iproto  &  1957 &  2.48  &  2.73  &  1.54 &  \textbf{1.46} \\
+   &  leader  &  2570 &  4.52  &  4.80  &  6.04 &  \textbf{1.98} \\
+   &  sieve  &  15001 &  2.20  &  2.50  &  2.08 &  \textbf{2.16} \\
+   \hline
+\multicolumn{2}{c|}{\textbf{flora}} & 72 & 2.5 & 0.29 & 3.17 & \textbf{1.17} \\
 \hline
 \end{tabular}
 }
-\caption{Detailed gain results: model checking programs.}
+\caption{Detailed gain results: \texttt{genome}, model checking and \texttt{flora} programs.}
 \label{tbl:results_detail_gain_model}
 \end{table}

@@ -8,26 +8,28 @@
      \multicolumn{2}{c|}{} & \textbf{\textit{Var}} & \textbf{\textit{Sub}} & \textbf{\textit{Speedup}} & \textbf{\textit{Var}} & \textbf{\textit{Sub}} & \textbf{\textit{Speedup}} \\
    \hline
    \hline
-   \multirow{5}{*}{\textbf{samegen}} &  \scriptsize{chain}  &  23385 & 28 &  \textbf{835.18}  & 44 & 60 &  0.73 \\
-   &  \scriptsize{cycle}  &  6176 & 12 &  \textbf{514.67}  & 32 & 28 &  1.14 \\
-   &  \scriptsize{grid}  &  2228 & 1352 &  \textbf{1.65}  & 1436 & 1068 &  1.34 \\
-   &  \scriptsize{pyramid}  &  2220 & 20 &  \textbf{111.00}  & 20 & 24 &  0.83 \\
-   &  \scriptsize{tree}  &  7132 & 8828 &  \textbf{0.81}  & 4532 & 7620 &  0.59 \\
+   \multirow{5}{*}{\textbf{samegen}} &  \scriptsize{chain  (32768) }  &  23439 & 22 &  \textbf{1065.41}  & 57 & 58 &  0.98 \\
+   &  \scriptsize{cycle  (16384) }  &  6046 & 12 &  \textbf{503.83}  & 38 & 33 &  1.15 \\
+   &  \scriptsize{grid  (32) }  &  2234 & 1362 &  \textbf{1.64}  & 1437 & 1205 &  1.19 \\
+   &  \scriptsize{pyramid  (4096) }  &  2286 & 18 &  \textbf{127.00}  & 25 & 21 &  1.19 \\
+   &  \scriptsize{tree  (8192) }  &  8037 & 8785 &  \textbf{0.91}  & 4856 & 7605 &  0.64 \\
    \hline
-   \multirow{5}{*}{\textbf{genome}} &  \scriptsize{chain}  &  9352 & 16 &  584.50  & 19277 & 20 &  \textbf{963.85} \\
-   &  \scriptsize{cycle}  &  2324 & 8 &  290.50  & 5860 & 8 &  \textbf{732.50} \\
-   &  \scriptsize{grid}  &  1076 & 8 &  \textbf{134.50}  & 1464 & 16 &  91.50 \\
-   &  \scriptsize{pyramid}  &  1936 & 4 &  \textbf{484.00}  & 2240 & 8 &  280.00 \\
-   &  \scriptsize{tree}  &  41646 & 28 &  \textbf{1487.36}  & 43674 & 48 &  909.88 \\
+   
+   \multirow{5}{*}{\textbf{genome}} &  \scriptsize{chain  (16384) }  &  9276 & 18 &  515.33  & 21133 & 16 &  \textbf{1320.81} \\
+   &  \scriptsize{cycle  (8192) }  &  2356 & 8 &  294.50  & 4744 & 8 &  \textbf{593.00} \\
+   &  \scriptsize{grid  (64) }  &  1098 & 8 &  137.25  & 1733 & 12 &  \textbf{144.42} \\
+   &  \scriptsize{pyramid  (4096) }  &  1957 & 8 &  244.62  & 2229 & 8 &  \textbf{278.62} \\
+   &  \scriptsize{tree  (32768) }  &  41756 & 26 &  \textbf{1606.00}  & 47097 & 52 &  905.71 \\
    \hline
-\multirow{3}{*}{\textbf{reach\_first}} &  \scriptsize{iproto}  &  2940 & 2536 &  \textbf{1.16}  & 1188 & 1440 &  0.82 \\
-&  \scriptsize{leader}  &  5844 & 6040 &  \textbf{0.97}  & 2176 & 2420 &  0.90 \\
-&  \scriptsize{sieve}  &  16637 & 23413 &  0.71  & 14224 & 15064 &  \textbf{0.94} \\
-\hline
-\multirow{3}{*}{\textbf{reach\_last}} &  \scriptsize{iproto}  &  2296 & 2576 &  \textbf{0.89}  & 1172 & 1452 &  0.81 \\
-&  \scriptsize{leader}  &  5796 & 5992 &  \textbf{0.97}  & 2160 & 2412 &  0.90 \\
-&  \scriptsize{sieve}  &  20653 & 19309 &  1.07  & 16861 & 14740 &  \textbf{1.14} \\
-\hline
+
+   \multirow{3}{*}{\textbf{reach\_first}} &  \scriptsize{iproto}  &  2533 & 2582 &  \textbf{0.98}  & 1321 & 1433 &  0.92 \\
+   &  \scriptsize{leader}  &  5797 & 6042 &  \textbf{0.96}  & 2304 & 2420 &  0.95 \\
+   &  \scriptsize{sieve}  &  17822 & 19099 &  0.93  & 14130 & 14880 &  \textbf{0.95} \\
+   \hline
+   \multirow{3}{*}{\textbf{reach\_last}} &  \scriptsize{iproto}  &  2428 & 2558 &  \textbf{0.95}  & 1177 & 1426 &  0.83 \\
+   &  \scriptsize{leader}  &  5786 & 6005 &  \textbf{0.96}  & 2170 & 2504 &  0.87 \\
+   &  \scriptsize{sieve}  &  18027 & 17945 &  1.00  & 14888 & 14782 &  \textbf{1.01} \\
+   \hline
 \hline
 \end{tabular}
 }

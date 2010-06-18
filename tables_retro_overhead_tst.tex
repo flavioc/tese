@@ -8,70 +8,46 @@
      \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
    \hline
    \hline
-
-\multirow{5}{*}{\textbf{double\_first}} &  chain &  2940 &  1.69  &  1.20  &  1.24 & 0.86 \\
-&  cycle &  20489 &  1.51  &  1.26  &  1.76 & 0.73 \\
-&  grid &  2108 &  1.84  &  1.30  &  1.18 & 0.87 \\
-&  pyramid &  12036 &  1.69  &  1.18  &  1.77 & 1.12 \\
-&  tree &  1568 &  0.50  &  0.63  &  0.46 & 0.88 \\
-\hline
-\multirow{5}{*}{\textbf{double\_last}} &  chain &  2896 &  1.76  &  1.22  &  1.27 & 1.05 \\
-&  cycle &  22505 &  1.36  &  0.90  &  1.35 & 0.67 \\
-&  grid &  2128 &  1.83  &  1.22  &  1.17 & 0.86 \\
-&  pyramid &  12004 &  1.68  &  1.18  &  1.46 & 0.89 \\
-&  tree &  1564 &  0.50  &  0.62  &  0.45 & 0.87 \\
-\hline
-\multirow{5}{*}{\textbf{left\_first}} &  chain &  2544 &  1.12  &  1.54  &  1.02 & 0.95 \\
-&  cycle &  6876 &  0.87  &  1.36  &  0.98 & 0.88 \\
-&  grid &  11832 &  1.14  &  1.33  &  0.86 & 0.96 \\
-&  pyramid &  12672 &  0.76  &  1.07  &  1.01 & 1.18 \\
-&  tree &  140 &  0.97  &  1.14  &  0.86 & 1.03 \\
-\hline
-\multirow{5}{*}{\textbf{left\_last}} &  chain &  2512 &  1.08  &  1.59  &  1.04 & 0.99 \\
-&  cycle &  6996 &  0.88  &  1.39  &  0.98 & 0.87 \\
-&  grid &  11948 &  1.12  &  1.31  &  0.85 & 0.96 \\
-&  pyramid &  2780 &  0.86  &  1.05  &  1.04 & 0.97 \\
-&  tree &  164 &  0.78  &  0.95  &  0.71 & 0.83 \\
-\hline
+   \multirow{5}{*}{\textbf{left\_first}} &  chain  (4096)  &  2560 &  1.10  &  1.52  &  1.04 &  0.98 \\
+   &  cycle  (4096)  &  6357 &  0.96  &  1.49  &  1.07 &  0.95 \\
+   &  grid  (64)  &  12074 &  1.20  &  1.33  &  0.88 &  0.96 \\
+   &  pyramid  (4096)  &  13037 &  0.73  &  1.05  &  0.98 &  \textbf{1.09} \\
+   &  tree  (32768)  &  149 &  0.92  &  1.08  &  0.79 &  0.98 \\
+   \hline
+   \multirow{5}{*}{\textbf{left\_last}} &  chain  (4096)  &  2577 &  1.07  &  1.52  &  1.03 &  0.95 \\
+   &  cycle  (4096)  &  6696 &  0.88  &  1.41  &  1.02 &  0.94 \\
+   &  grid  (64)  &  12072 &  1.13  &  1.30  &  0.89 &  \textbf{1.02} \\
+   &  pyramid  (2048)  &  2792 &  0.86  &  1.05  &  1.04 &  \textbf{1.05} \\
+   &  tree  (32768)  &  153 &  0.85  &  1.02  &  0.77 &  0.92 \\
+   \hline
+   \multirow{5}{*}{\textbf{right\_first}} &  chain  (4096)  &  3109 &  0.91  &  0.98  &  1.05 &  \textbf{1.09} \\
+   &  cycle  (4096)  &  6894 &  0.91  &  1.02  &  1.03 &  0.97 \\
+   &  grid  (64)  &  14720 &  1.32  &  1.04  &  1.12 &  \textbf{1.13} \\
+   &  pyramid  (4096)  &  11578 &  0.94  &  0.85  &  1.04 &  \textbf{1.00} \\
+   &  tree  (32768)  &  212 &  0.75  &  0.85  &  0.93 &  \textbf{1.08} \\
+   \hline
+   \multirow{5}{*}{\textbf{right\_last}} &  chain  (4096)  &  3144 &  0.90  &  0.95  &  1.25 &  \textbf{1.19} \\
+   &  cycle  (4096)  &  6225 &  1.02  &  1.13  &  1.27 &  \textbf{1.06} \\
+   &  grid  (64)  &  12265 &  1.53  &  1.09  &  1.60 &  \textbf{1.14} \\
+   &  pyramid  (4096)  &  11085 &  0.93  &  0.99  &  1.21 &  \textbf{1.03} \\
+   &  tree  (65536)  &  1376 &  \scriptsize{crashed}  &  \scriptsize{crashed}  &  0.31 &  0.96 \\
+   \hline
+   
+   \multirow{5}{*}{\textbf{double\_first}} &  chain  (512)  &  2925 &  1.74  &  1.21  &  1.24 &  0.92 \\
+   &  cycle  (512)  &  20513 &  1.52  &  1.08  &  1.74 &  0.73 \\
+   &  grid  (16)  &  2112 &  1.85  &  1.25  &  1.31 &  0.87 \\
+   &  pyramid  (512)  &  12990 &  1.68  &  1.09  &  1.45 &  0.88 \\
+   &  tree  (32768)  &  1606 &  0.48  &  0.60  &  0.45 &  0.94 \\
+   \hline
+   \multirow{5}{*}{\textbf{double\_last}} &  chain  (512)  &  2976 &  1.69  &  1.20  &  1.23 &  0.92 \\
+   &  cycle  (512)  &  20963 &  1.46  &  0.99  &  1.49 &  0.78 \\
+   &  grid  (16)  &  2116 &  1.86  &  1.23  &  1.19 &  0.88 \\
+   &  pyramid  (512)  &  12062 &  1.69  &  1.27  &  1.51 &  0.88 \\
+   &  tree  (32768)  &  1564 &  0.49  &  0.62  &  0.45 &  0.89 \\
+   \hline
 \hline
 \end{tabular}
 }
-\caption{Detailed overhead results: \texttt{double} and \texttt{left} programs.}
-\label{tbl:overhead_detail_tst1}
-\end{table}
-
-
-\begin{table}[ht]
-\centering
-\footnotesize{
-  \begin{tabular}{cc|c|cc|cc}
-   \hline
-    \hline
-    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
-     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
-   \hline
-   \hline
-\multirow{5}{*}{\textbf{right\_first}} &  chain &  3160 &  0.90  &  0.90  &  1.06 & 1.08 \\
-&  cycle &  8148 &  0.78  &  0.87  &  0.82 & 0.85 \\
-&  grid &  14852 &  1.22  &  1.03  &  1.06 & 1.22 \\
-&  pyramid &  10836 &  1.12  &  0.90  &  1.09 & 1.06 \\
-&  tree &  204 &  0.78  &  0.90  &  0.84 & 1.10 \\
-\hline
-\multirow{5}{*}{\textbf{right\_last}} &  chain &  3152 &  0.89  &  0.91  &  1.17 & 1.16 \\
-&  cycle &  6196 &  1.03  &  1.13  &  1.21 & 1.06 \\
-&  grid &  12284 &  1.61  &  1.09  &  1.48 & 1.16 \\
-&  pyramid &  10952 &  0.95  &  0.96  &  1.19 & 1.04 \\
-&  tree &  1344 &  \scriptsize{crashed}  &  0.93  &  0.31 & 0.99 \\
-\hline
-\multirow{5}{*}{\textbf{samegen}} &  chain &  72 &  324.79  &  0.39  &  0.61 & 0.83 \\
-&  cycle &  32 &  193.00  &  0.38  &  1.00 & 0.88 \\
-&  grid &  1160 &  1.92  &  1.17  &  1.24 & 0.92 \\
-&  pyramid &  28 &  79.29  &  0.71  &  0.71 & 0.86 \\
-&  tree &  7124 &  1.00  &  1.24  &  0.64 & 1.07 \\
-\hline
-\hline
-\end{tabular}
-}
-\caption{Detailed overhead results: \texttt{right} and \texttt{samegen} programs.}
-\label{tbl:overhead_detail_tst2}
+\caption{Detailed overhead results: \texttt{path} programs.}
+\label{tbl:overhead_detail_tst}
 \end{table}

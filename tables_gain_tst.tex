@@ -8,40 +8,34 @@
      \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
    \hline
    \hline
-   \multirow{5}{*}{\textbf{left\_first}} &  chain &  2956 &  1.03  &  1.38  &  0.96 & 0.90 \\
-   &  cycle &  6808 &  0.92  &  1.40  &  0.79 & 0.77 \\
-   &  grid &  13316 &  1.14  &  1.31  &  1.06 & 1.10 \\
-   &  pyramid &  16437 &  0.75  &  0.90  &  0.86 & 0.94 \\
-   &  tree &  184 &  0.89  &  0.98  &  0.89 & 1.04 \\
+   \multirow{5}{*}{\textbf{left\_first}} &  chain  (4096)  &  2976 &  1.04  &  1.37  &  0.95 &  0.91 \\
+   &  cycle  (4096)  &  7020 &  0.89  &  1.38  &  0.77 &  0.75 \\
+   &  grid  (64)  &  13444 &  1.13  &  1.29  &  0.94 &  \textbf{1.00} \\
+   &  pyramid  (4096)  &  16562 &  0.75  &  0.89  &  0.87 &  0.93 \\
+   &  tree  (32768)  &  174 &  0.93  &  1.01  &  0.93 &  \textbf{1.16} \\
    \hline
-   \multirow{5}{*}{\textbf{left\_last}} &  chain &  2928 &  1.23  &  1.42  &  0.95 & 0.90 \\
-   &  cycle &  6884 &  0.92  &  1.42  &  0.78 & 0.79 \\
-   &  grid &  16469 &  1.15  &  1.08  &  0.71 & 0.78 \\
-   &  pyramid &  3260 &  0.82  &  1.01  &  0.97 & 0.91 \\
-   &  tree &  184 &  0.89  &  0.98  &  0.85 & 1.00 \\
+   \multirow{5}{*}{\textbf{left\_last}} &  chain  (4096)  &  2930 &  1.11  &  1.42  &  0.95 &  0.91 \\
+   &  cycle  (4096)  &  6917 &  0.91  &  1.41  &  0.77 &  0.77 \\
+   &  grid  (64)  &  14496 &  1.13  &  1.28  &  0.83 &  0.90 \\
+   &  pyramid  (2048)  &  3253 &  0.83  &  1.00  &  0.98 &  0.91 \\
+   &  tree  (32768)  &  178 &  0.90  &  1.02  &  0.89 &  \textbf{1.00} \\
    \hline
-\multirow{5}{*}{\textbf{double\_first}} &  chain &  3028 &  1.87  &  1.18  &  1.15 & 0.93 \\
-&  cycle &  17493 &  1.76  &  1.54  &  1.09 & 1.16 \\
-&  grid &  2104 &  1.92  &  1.24  &  1.15 & 0.94 \\
-&  pyramid &  11956 &  1.74  &  1.20  &  1.27 & 1.01 \\
-&  tree &  1360 &  0.67  &  0.82  &  0.58 & 1.62 \\
-\hline
-\multirow{5}{*}{\textbf{double\_last}} &  chain &  2952 &  1.70  &  1.22  &  1.19 & 1.20 \\
-&  cycle &  17205 &  1.84  &  1.20  &  1.29 & 0.96 \\
-&  grid &  2120 &  1.83  &  1.25  &  1.12 & 0.93 \\
-&  pyramid &  11992 &  2.19  &  1.19  &  1.29 & 0.96 \\
-&  tree &  1380 &  0.65  &  0.83  &  0.58 & 1.63 \\
-\hline
-\multirow{5}{*}{\textbf{genome}} &  chain &  24 &  382.00  &  0.83  &  802.71 & 0.50 \\
-&  cycle &  12 &  192.67  &  1.00  &  394.67 & 0.67 \\
-&  grid &  8 &  140.00  &  1.00  &  181.50 & 2.00 \\
-&  pyramid &  16 &  122.25  &  0.50  &  158.50 & 0.50 \\
-&  tree &  64 &  827.98  &  0.44  &  682.66 & 0.94 \\
-\hline
+   \multirow{5}{*}{\textbf{double\_first}} &  chain  (512)  &  2952 &  1.77  &  1.22  &  1.18 &  0.95 \\
+   &  cycle  (512)  &  17367 &  1.82  &  1.42  &  1.11 &  \textbf{1.01} \\
+   &  grid  (16)  &  2110 &  1.90  &  1.24  &  1.15 &  0.93 \\
+   &  pyramid  (512)  &  12284 &  1.85  &  1.16  &  1.32 &  0.96 \\
+   &  tree  (32768)  &  1372 &  0.67  &  0.83  &  0.58 &  \textbf{1.61} \\
+   \hline
+   \multirow{5}{*}{\textbf{double\_last}} &  chain  (512)  &  2934 &  1.70  &  1.23  &  1.19 &  \textbf{1.11} \\
+   &  cycle  (512)  &  17741 &  1.75  &  1.22  &  1.14 &  0.94 \\
+   &  grid  (16)  &  2112 &  1.88  &  1.31  &  1.12 &  0.94 \\
+   &  pyramid  (512)  &  12444 &  1.81  &  1.16  &  1.23 &  0.92 \\
+   &  tree  (32768)  &  1420 &  0.63  &  0.80  &  0.56 &  \textbf{1.61} \\
+   \hline
 
 \hline
 \end{tabular}
 }
-\caption{Detailed gain results: \texttt{path} and \texttt{genome} programs.}
+\caption{Detailed gain results: \texttt{path} programs.}
 \label{tbl:results_detail_gain_tst}
 \end{table}

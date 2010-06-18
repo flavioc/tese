@@ -9,17 +9,24 @@
    \hline
    \hline
 
-\multirow{3}{*}{\textbf{reach\_first}} &  iproto &  1576 &  1.87  &  1.61  &  0.75 & 0.91 \\
-&  leader &  2644 &  2.21  &  2.28  &  0.82 & 0.92 \\
-&  sieve &  15496 &  1.07  &  1.51  &  0.92 & 0.97 \\
-\hline
-\multirow{3}{*}{\textbf{reach\_last}} &  iproto &  1592 &  1.44  &  1.62  &  0.74 & 0.91 \\
-&  leader &  2680 &  2.16  &  2.24  &  0.81 & 0.90 \\
-&  sieve &  15388 &  1.34  &  1.25  &  1.10 & 0.96 \\
-\hline
+   \multirow{5}{*}{\textbf{samegen}} &  chain  (32768)  &  65 &  360.46  &  0.38  &  0.75 &  0.89 \\
+   &  cycle  (16384)  &  36 &  169.22  &  0.33  &  1.03 &  0.81 \\
+   &  grid  (32)  &  1162 &  1.93  &  1.17  &  1.24 &  \textbf{1.03} \\
+   &  pyramid  (4096)  &  30 &  76.17  &  0.60  &  0.70 &  0.70 \\
+   &  tree  (8192)  &  6970 &  1.14  &  1.26  &  0.70 &  \textbf{1.09} \\
+   \hline
+   
+   \multirow{3}{*}{\textbf{reach\_first}} &  iproto  &  1570 &  1.61  &  1.64  &  0.84 &  0.91 \\
+   &  leader  &  2514 &  2.31  &  2.40  &  0.92 &  0.96 \\
+   &  sieve  &  14644 &  1.22  &  1.30  &  0.96 &  \textbf{1.02} \\
+   \hline
+   \multirow{3}{*}{\textbf{reach\_last}} &  iproto  &  1585 &  1.53  &  1.61  &  0.74 &  0.90 \\
+   &  leader  &  2560 &  2.26  &  2.35  &  0.85 &  0.98 \\
+   &  sieve  &  14648 &  1.23  &  1.23  &  1.02 &  \textbf{1.01} \\
+
 \hline
 \end{tabular}
 }
-\caption{Detailed overhead results: model checking programs.}
+\caption{Detailed overhead results: \texttt{samegen} and model checking programs.}
 \label{tbl:overhead_detail_model}
 \end{table}
