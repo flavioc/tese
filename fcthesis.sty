@@ -1,4 +1,4 @@
-% Vers�o para teses em ingl�s.
+% Versão para teses em inglês.
 % Definicao do estilo da tese para o Dept. de CC da FCUP.
 % Hacked from Manchester University thesis style (also hacked from 
 % Stanford University thesis style suthesis.sty)
@@ -87,16 +87,18 @@
         \vfill
 %        \vskip.5in
         
-        \begin{center}
-                {Supervisor: \expandafter{\@supervisor}}\\
-        \end{center}
+        {\large{Aprovada em provas públicas pelo júri:}}\\
+        {Presidente: António Augusto de Sousa} \\
+        {Vogal Externo: Salvador Pinto Abreu} \\
+        {Orientador: \expandafter{\@supervisor}}\\
+
+        \begin{flushright}
+        \makebox[5.5in]{\hrulefill}
+        \end{flushright}
+                { \@submitdate }\\
 
         \vskip.2in
 
-        \begin{center}
-                \expandafter{\@department}\\
-                \@submitdate\\
-        \end{center}
         \vskip.2in
 %\newpage
 }
