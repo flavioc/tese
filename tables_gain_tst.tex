@@ -1,41 +1,42 @@
 \begin{table}[ht]
 \centering
-\footnotesize{
-  \begin{tabular}{cc|c|cc|cc}
+\small{
+  \begin{tabular}{cc|ccc}
    \hline
     \hline
-    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
-     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+    \multicolumn{2}{c|}{\multirow{2}{*}{\normalsize{\textbf{Data}}}} & \multicolumn{3}{c}{\normalsize{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \small{\textit{Retro}} & \textit{\small{Var / Retro}} & \textit{\small{Sub / Retro}} \\
    \hline
-   \hline
-   \multirow{5}{*}{\textbf{left\_first}} &  chain  (4096)  &  2976 &  1.04  &  1.37  &  0.95 &  0.91 \\
-   &  cycle  (4096)  &  7020 &  0.89  &  1.38  &  0.77 &  0.75 \\
-   &  grid  (64)  &  13444 &  1.13  &  1.29  &  0.94 &  \textbf{1.00} \\
-   &  pyramid  (4096)  &  16562 &  0.75  &  0.89  &  0.87 &  0.93 \\
-   &  tree  (32768)  &  174 &  0.93  &  1.01  &  0.93 &  \textbf{1.16} \\
-   \hline
-   \multirow{5}{*}{\textbf{left\_last}} &  chain  (4096)  &  2930 &  1.11  &  1.42  &  0.95 &  0.91 \\
-   &  cycle  (4096)  &  6917 &  0.91  &  1.41  &  0.77 &  0.77 \\
-   &  grid  (64)  &  14496 &  1.13  &  1.28  &  0.83 &  0.90 \\
-   &  pyramid  (2048)  &  3253 &  0.83  &  1.00  &  0.98 &  0.91 \\
-   &  tree  (32768)  &  178 &  0.90  &  1.02  &  0.89 &  \textbf{1.00} \\
-   \hline
-   \multirow{5}{*}{\textbf{double\_first}} &  chain  (512)  &  2952 &  1.77  &  1.22  &  1.18 &  0.95 \\
-   &  cycle  (512)  &  17367 &  1.82  &  1.42  &  1.11 &  \textbf{1.01} \\
-   &  grid  (16)  &  2110 &  1.90  &  1.24  &  1.15 &  0.93 \\
-   &  pyramid  (512)  &  12284 &  1.85  &  1.16  &  1.32 &  0.96 \\
-   &  tree  (32768)  &  1372 &  0.67  &  0.83  &  0.58 &  \textbf{1.61} \\
-   \hline
-   \multirow{5}{*}{\textbf{double\_last}} &  chain  (512)  &  2934 &  1.70  &  1.23  &  1.19 &  \textbf{1.11} \\
-   &  cycle  (512)  &  17741 &  1.75  &  1.22  &  1.14 &  0.94 \\
-   &  grid  (16)  &  2112 &  1.88  &  1.31  &  1.12 &  0.94 \\
-   &  pyramid  (512)  &  12444 &  1.81  &  1.16  &  1.23 &  0.92 \\
-   &  tree  (32768)  &  1420 &  0.63  &  0.80  &  0.56 &  \textbf{1.61} \\
    \hline
 
+   \multirow{5}{*}{left\_first} &  \footnotesize{chain  (4096) } &  2976 &  0.95  &  0.91 \\
+   &  \footnotesize{cycle  (4096) } &  7020 &  0.77  &  0.75 \\
+   &  \footnotesize{grid  (64) } &  13444 &  0.94  &  \textbf{1.00} \\
+   &  \footnotesize{pyramid  (4096) } &  16562 &  0.87  &  0.93 \\
+   &  \footnotesize{tree  (32768) } &  174 &  0.93  &  \textbf{1.16} \\
+   \hline
+   \multirow{5}{*}{left\_last} &  \footnotesize{chain  (4096) } &  2930 &  0.95  &  0.91 \\
+   &  \footnotesize{cycle  (4096) } &  6917 &  0.77  &  0.77 \\
+   &  \footnotesize{grid  (64) } &  14496 &  0.83  &  0.90 \\
+   &  \footnotesize{pyramid  (2048) } &  3253 &  0.98  &  0.91 \\
+   &  \footnotesize{tree  (32768) } &  178 &  0.89  &  \textbf{1.00} \\
+   \hline
+
+   \multirow{5}{*}{double\_first} &  \footnotesize{chain  (512) } &  2952 &  \textbf{1.18}  &  0.95 \\
+   &  \footnotesize{cycle  (512) } &  17367 &  \textbf{1.11}  &  \textbf{1.01} \\
+   &  \footnotesize{grid  (16) } &  2110 &  \textbf{1.15}  &  0.93 \\
+   &  \footnotesize{pyramid  (512) } &  12284 &  \textbf{1.32}  &  0.96 \\
+   &  \footnotesize{tree  (32768) } &  1372 &  0.58  &  \textbf{1.61} \\
+   \hline
+   \multirow{5}{*}{double\_last} &  \footnotesize{chain  (512) } &  2934 &  \textbf{1.19}  &  \textbf{1.11} \\
+   &  \footnotesize{cycle  (512) } &  17741 &  \textbf{1.14}  &  0.94 \\
+   &  \footnotesize{grid  (16) } &  2112 &  \textbf{1.12}  &  0.94 \\
+   &  \footnotesize{pyramid  (512) } &  12444 &  \textbf{1.23}  &  0.92 \\
+   &  \footnotesize{tree  (32768) } &  1420 &  0.56  &  \textbf{1.61} \\
+   \hline
 \hline
 \end{tabular}
 }
-\caption{Detailed gain results: \texttt{path} programs.}
+\caption{Times, in milliseconds, and speedups for RCS in YapTab: \textbf{path} programs.}
 \label{tbl:results_detail_gain_tst}
 \end{table}

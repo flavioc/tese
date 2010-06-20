@@ -1,53 +1,55 @@
 \begin{table}[ht]
 \centering
-\footnotesize{
-  \begin{tabular}{cc|c|cc|cc}
+\small{
+  \begin{tabular}{cc|ccc}
    \hline
     \hline
-    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
-     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+    \multicolumn{2}{c|}{\multirow{2}{*}{\normalsize{\textbf{Data}}}} & \multicolumn{3}{c}{\normalsize{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \small{\textit{Retro}} & \textit{\small{Retro / Var}} & \textit{\small{Retro / Sub}} \\
    \hline
-   \hline
-   \multirow{5}{*}{\textbf{left\_first}} &  chain  (4096)  &  2560 &  1.10  &  1.52  &  1.04 &  0.98 \\
-   &  cycle  (4096)  &  6357 &  0.96  &  1.49  &  1.07 &  0.95 \\
-   &  grid  (64)  &  12074 &  1.20  &  1.33  &  0.88 &  0.96 \\
-   &  pyramid  (4096)  &  13037 &  0.73  &  1.05  &  0.98 &  \textbf{1.09} \\
-   &  tree  (32768)  &  149 &  0.92  &  1.08  &  0.79 &  0.98 \\
-   \hline
-   \multirow{5}{*}{\textbf{left\_last}} &  chain  (4096)  &  2577 &  1.07  &  1.52  &  1.03 &  0.95 \\
-   &  cycle  (4096)  &  6696 &  0.88  &  1.41  &  1.02 &  0.94 \\
-   &  grid  (64)  &  12072 &  1.13  &  1.30  &  0.89 &  \textbf{1.02} \\
-   &  pyramid  (2048)  &  2792 &  0.86  &  1.05  &  1.04 &  \textbf{1.05} \\
-   &  tree  (32768)  &  153 &  0.85  &  1.02  &  0.77 &  0.92 \\
-   \hline
-   \multirow{5}{*}{\textbf{right\_first}} &  chain  (4096)  &  3109 &  0.91  &  0.98  &  1.05 &  \textbf{1.09} \\
-   &  cycle  (4096)  &  6894 &  0.91  &  1.02  &  1.03 &  0.97 \\
-   &  grid  (64)  &  14720 &  1.32  &  1.04  &  1.12 &  \textbf{1.13} \\
-   &  pyramid  (4096)  &  11578 &  0.94  &  0.85  &  1.04 &  \textbf{1.00} \\
-   &  tree  (32768)  &  212 &  0.75  &  0.85  &  0.93 &  \textbf{1.08} \\
-   \hline
-   \multirow{5}{*}{\textbf{right\_last}} &  chain  (4096)  &  3144 &  0.90  &  0.95  &  1.25 &  \textbf{1.19} \\
-   &  cycle  (4096)  &  6225 &  1.02  &  1.13  &  1.27 &  \textbf{1.06} \\
-   &  grid  (64)  &  12265 &  1.53  &  1.09  &  1.60 &  \textbf{1.14} \\
-   &  pyramid  (4096)  &  11085 &  0.93  &  0.99  &  1.21 &  \textbf{1.03} \\
-   &  tree  (65536)  &  1376 &  \scriptsize{crashed}  &  \scriptsize{crashed}  &  0.31 &  0.96 \\
    \hline
    
-   \multirow{5}{*}{\textbf{double\_first}} &  chain  (512)  &  2925 &  1.74  &  1.21  &  1.24 &  0.92 \\
-   &  cycle  (512)  &  20513 &  1.52  &  1.08  &  1.74 &  0.73 \\
-   &  grid  (16)  &  2112 &  1.85  &  1.25  &  1.31 &  0.87 \\
-   &  pyramid  (512)  &  12990 &  1.68  &  1.09  &  1.45 &  0.88 \\
-   &  tree  (32768)  &  1606 &  0.48  &  0.60  &  0.45 &  0.94 \\
+   \multirow{5}{*}{left\_first} &  \footnotesize{chain  (4096) } &  2560 &  \textbf{0.96}  &  1.02 \\
+   &  \footnotesize{cycle  (4096) } &  6357 &  \textbf{0.93}  &  1.05 \\
+   &  \footnotesize{grid  (64) } &  12074 &  1.13  &  1.04 \\
+   &  \footnotesize{pyramid  (4096) } &  13037 &  1.02  &  \textbf{0.92} \\
+   &  \footnotesize{tree  (32768) } &  149 &  1.26  &  1.02 \\
    \hline
-   \multirow{5}{*}{\textbf{double\_last}} &  chain  (512)  &  2976 &  1.69  &  1.20  &  1.23 &  0.92 \\
-   &  cycle  (512)  &  20963 &  1.46  &  0.99  &  1.49 &  0.78 \\
-   &  grid  (16)  &  2116 &  1.86  &  1.23  &  1.19 &  0.88 \\
-   &  pyramid  (512)  &  12062 &  1.69  &  1.27  &  1.51 &  0.88 \\
-   &  tree  (32768)  &  1564 &  0.49  &  0.62  &  0.45 &  0.89 \\
+   \multirow{5}{*}{left\_last} &  \footnotesize{chain  (4096) } &  2577 &  \textbf{0.97}  &  1.05 \\
+   &  \footnotesize{cycle  (4096) } &  6696 &  \textbf{0.98}  &  1.07 \\
+   &  \footnotesize{grid  (64) } &  12072 &  1.12  &  \textbf{0.98} \\
+   &  \footnotesize{pyramid  (2048) } &  2792 &  \textbf{0.97}  &  \textbf{0.96} \\
+   &  \footnotesize{tree  (32768) } &  153 &  1.30  &  1.09 \\
+   \hline
+
+   \multirow{5}{*}{right\_first} &  \footnotesize{chain  (4096) } &  3109 &  \textbf{0.95}  &  \textbf{0.92} \\
+   &  \footnotesize{cycle  (4096) } &  6894 &  \textbf{0.97}  &  1.03 \\
+   &  \footnotesize{grid  (64) } &  14720 &  \textbf{0.89}  &  \textbf{0.88} \\
+   &  \footnotesize{pyramid  (4096) } &  11578 &  \textbf{0.96}  &  \textbf{1.00} \\
+   &  \footnotesize{tree  (32768) } &  212 &  1.07  &  \textbf{0.92} \\
+   \hline
+   \multirow{5}{*}{right\_last} &  \footnotesize{chain  (4096) } &  3144 &  \textbf{0.80}  &  \textbf{0.84} \\
+   &  \footnotesize{cycle  (4096) } &  6225 &  \textbf{0.79}  &  \textbf{0.95} \\
+   &  \footnotesize{grid  (64) } &  12265 &  \textbf{0.63}  &  \textbf{0.88} \\
+   &  \footnotesize{pyramid  (4096) } &  11085 &  \textbf{0.83}  &  \textbf{0.97} \\
+   &  \footnotesize{tree  (65536) } &  1376 &  3.19  &  1.04 \\
+   \hline
+
+   \multirow{5}{*}{double\_first} &  \footnotesize{chain  (512) } &  2925 &  \textbf{0.81}  &  1.08 \\
+   &  \footnotesize{cycle  (512) } &  20513 &  \textbf{0.57}  &  1.36 \\
+   &  \footnotesize{grid  (16) } &  2112 &  \textbf{0.76}  &  1.15 \\
+   &  \footnotesize{pyramid  (512) } &  12990 &  \textbf{0.69}  &  1.13 \\
+   &  \footnotesize{tree  (32768) } &  1606 &  2.24  &  1.07 \\
+   \hline
+   \multirow{5}{*}{double\_last} &  \footnotesize{chain  (512) } &  2976 &  \textbf{0.81}  &  1.09 \\
+   &  \footnotesize{cycle  (512) } &  20963 &  \textbf{0.67}  &  1.29 \\
+   &  \footnotesize{grid  (16) } &  2116 &  \textbf{0.84}  &  1.13 \\
+   &  \footnotesize{pyramid  (512) } &  12062 &  \textbf{0.66}  &  1.14 \\
+   &  \footnotesize{tree  (32768) } &  1564 &  2.22  &  1.13 \\
    \hline
 \hline
 \end{tabular}
 }
-\caption{Detailed overhead results: \texttt{path} programs.}
+\caption{Times, in milliseconds, and overheads for RCS in YapTab: \textbf{path} programs.}
 \label{tbl:overhead_detail_tst}
 \end{table}

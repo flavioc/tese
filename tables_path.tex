@@ -5,52 +5,50 @@
    \hline
     \hline
     \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \multicolumn{3}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{3}{c}{\small{\textbf{YapTab}}} \\
-     \multicolumn{2}{c|}{} & \textbf{\textit{Var}} & \textbf{\textit{Sub}} & \textbf{\textit{Speedup}} & \textbf{\textit{Var}} & \textbf{\textit{Sub}} & \textbf{\textit{Speedup}} \\
+     \multicolumn{2}{c|}{} & \textit{Var} & \textit{Sub} & \textit{Speedup} & \textit{Var} & \textit{Sub} & \textit{Speedup} \\
    \hline
    \hline
-   \multirow{5}{*}{\textbf{left\_first}} &  \scriptsize{chain  (4096) }  &  2793 & 3869 &  0.72  & 2688 & 2533 &  \textbf{1.06} \\
+
+   \multirow{5}{*}{left\_first} &  \scriptsize{chain  (4096) }  &  2793 & 3869 &  0.72  & 2688 & 2533 &  \textbf{1.06} \\
    &  \scriptsize{cycle  (4096) }  &  6201 & 9561 &  0.65  & 7260 & 6100 &  \textbf{1.19} \\
    &  \scriptsize{grid  (64) }  &  15416 & 16003 &  \textbf{0.96}  & 10702 & 11638 &  0.92 \\
    &  \scriptsize{pyramid  (4096) }  &  9565 & 13849 &  0.69  & 13550 & 13462 &  \textbf{1.01} \\
    &  \scriptsize{tree  (32768) }  &  140 & 161 &  0.87  & 129 & 142 &  \textbf{0.91} \\
    \hline
-   \multirow{5}{*}{\textbf{left\_last}} &  \scriptsize{chain  (4096) }  &  2766 & 3900 &  0.71  & 2666 & 2505 &  \textbf{1.06} \\
+   \multirow{5}{*}{left\_last} &  \scriptsize{chain  (4096) }  &  2766 & 3900 &  0.71  & 2666 & 2505 &  \textbf{1.06} \\
    &  \scriptsize{cycle  (4096) }  &  5724 & 9273 &  0.62  & 7042 & 6394 &  \textbf{1.10} \\
    &  \scriptsize{grid  (64) }  &  13609 & 15670 &  \textbf{0.87}  & 10801 & 12396 &  \textbf{0.87} \\
    &  \scriptsize{pyramid  (2048) }  &  2385 & 2958 &  0.81  & 2904 & 3112 &  \textbf{0.93} \\
    &  \scriptsize{tree  (32768) }  &  133 & 156 &  \textbf{0.85}  & 122 & 145 &  0.84 \\
    \hline
 
-   \multirow{5}{*}{\textbf{right\_first}} &  \scriptsize{chain  (4096) }  &  2830 & 3030 &  0.93  & 3253 & 3434 &  \textbf{0.95} \\
+   \multirow{5}{*}{right\_first} &  \scriptsize{chain  (4096) }  &  2830 & 3030 &  0.93  & 3253 & 3434 &  \textbf{0.95} \\
    &  \scriptsize{cycle  (4096) }  &  6313 & 7012 &  0.90  & 7090 & 6648 &  \textbf{1.07} \\
    &  \scriptsize{grid  (64) }  &  21318 & 15282 &  \textbf{1.39}  & 16659 & 16091 &  1.04 \\
    &  \scriptsize{pyramid  (4096) }  &  10348 & 10617 &  0.97  & 12781 & 11677 &  \textbf{1.09} \\
    &  \scriptsize{tree  (32768) }  &  157 & 180 &  0.87  & 217 & 237 &  \textbf{0.92} \\
    \hline
-   \multirow{5}{*}{\textbf{right\_last}} &  \scriptsize{chain  (4096) }  &  2864 & 2970 &  0.96  & 4032 & 3672 &  \textbf{1.10} \\
+   \multirow{5}{*}{right\_last} &  \scriptsize{chain  (4096) }  &  2864 & 2970 &  0.96  & 4032 & 3672 &  \textbf{1.10} \\
    &  \scriptsize{cycle  (4096) }  &  6373 & 7036 &  0.91  & 8362 & 6654 &  \textbf{1.26} \\
    &  \scriptsize{grid  (64) }  &  18346 & 13374 &  1.37  & 19741 & 13286 &  \textbf{1.49} \\
    &  \scriptsize{pyramid  (4096) }  &  10548 & 10900 &  0.97  & 13496 & 11397 &  \textbf{1.18} \\
    &  \scriptsize{tree  (65536) }  &  \scriptsize{crashed} & \scriptsize{crashed} &  ---  & 478 & 1458 &  0.33 \\
    \hline
-   
-   \multirow{5}{*}{\textbf{double\_first}} &  \scriptsize{chain  (512) }  &  5070 & 3546 &  \textbf{1.43}  & 3626 & 2705 &  1.34 \\
+   \multirow{5}{*}{double\_first} &  \scriptsize{chain  (512) }  &  5070 & 3546 &  \textbf{1.43}  & 3626 & 2705 &  1.34 \\
    &  \scriptsize{cycle  (512) }  &  31053 & 20431 &  1.52  & 36334 & 15141 &  \textbf{2.40} \\
    &  \scriptsize{grid  (16) }  &  3906 & 2594 &  \textbf{1.51}  & 2762 & 1845 &  1.50 \\
    &  \scriptsize{pyramid  (512) }  &  22507 & 14176 &  1.59  & 19341 & 11589 &  \textbf{1.67} \\
    &  \scriptsize{tree  (32768) }  &  773 & 961 &  \textbf{0.80}  & 756 & 1602 &  0.47 \\
    \hline
-   \multirow{5}{*}{\textbf{double\_last}} &  \scriptsize{chain  (512) }  &  5032 & 3553 &  \textbf{1.42}  & 3638 & 2578 &  1.41 \\
+   \multirow{5}{*}{double\_last} &  \scriptsize{chain  (512) }  &  5032 & 3553 &  \textbf{1.42}  & 3638 & 2578 &  1.41 \\
    &  \scriptsize{cycle  (512) }  &  30991 & 20881 &  1.48  & 31302 & 16918 &  \textbf{1.85} \\
    &  \scriptsize{grid  (16) }  &  4048 & 2697 &  \textbf{1.50}  & 2510 & 1882 &  1.33 \\
    &  \scriptsize{pyramid  (512) }  &  20518 & 15255 &  1.35  & 19969 & 10586 &  \textbf{1.89} \\
    &  \scriptsize{tree  (32768) }  &  766 & 972 &  \textbf{0.79}  & 730 & 1453 &  0.50 \\
    \hline
-
-
 \hline
 \end{tabular}
 }
-\caption{Times and speedups for call subsumption in SLG-WAM and YapTab: \texttt{path} programs.}
+\caption{Times, in milliseconds, and speedups for call subsumption in SLG-WAM and YapTab: \textbf{path} programs.}
 \label{tbl:result_detail_path}
 \end{table}

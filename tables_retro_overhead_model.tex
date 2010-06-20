@@ -1,32 +1,31 @@
 \begin{table}[ht]
 \centering
-\footnotesize{
-  \begin{tabular}{cc|c|cc|cc}
+\small{
+  \begin{tabular}{cc|ccc}
    \hline
     \hline
-    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
-     \multicolumn{2}{c|}{} & \scriptsize{\textit{milliseconds}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+    \multicolumn{2}{c|}{\multirow{2}{*}{\normalsize{\textbf{Data}}}} & \multicolumn{3}{c}{\normalsize{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \small{\textit{Retro}} & \textit{\small{Retro / Var}} & \textit{\small{Retro / Sub}} \\
    \hline
    \hline
 
-   \multirow{5}{*}{\textbf{samegen}} &  chain  (32768)  &  65 &  360.46  &  0.38  &  0.75 &  0.89 \\
-   &  cycle  (16384)  &  36 &  169.22  &  0.33  &  1.03 &  0.81 \\
-   &  grid  (32)  &  1162 &  1.93  &  1.17  &  1.24 &  \textbf{1.03} \\
-   &  pyramid  (4096)  &  30 &  76.17  &  0.60  &  0.70 &  0.70 \\
-   &  tree  (8192)  &  6970 &  1.14  &  1.26  &  0.70 &  \textbf{1.09} \\
+   \multirow{5}{*}{samegen} &  \footnotesize{chain  (32768) } &  65 &  1.33  &  1.12 \\
+   &  \footnotesize{cycle  (16384) } &  36 &  \textbf{0.97}  &  1.24 \\
+   &  \footnotesize{grid  (32) } &  1162 &  \textbf{0.81}  &  \textbf{0.97} \\
+   &  \footnotesize{pyramid  (4096) } &  30 &  1.43  &  1.43 \\
+   &  \footnotesize{tree  (8192) } &  6970 &  1.42  &  \textbf{0.92} \\
    \hline
-   
-   \multirow{3}{*}{\textbf{reach\_first}} &  iproto  &  1570 &  1.61  &  1.64  &  0.84 &  0.91 \\
-   &  leader  &  2514 &  2.31  &  2.40  &  0.92 &  0.96 \\
-   &  sieve  &  14644 &  1.22  &  1.30  &  0.96 &  \textbf{1.02} \\
+   \multirow{3}{*}{reach\_first} &  iproto  &  1570 &  1.19  &  1.10 \\
+   &  leader  &  2514 &  1.09  &  1.04 \\
+   &  sieve  &  14644 &  1.04  &  \textbf{0.98} \\
    \hline
-   \multirow{3}{*}{\textbf{reach\_last}} &  iproto  &  1585 &  1.53  &  1.61  &  0.74 &  0.90 \\
-   &  leader  &  2560 &  2.26  &  2.35  &  0.85 &  0.98 \\
-   &  sieve  &  14648 &  1.23  &  1.23  &  1.02 &  \textbf{1.01} \\
-
+   \multirow{3}{*}{reach\_last} &  iproto  &  1585 &  1.35  &  1.11 \\
+   &  leader  &  2560 &  1.18  &  1.02 \\
+   &  sieve  &  14648 &  \textbf{0.98}  &  \textbf{0.99} \\
+   \hline
 \hline
 \end{tabular}
 }
-\caption{Detailed overhead results: \texttt{samegen} and model checking programs.}
+\caption{Times, in milliseconds, and overheads for RCS in YapTab: \textbf{samegen} and model checking programs.}
 \label{tbl:overhead_detail_model}
 \end{table}

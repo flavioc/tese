@@ -5,34 +5,35 @@
    \hline
     \hline
     \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \multicolumn{3}{c|}{\small{\textbf{SLG-WAM}}} & \multicolumn{3}{c}{\small{\textbf{YapTab}}} \\
-     \multicolumn{2}{c|}{} & \textbf{\textit{Var}} & \textbf{\textit{Sub}} & \textbf{\textit{Speedup}} & \textbf{\textit{Var}} & \textbf{\textit{Sub}} & \textbf{\textit{Speedup}} \\
+     \multicolumn{2}{c|}{} & \textit{Var} & \textit{Sub} & \textit{Speedup} & \textit{Var} & \textit{Sub} & \textit{Speedup} \\
    \hline
    \hline
-   \multirow{5}{*}{\textbf{samegen}} &  \scriptsize{chain  (32768) }  &  23439 & 22 &  \textbf{1065.41}  & 57 & 58 &  0.98 \\
+   
+   \multirow{5}{*}{samegen} &  \scriptsize{chain  (32768) }  &  23439 & 22 &  \textbf{1065.41}  & 57 & 58 &  0.98 \\
    &  \scriptsize{cycle  (16384) }  &  6046 & 12 &  \textbf{503.83}  & 38 & 33 &  1.15 \\
    &  \scriptsize{grid  (32) }  &  2234 & 1362 &  \textbf{1.64}  & 1437 & 1205 &  1.19 \\
    &  \scriptsize{pyramid  (4096) }  &  2286 & 18 &  \textbf{127.00}  & 25 & 21 &  1.19 \\
    &  \scriptsize{tree  (8192) }  &  8037 & 8785 &  \textbf{0.91}  & 4856 & 7605 &  0.64 \\
    \hline
    
-   \multirow{5}{*}{\textbf{genome}} &  \scriptsize{chain  (16384) }  &  9276 & 18 &  515.33  & 21133 & 16 &  \textbf{1320.81} \\
+   \multirow{5}{*}{genome} &  \scriptsize{chain  (16384) }  &  9276 & 18 &  515.33  & 21133 & 16 &  \textbf{1320.81} \\
    &  \scriptsize{cycle  (8192) }  &  2356 & 8 &  294.50  & 4744 & 8 &  \textbf{593.00} \\
    &  \scriptsize{grid  (64) }  &  1098 & 8 &  137.25  & 1733 & 12 &  \textbf{144.42} \\
    &  \scriptsize{pyramid  (4096) }  &  1957 & 8 &  244.62  & 2229 & 8 &  \textbf{278.62} \\
    &  \scriptsize{tree  (32768) }  &  41756 & 26 &  \textbf{1606.00}  & 47097 & 52 &  905.71 \\
    \hline
 
-   \multirow{3}{*}{\textbf{reach\_first}} &  \scriptsize{iproto}  &  2533 & 2582 &  \textbf{0.98}  & 1321 & 1433 &  0.92 \\
-   &  \scriptsize{leader}  &  5797 & 6042 &  \textbf{0.96}  & 2304 & 2420 &  0.95 \\
-   &  \scriptsize{sieve}  &  17822 & 19099 &  0.93  & 14130 & 14880 &  \textbf{0.95} \\
+   \multirow{3}{*}{reach\_first} &  \scriptsize{iproto }  &  2533 & 2582 &  \textbf{0.98}  & 1321 & 1433 &  0.92 \\
+   &  \scriptsize{leader }  &  5797 & 6042 &  \textbf{0.96}  & 2304 & 2420 &  0.95 \\
+   &  \scriptsize{sieve }  &  17822 & 19099 &  0.93  & 14130 & 14880 &  \textbf{0.95} \\
    \hline
-   \multirow{3}{*}{\textbf{reach\_last}} &  \scriptsize{iproto}  &  2428 & 2558 &  \textbf{0.95}  & 1177 & 1426 &  0.83 \\
-   &  \scriptsize{leader}  &  5786 & 6005 &  \textbf{0.96}  & 2170 & 2504 &  0.87 \\
-   &  \scriptsize{sieve}  &  18027 & 17945 &  1.00  & 14888 & 14782 &  \textbf{1.01} \\
+   \multirow{3}{*}{reach\_last} &  \scriptsize{iproto }  &  2428 & 2558 &  \textbf{0.95}  & 1177 & 1426 &  0.83 \\
+   &  \scriptsize{leader }  &  5786 & 6005 &  \textbf{0.96}  & 2170 & 2504 &  0.87 \\
+   &  \scriptsize{sieve }  &  18027 & 17945 &  1.00  & 14888 & 14782 &  \textbf{1.01} \\
    \hline
 \hline
 \end{tabular}
 }
-\caption{Times and speedups for call subsumption in SLG-WAM and YapTab: \texttt{samegen}, \texttt{genome}, and model checking programs.}
+\caption{Times, in milliseconds, and speedups for call subsumption in SLG-WAM and YapTab: \textbf{samegen}, \textbf{genome}, and model checking programs.}
 \label{tbl:result_detail_others}
 \end{table}

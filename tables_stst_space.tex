@@ -1,35 +1,36 @@
 \begin{table}[ht]
 \centering
-\footnotesize{
-  \begin{tabular}{cc|c|cc}
+\small{
+  \begin{tabular}{cc|ccc}
    \hline
     \hline
-    \multicolumn{2}{c|}{\multirow{2}{*}{\small{\textbf{Data}}}} & \textbf{\small{Retro}} & \multicolumn{2}{c}{\small{\textbf{YapTab}}} \\
-     \multicolumn{2}{c|}{} & \scriptsize{\textit{nodes}} & \textbf{\textit{\scriptsize{Var / Retro}}} & \textbf{\textit{\scriptsize{Sub / Retro}}} \\
+    \multicolumn{2}{c|}{\multirow{2}{*}{\normalsize{\textbf{Data}}}} & \multicolumn{3}{c}{\normalsize{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \small{\textit{Retro}} & \textit{\small{Var / Retro}} & \textit{\small{Sub / Retro}} \\
    \hline
    \hline
-
-\multirow{5}{*}{\textbf{double}} &  chain (256) &  26387 &  2.48365 & 0.87490 \\
-&  cycle (256) &  36844 &  3.57141 & 0.89333 \\
-&  grid (16) &  59028 &  2.22920 & 0.82586 \\
-&  pyramid (256) &  56638 &  3.47583 & 0.95187 \\
-&  tree (16384) &  213008 &  1.88449 & 0.96148 \\
-\hline
-\multirow{5}{*}{\textbf{left}} &  chain (2048) &  2100233 &  0.99902 & 0.99902 \\
-&  cycle (2048) &  4200450 &  0.99902 & 0.99902 \\
-&  grid (64) &  16789506 &  0.99951 & 0.99951 \\
-&  pyramid (1024) &  1576457 &  0.99870 & 0.99870 \\
-&  tree (65536) &  983056 &  0.96665 & 0.96665 \\
-\hline
-\multirow{5}{*}{\textbf{right}} &  chain (4096) &  8398847 &  1.99756 & 0.99902 \\
-&  cycle (4096) &  16789506 &  1.99902 & 0.99951 \\
-&  grid (32) &  1051650 &  1.99610 & 0.99805 \\
-&  pyramid (2048) &  6302719 &  1.99675 & 0.99870 \\
-&  tree (32768) &  491520 &  1.76667 & 0.90000 \\
-\hline
+   \multirow{5}{*}{left} &  \footnotesize{chain (2048)} &  2100233 &  0.99902 & 0.99902 \\
+   &  \footnotesize{cycle (2048)} &  4200450 &  0.99902 & 0.99902 \\
+   &  \footnotesize{grid (64)} &  16789506 &  0.99951 & 0.99951 \\
+   &  \footnotesize{pyramid (1024)} &  1576457 &  0.99870 & 0.99870 \\
+   &  \footnotesize{tree (65536)} &  983056 &  0.96665 & 0.96665 \\
+   \hline
+   
+   \multirow{5}{*}{right} &  \footnotesize{chain (4096)} &  8398847 &  1.99756 & 0.99902 \\
+   &  \footnotesize{cycle (4096)} &  16789506 &  1.99902 & 0.99951 \\
+   &  \footnotesize{grid (32)} &  1051650 &  1.99610 & 0.99805 \\
+   &  \footnotesize{pyramid (2048)} &  6302719 &  1.99675 & 0.99870 \\
+   &  \footnotesize{tree (32768)} &  491520 &  1.76667 & 0.90000 \\
+   \hline
+   
+   \multirow{5}{*}{double} &  \footnotesize{chain (256)} &  26387 &  2.48365 & 0.87490 \\
+   &  \footnotesize{cycle (256)} &  36844 &  3.57141 & 0.89333 \\
+   &  \footnotesize{grid (16)} &  59028 &  2.22920 & 0.82586 \\
+   &  \footnotesize{pyramid (256)} &  56638 &  3.47583 & 0.95187 \\
+   &  \footnotesize{tree (16384)} &  213008 &  1.88449 & 0.96148 \\
+   \hline
 \hline
 \end{tabular}
 }
-\caption{Detailed space results for the query goal `\texttt{?-~path(f(X),f(Y))}'.}
+\caption{Detailed number of stored answer trie nodes for the query goal `\texttt{?-~path(f(X),f(Y)).}'.}
 \label{tbl:results_detail_stst_space}
 \end{table}
