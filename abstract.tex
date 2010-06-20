@@ -9,14 +9,14 @@ In variant-based tabling, $A$ is similar to $B$ if they are the same
 up to variable renaming. In subsumption-based tabling, $A$ is similar to $B$ when $A$ is subsumed
 by $B$ (or $B$ subsumes $A$). This stems from a simple principle: if $A$ is subsumed by $B$ and
 $S_A$ and $S_B$ are the respective answer sets, then $S_A \subseteq S_B$.
-While subsumption-based tabling can yield superior time performance by allowing greater answer
-reuse, its efficient implementation is harder than variant-based tabling, which makes tabling engines
-with variant checks much more popular in the logic community.
+While subsumption-based tabling (or \emph{call subsumption}) can yield superior time performance
+by allowing greater answer reuse, its efficient implementation is harder than variant-based tabling,
+which makes tabling engines with variant checks much more popular in the logic community.
 
 This thesis first addresses the porting and integration of the \emph{Time Stamped Tries} mechanism
 from the SLG-WAM tabling engine into the YapTab tabling engine. Our performance results show that our
-integration efforts were successful, with comparable speedups when using subsumptive tabling against
-variant tabling.
+integration efforts were successful, with comparable speedups when using subsumptive-based tabling against
+variant-based tabling.
 
 In the second part of this thesis we present the design, implementation, and evaluation of a novel extension
 based on subsumption-based tabling called \emph{Retroactive Call Subsumption} (RCS). RCS overcomes some limitations

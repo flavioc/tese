@@ -4,7 +4,7 @@ engines are described. First, the variant table space for both SLG-WAM and YapTa
 explained. Because they share a lot of similarities, the description covers the common
 ground between the two systems. Next, we explore two well-known mechanisms that modify
 the previous table space for call by subsumption. Those two mechanisms have already been
-implemented in XSB \cite{Rao-96, Johnson-99}.
+implemented in XSB Prolog \cite{Rao-96, Johnson-99}.
 
 \section{Table Space} \label{sec:table_space}
 
@@ -20,7 +20,7 @@ to organize the table space. The table space is heavily used throughout the eval
 \subsection{Tries}
 
 Clearly, the success of tabling is highly dependent on the data structures used.
-Both Yap \cite{Rocha-00a} and XSB \cite{RamakrishnanIV-95} use a trie-based approach.
+Both the YapTab \cite{Rocha-00a} and SLG-WAM \cite{RamakrishnanIV-95} engines use a trie-based approach.
 
 Tries were initially proposed to index dictionaries \cite{Fredkin-62} and have since been generalized to index recursive data structures
 such as terms. The essential idea underlying a trie is to partition a set $T$ of terms based upon their structure,
@@ -47,7 +47,7 @@ Given the nature of tries, the following conclusions can be made:
 \end{itemize}
 
 When creating transitions for variables, we use the format outlined by Bachmair \textit{et al.} \cite{Bachmair-93},
-described in Section \ref{sec:variant_tabling}.
+that was described in Section \ref{sec:variant_tabling}.
 
 Figure~\ref{fig:tries_use} shows a trie with three terms. First, in (a) the trie is represented by a \textit{root node} and has
 no terms. Next, in (b) the term \texttt{t(X,a)} is inserted and three nodes are created that represent each part of the term.
@@ -65,8 +65,8 @@ two prefix nodes with \texttt{t(X,a)}.
 Yap and XSB use two levels of tries to implement the table space (see Figure~\ref{fig:table_space_tries}):
 
 \begin{itemize}
-  \item The first level (subgoal trie) stores subgoal calls for each predicate;
-  \item The second level (answer trie) stores answers for a specific subgoal.
+  \item The first level, the \emph{subgoal trie}, stores subgoal calls for each predicate;
+  \item The second level, the \emph{answer trie}, stores answers for a specific subgoal.
 \end{itemize}
 
 \begin{figure}[ht]
@@ -76,10 +76,10 @@ Yap and XSB use two levels of tries to implement the table space (see Figure~\re
    \label{fig:table_space_tries}
  \end{figure}
 
-For both levels, each trie node usually contains four fields. The first field represents the \textbf{symbol} (or \textbf{atom})
-of the transition. The second points to the first descendant transition (called the \textbf{child} node)
-and the third stores a pointer to the \textbf{parent} node.
-The fourth field points to a \textbf{sibling} node, if any.
+For both levels, each trie node usually contains four fields. The first field represents the \texttt{symbol}
+(or \texttt{atom}) of the transition. The second points to the first descendant transition (called the \texttt{child} node)
+and the third stores a pointer to the \texttt{parent} node.
+The fourth field points to a \texttt{sibling} node, if any.
 
 When the chain of sibling nodes gets too big, an hashing scheme is dynamically employed to provide direct
 access to nodes, optimizing the search of transitions.
@@ -90,7 +90,7 @@ Notice that for the subgoal trie only the subgoal arguments are stored.
 The leaf points to a data structure called \textit{subgoal frame}. The subgoal frame stores
 information about the subgoal, namely an entry point to its \textit{answer trie}.
 
-The answer trie stores answers to the subgoal. When inserting answers only substitutions
+The answer trie stores answers to the subgoal. When inserting answers, only substitutions
 for the variables in the call are stored. This optimization is called \textit{substitution factoring} \cite{RamakrishnanIV-95}.
 
 Figure~\ref{fig:table_space_tries} shows the table space organization after evaluating the query goal
@@ -104,24 +104,24 @@ Notice that by using substitution factoring for the answer trie, only the substi
 
 A subgoal frame contains general information about the state of a tabled subgoal. To access answers, this
 frame contains a pointer to the root of the answer trie. A chain of answers used by consumers is also kept
-in the form of head and tail pointers. In XSB, a \textit{answer return list} is built and the consumer has
+in the form of head and tail pointers. In XSB Prolog, a \textit{answer return list} is built and the consumer has
 a pointer to the node of the list representing the last consumed answer. In Yap, answers are chained using
-the \textbf{child} pointer of the leaf answer nodes and consumers only keep the last consumed answer leaf.
+the \texttt{child} pointer of the leaf answer nodes and consumers only keep the last consumed answer leaf.
 The last consumed answer pointer is an \textit{answer continuation}. When a consumer needs to verify
 or consume the next available answer, it uses the continuation to retrieve the next answer, following the
 chain of answers. To load an answer, the trie nodes are traversed in bottom-up order and the answer is
 reconstructed.
 
 To simplify memory management, both systems link subgoal frames by storing
-\textbf{next} and \textbf{previous} pointers in each subgoal frame, forming a double linked list.
-The evaluation state of the subgoal is also stored. For example, Yap has the following states:
+\texttt{next} and \texttt{previous} pointers in each subgoal frame, forming a double linked list.
+The evaluation state of the subgoal is also stored. For example, YapTab has the following states:
 \textit{ready}, \textit{evaluating}, \textit{complete} and \textit{incomplete}.
 
 \section{Tabling by Call Subsumption} \label{sec:subsumption}
 
 Although variant based tabling has proven to be greatly beneficial in solving some shortcomings of the SLD resolution,
 other approaches are possible. Tabling by call subsumption aims to reuse answer computations by sharing answers from
-\textit{more general} goals \cite{Johnson-99}.
+\textit{more general} subgoals \cite{Johnson-99}.
 
 When a subgoal is first called, a variant engine will lookup in the table space for a variant subgoal, i.e.,
 one that is identical by renaming the variables. If such a subgoal already exists on the subgoal trie, a new
@@ -130,7 +130,8 @@ consumer is created and the available answers from the variant subgoal are pushe
 Although a variant check is a light-weight operation computationally,
 tabling engines using such checks can end up computing answers through program clause resolution, which takes time and space,
 when they could retrieve answers from a subgoal that \textit{subsumes} the new call. By other words, a more specific subgoal
-could consume answers from a general subgoal, which contains the full set of answers for the specific subgoal among the complete set.
+could consume answers from a general subgoal, which contains the set of relevant answers for the specific subgoal in
+its answer set.
 
 Formally, if two subgoals $G$ and $G'$ exist, such that $S$ and $S'$ are the respective answer sets and
 $G'$ subsumes $G$, then we can conclude that $S \subseteq S'$.
@@ -166,20 +167,20 @@ In variant tabling the engine would search for a variant subgoal in the table sp
 new generator node, meanwhile expanding the execution tree by means of program clause resolution. In subsumptive
 tabling, the engine searches for a subsuming call, and finds \texttt{path(X,Z)}. As this subgoal is more general than
 \texttt{path(b,Z)} it will generate all the answers needed for the subsumed goal. A special type of consumer called a
-\textit{subsumptive consumer} is thus created. This consumer knows the subsuming subgoal and can retrieve the answers
+\textit{subsumed consumer} is thus created. This consumer knows how to retrieve the answers
 that unify with the subsumed call.
 
 As \texttt{path(X,Z)} has no answers, no answers can be consumed by \texttt{path(b,Z)}, and thus the consumer
 node is suspended and execution backtracks to node 2. The second clause of \texttt{edge/2} is tried and a new tabled
-subgoal is called: \texttt{path(a,Z)} (step 4). Like \texttt{path(b,Z)}, this subgoal is subsumed by \texttt{path(X,Z)},
-hence a new subsumptive consumer node is created. Execution suspends once again because no answers are available and
+subgoal is called: \texttt{path(a,Z)} (step 4). Like the subgoal \texttt{path(b,Z)}, this subgoal is subsumed by \texttt{path(X,Z)},
+hence a new subsumed consumer node is created. Execution suspends once again because no answers are available and
 the engine goes back to node 1 to try the second \texttt{path/2} clause (step 5).
 
 Answers for \texttt{path(X,Z)} are found in steps 6, \texttt{\{X~=~a,~Z~=~b\}}, and 7, \texttt{\{X~=~b,~Z~=~a\}}.
 They are stored in the answer set for this subgoal. Execution thus backtracks to node 1 and completion
 is attempted. Node 1 verifies that node 3 and 4 have unconsumed answers and starts by resuming computation at node 3.
 
-Node 3 being a subsumptive consumer looks up in the \texttt{path(X,Z)} answer set for answers specific to \texttt{path(b,Z)},
+Node 3 being a subsumed consumer, looks up in the \texttt{path(X,Z)} answer set for answers specific to \texttt{path(b,Z)},
 finding one: \texttt{\{Z~=~a\}}. At this point, the consumer marks the answer for later retrieval, so that answers can be
 immediately consumed when a variant subgoal is called. Like variant tabling, the consumer keeps a last consumed answer
 continuation to know which answers have already been consumed. Variable bindings for this answer are propagated and a
@@ -191,7 +192,7 @@ Execution suspends node 3 and resumes computation at node 4. Here \texttt{path(a
 unifies with the subsumed goal and is consumed. By variable propagation, a new answer for \texttt{path(X,Z)} is also
 generated, \texttt{\{X~=~b,~Z~=~b\}} (step 9). Node 3 then tries to consume a new answer and finds \texttt{\{X~=~a,~Z~=~a\}}.
 This new answer is added to the \texttt{path(a,Z)} table space. As the new variable bindings are propagated, a new
-answer is also generated for top subgoal, but the answer \texttt{\{X~=~b,~Z~=~a\}} is repeated (step 10), hence it
+answer is also generated for the top subgoal, but the answer \texttt{\{X~=~b,~Z~=~a\}} is repeated (step 10), hence it
 is not inserted into the table space.
 
 Execution now suspends node 4 and resumes the the leader node, \texttt{path(X,Z)}, that will once
@@ -210,21 +211,21 @@ program clauses expanded. The subsumptive computation also took less steps to co
 reuse of answers was done between \texttt{path(X,Z)}, \texttt{path(b,Z)} and \texttt{path(a,Z)}.
 
 Like variant tabling, the same four main operations are used when evaluating subsumptive subgoals.
-These operations are very similar, with a few differences. Operations \textit{new answer} and
+These operations are very similar, with a few key differences. Operations \textit{new answer} and
 \textit{completion} remain the same, while the \textit{tabled subgoal call} and \textit{answer resolution}
 operations work slightly differently:
 
 \begin{itemize}
 \item The \textit{tabled subgoal call} operation represents a call to a tabled subgoal.
-When a subgoal $C$ is called, a search for a subsuming subgoal $C'$ is done. If such subgoal is found,
-$C$ will be resolved using \textit{answer clause resolution}, thus consuming answers from $C'$.
-If no subgoal $C'$ is found, then a new entry, representing $C$, is inserted into the table space and
-$C$ will be evaluated using program clause resolution.
+When a subgoal $G$ is called, a search for a subsuming subgoal $G'$ is done. If such subgoal is found,
+$G$ will be resolved using \textit{answer clause resolution}, thus consuming answers from $G'$.
+If no subgoal $G'$ is found, then a new entry, representing $G$, is inserted into the table space and
+$G$ will be evaluated using program clause resolution.
 
 \item The \textit{answer resolution} operation checks whether new answers from the table space are
-available for consumption. Each subsumptive consumer node uses an answer continuation that represents
+available for consumption. Each subsumed consumer node uses an answer continuation that represents
 the set of remaining answers to be consumed. Given this answer continuation, we inspect the answer trie
-from the subsuming subgoal and retrieve the next answer that matches with the subsumed goal. Once the
+from the subsuming subgoal and retrieve the next answer that matches with the subsumed subgoal. Once the
 answer is retrieved and loaded, the answer continuation is updated to reflect the new answer consumed.
 
 \end{itemize}
@@ -254,7 +255,7 @@ A SFA solves the problem of retrieving an ordered subset of answers, starting fr
 newest answer. It is an ordered tree-structure automaton and is very similar to a trie. It begins with
 a root as the start state and has edges as transitions that represent unifications. Every leaf represents
 a distinct term and the transitions on the path from the root to a leaf represent the operations necessary
-to unify the goal with the term at the leaf.
+to unify the goal with the answer at the leaf.
 
 Apart from ordering, SFAs differ from tries in that transitions from a state may not be unique and each
 transition in a trie denotes match operations, not unify operations.
@@ -274,17 +275,15 @@ representing a new answer.
 Figure~\ref{fig:sfa_example} represents a SFA for the subgoal \texttt{p(X,Y,Z)} and
 illustrates insert operations.
 
-When a new subgoal $G$ subsumed by the subgoal $G'$ is first called, we must determine the \textit{answer template}
+When a new subgoal $G$ subsumed by the subgoal $G'$ is first called, we must determine the \textit{substitutions}
 from $G'$ to the sub-terms of $G$, because only variable substitutions are inserted into a SFA.
-The answer template is usually stored under the choice point.
-
-For example, if $G'$ is \texttt{p(X,Y,Z)} and $G$ is \texttt{p(a,a,V)}, the variable assignments
+For example, if $G'$ is \texttt{p(X,Y,Z)} and $G$ is \texttt{p(a,a,V)}, the substitutions
 are \texttt{\{X~=~a,~Y~=~a,~Z~=~VAR0\}}. During unification operations, we must unify the first SFA symbol
 to $a$, then to $a$ again, and finally with \texttt{VAR0}.
 Once a variable is \textit{bound}, subsequent unify operations must unify with the bounded sub-term.
 
 The unification process starts in the root state with an empty \textit{continuation stack}.
-When a state $s$ is reached, the leftmost transition that unifies with the current $G$ assignment is chosen,
+When a state $s$ is reached, the leftmost transition that unifies with the current $G$ substitution is chosen,
 this is called the \textit{applicable transition}.
 Before moving to the next state, we select the next applicable transition and push it on the continuation stack.
 If no applicable transitions are available at state $s$ or if an answer was found, we pop a transition from
@@ -380,12 +379,12 @@ instantiated transitions that may have been created after the last retrieval ope
 This stack modification is done by using the last visited state $s13$, resulting in the following
 stack configuration: $[s1~\rightarrow~v1,~s8~\rightarrow~s15]$.
 Now the answer \texttt{p(a,b,c)} can be easily retrieved using the transition $s8 \rightarrow s15$.
-Notice that the transition $s1~\rightarrow~v1$ remains unmodified as new transitions can be created
+Note that the transition $s1~\rightarrow~v1$ remains unmodified as new transitions can be created
 from $s1$.
 
 \subsubsection{Table Space Organization}
 
-This new DTSA mechanism was implemented in XSB by extending the variant engine \cite{Rao-96}.
+This new DTSA mechanism was implemented in XSB Prolog by extending the variant engine \cite{Rao-96}.
 First, each subgoal frame now contains both an answer trie and a DTSA.
 Answer tries are used to check for duplicate answers and the DTSA is created lazily, when a
 subsumed subgoal is first called.
@@ -400,7 +399,7 @@ subsumed goals are then retrieved using the trie instructions through unificatio
 \subsection{Time Stamped Tries} \label{sec:time_stamped_tries}
 
 \textit{Time Stamped Tries} (TST) is another mechanism that was implemented in XSB
-to support tabling by call subsumption \cite{Johnson-99}.
+Prolog to support tabling by call subsumption \cite{Johnson-99}.
 
 TST is a relatively simple technique based around the idea of augmenting a trie with information about the relative time
 its terms were inserted. The time of insertion of each term is called its \textit{time stamp} and is represented by a
@@ -441,12 +440,11 @@ the time stamps, search and insertion in TSTs work exactly the same as standard 
 \subsubsection{Retrieving Answers}
 
 Retrieving all answers that are specific to a subsumed subgoal $G$ from a TST with answers from subgoal $G'$
-works by navigating the TST and unifying the answers against the answer template.
+works by navigating the TST and unifying the answers against the subsumptive substitutions.
 If we wanted to retrieve answers to the subgoal \texttt{p(a,a,X)} from the TST in Figure~\ref{fig:tst_2},
-during the subgoal call we determine the answer template relative to \texttt{path(X,Y,Z)}:
-\texttt{\{X~=~a,~Y~=~a,~Z~=~VAR0\}},
-and store it under the choice point. Then, the terms \texttt{[a,~a,~VAR0]} are unified
-with the trie symbols, thus finding answers that are specific to $G$.
+during the subgoal call we must determine the substitutions relative to \texttt{path(X,Y,Z)},
+\texttt{\{X~=~a,~Y~=~a,~Z~=~VAR0\}}, and then we must unify the terms \texttt{[a,~a,~VAR0]} against
+the trie symbols.
 
 Like tries, TSTs only store substitutions for variables, thus we must unify
 the first sub-term $a$, then $a$ again and then the variable, which unifies with any symbol.
@@ -466,13 +464,13 @@ been added since the last time a search operation was done by using the time sta
 The table space in this technique extends the variant table space by
 using TSTs instead of answer tries for subsuming goals.
  
-Each subsumed subgoal in a subgoal trie stores the last search time stamp $t$. The process of
+Each subsumed subgoal frame, also represented in a subgoal trie, stores the last search time stamp $t$. The process of
 incrementally searching for new answers in a TST will use $t$ and update it after the process completes.
-When a subsumed subgoal is first called $t$ is set to $0$, thus initially allowing the retrieval of all
+When a subsumed subgoal is first called, $t$ is set to $0$, thus initially allowing the retrieval of all
 relevant answers.
 
 The subgoal in the subgoal trie also stores an answer return list. Each time new answers are identified, they are appended
-to this linked list. The original subsumptive consumer and its variant subgoals will then consume answers from it. If no
+to this linked list. The original subsumed consumer and its variant subgoals will then consume answers from it. If no
 new answers can be retrieved from the list, the TST process is employed to identify more answers from the subsuming TST,
 inserting them into the list.
 
@@ -505,5 +503,5 @@ being simpler and having reduced space needs.
 
 In the next chapter we will discuss the algorithms and data structures used in the TST technique,
 covering the algorithm used to discover subsuming subgoals and the algorithm to collect relevant
-answers. Finally, we will explain how the TST is integrated into the YapTab tabling engine to enable
+answers. Finally, we will explain how the TST mechanisms are integrated into the YapTab tabling engine to enable
 call by subsumption.

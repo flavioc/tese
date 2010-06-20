@@ -1,6 +1,6 @@
 In this chapter, we throughly describe the Time Stamped Tries approach
 to implement a subsumptive tabling engine. This mechanism was proposed by
-Ernie Johnson \textit{et al}. \cite{Johnson-99} and is currently implemented in XSB.
+Ernie Johnson \textit{et al}. \cite{Johnson-99} and is currently implemented in XSB Prolog.
 It is based on the idea of extending each answer trie node with \textit{time stamp}
 information as a means to distinguish between new answers and old answers.
 
@@ -69,9 +69,9 @@ Next, the functor term \texttt{a/1} matches with trie node $n6$ and the process 
 The last term symbol \texttt{2} can match with node $n7$, as it is an unbound variable
 and the only node available.
 If the variable was bound, like \texttt{VAR0} for instance,
-the process would check if the current term symbol unifies with the variable binding made before (\texttt{VAR0=2}) and
+the process would check if the current term symbol unifies with the variable binding made before (\texttt{VAR0~=~2}) and
 it would also succeed. As node $n7$ is a leaf node, the process finishes with a subsumptive path found and
-the following variable bindings made: \texttt{VAR0=2}, \texttt{VAR1=X}, and \texttt{VAR2=2}.
+the following variable bindings made: \texttt{VAR0~=~2}, \texttt{VAR1~=~X}, and \texttt{VAR2~=~2}.
 
 Implementation wise, this algorithm uses the following data structures:
 
@@ -88,7 +88,7 @@ During execution, two matching methods are considered: the first tries to match 
 the second method uses trie variables instead of exact symbols and is employed when the first method fails.
 When a trie node match succeeds, matching defaults to the first method, which means
 that exact matches are always tried before variables when a new \textit{trie level} is reached and variables are usually attempted
-when backtracking. A trie level represents a set of nodes that are linked by \textbf{sibling} links or that are
+when backtracking. A trie level represents a set of nodes that are linked by \texttt{sibling} links or that are
 in the same hash table.
 
 The process starts by pushing the $G$ subgoal arguments, $X1, X2, ...Xn$ into the term stack, so that $X1$ is at the top
@@ -106,8 +106,8 @@ the variable trie nodes. The skeleton for this algorithm is presented in Figure~
 The basic idea of this algorithm is to match the current term from the term stack against a node in the current
 trie level and store the next alternative node on this level on the call choice point stack. If no node
 is found, we try alternatives on the choice point stack, else we use the matched node to descend into the trie.
-Two modes of matching exist: (1) \textbf{MATCH\_EXACTLY}, which is used when a new trie level is reached for the
-first time in order to do exact matches; (2) \textbf{MATCH\_TRIE\_VARS}, used when the current trie node is reached
+Two modes of matching exist: (1) \texttt{MATCH\_EXACTLY}, which is used when a new trie level is reached for the
+first time in order to do exact matches; (2) \texttt{MATCH\_TRIE\_VARS}, used when the current trie node is reached
 by backtracking, forcing variable matching.
 
 \begin{figure}[ht]
@@ -307,7 +307,7 @@ a subsuming call: \texttt{p(VAR0,f(b))}.
 
 \begin{figure}[ht]
   \centering
-    \includegraphics[scale=0.6]{match_functor.pdf}
+    \includegraphics[scale=0.65]{match_functor.pdf}
   \caption{Finding a subsuming goal for subgoal \texttt{p(a,f(b))}.}
   \label{fig:match_functor}
 \end{figure}
@@ -327,7 +327,7 @@ was already bound to variable \texttt{X}.
 To recognize already seen call variables, we bind them to the variable enumerator vector, indexed
 by the corresponding trie variable number. The trail stack is used to trail those variables.
 When a bound variable must be matched again, first we try to pair it with the same trie variable,
-and if such trie variable can not be found, we try an unbound trie variable, thus,
+and if such trie variable can not be found, we try an unbound trie variable, thus
 avoiding two different call variables to be bound to the same trie variable.
 
 The pseudo-code for this procedure is shown in Figure~\ref{fig:match_variable}.
@@ -502,9 +502,9 @@ construct_answer_template_from_generator(subgoal_call, generator_sf) {
 \section{Time Stamped Answer Trie}
 
 A time stamped node extends an answer trie node with time stamp information.
-Each node contains the following fields: \textbf{symbol}, \textbf{child}, \textbf{parent}, \textbf{sibling}
-and \textbf{timestamp}. For implementation and algorithmic purposes, each node also needs a bit field,
-\textbf{status}, that defines some node properties that will be described shortly.
+Each node contains the following fields: \texttt{symbol}, \texttt{child}, \texttt{parent}, \texttt{sibling}
+and \texttt{timestamp}. For implementation and algorithmic purposes, each node also needs a bit field,
+\texttt{status}, that defines some node properties that will be described shortly.
 
 Insertion of an answer $S$ into a TST can be divided into two steps:
 
@@ -541,11 +541,11 @@ When a chain of sibling nodes becomes larger than a threshold value, we dynamica
 nodes through an hash table to provide direct node access and therefore optimize the search. Given
 that an hash table can have a large number of answer nodes with different time stamp values, we maintain
 a reference to these nodes, in decreasing order of their time stamp values in a double linked list
-called the \textit{time stamped index}.
+called the \textit{time stamp index}.
 Besides the double linked list pointers, each index node contains a pointer to the corresponding
 answer node and the value of its time stamp. Each answer node indexed in the hash table has a different use
-for the \textbf{timestamp} field: instead of containing a positive integer, contains a pointer
-to the respective index node. The trie node field \textbf{status} distinguishes
+for the \texttt{timestamp} field: instead of containing a positive integer, contains a pointer
+to the respective index node. The trie node field \texttt{status} distinguishes
 both cases. Figure~\ref{fig:hash_table_tst} illustrates an hash table with a time stamp index.
 
 \begin{figure}[ht]
@@ -602,7 +602,7 @@ time stamp indexing (see Figure~\ref{fig:tst_chain_insert}), inserting a new nod
 because hash tables index nodes by time stamp.
 Figure~\ref{fig:hash_table_insert}
 illustrates the insertion of a symbol (\texttt{25}) and the creation of the respective
-index node. Note that the \textbf{index\_head} field was changed to point to the new index node,
+index node. Note that the \texttt{index\_head} field was changed to point to the new index node,
 which is always the node with the greatest time stamp.
 
 \begin{figure}[ht]
@@ -626,10 +626,9 @@ The time stamp for the new answer is calculated by inspecting the time stamp of 
 Next, we update the time stamps in the answer trie branch starting from the answer leaf node to the
 root node.
 
-If the current node is an hashed node with time stamp indexes,
-its index node is moved to the head of
+If the current node is an hashed node with a time stamp index, the corresponding index node is moved to the head of
 the index's double linked list. We can test whether an answer node is indexed by
-an hash table by inspecting its \textbf{status} field.
+an hash table by inspecting its \texttt{status} field.
 Figure~\ref{fig:update_timestamps} contains the pseudo-code for procedure \texttt{update\_timestamps}.
 
 \begin{figure}[ht]
@@ -652,11 +651,11 @@ update_timestamps(trie_root, leaf) {
 \label{fig:update_timestamps}
 \end{figure}
 
-When moving an index node $N$, the \textbf{index\_head} field of the hash table must be updated
+When moving an index node $N$, the \texttt{index\_head} field of the hash table must be updated
 to point to $N$. Moreover, if $N$ was at the end of the chain,
-the \textbf{index\_tail} field must be also updated to the \textbf{previous} field of $N$.
-Previous pointers of the \textbf{next} node of $N$ and the next pointer of
-the \textbf{previous} node of $N$ must
+the \texttt{index\_tail} field must be also updated to the \texttt{previous} field of $N$.
+Previous pointers of the \texttt{next} node of $N$ and the next pointer of
+the \texttt{previous} node of $N$ must
 also be updated to keep the chain consistent.
 Figure~\ref{fig:hash_table_promote} illustrates the relocation of an index node, after
 its time stamp be updated from 5 to 7.
@@ -670,11 +669,11 @@ its time stamp be updated from 5 to 7.
 
 \subsection{Lazy Creation of Time Stamp Indexes}
 
-Time stamped indexes are only created when a consumer subgoal is first called.
+Time stamp indexes are only created when a consumer subgoal is first called.
 We must iterate over all the hash tables present on the trie to create the time stamp index.
 To efficiently locate all hash tables in an answer trie, we chain these hash tables
-using the \textbf{next} field and the start of this chain is stored
-in the \textbf{sibling} field of the root node.
+using the \texttt{next} field and the start of this chain is stored
+in the \texttt{sibling} field of the root node.
 
 Creating the index for an hash table amounts to iterating over the hashed nodes
 and orderly inserting new index nodes on the index chain.
@@ -727,7 +726,7 @@ The whole algorithm can be summarized into eight steps:
 
 The setup phase pushes the answer template into the term stack and backups the WAM registers.
 The trail register is set to the next free position
-of the WAM trail, thus avoiding writing on frozen segments. Registers HB, H and TR are
+of the WAM trail, thus avoiding writing on frozen segments. Registers \texttt{HB}, \texttt{H} and \texttt{TR} are
 saved as they will be manipulated and need to be restored to avoid any interference with
 the normal WAM execution.
 
@@ -785,17 +784,17 @@ Each stack frame (see Figure~\ref{fig:choice_point_stack}) stores the following 
 \texttt{term\_stack\_top}, the top of the term stack;
 \texttt{term\_log\_stack\_top}, the top of the term log stack;
 \texttt{trail\_top}, the current trail position;
-and \texttt{saved\_HB}, the register HB.
+and \texttt{saved\_HB}, the register \texttt{HB}.
 
-\begin{figure}[H]
+\begin{figure}[ht]
   \centering
     \includegraphics[scale=0.45]{choice_point_stack.pdf}
   \caption{Choice point stack organization.}
   \label{fig:choice_point_stack}
 \end{figure}
 
-The HB register serves the same purpose as the standard HB register in a WAM choice point.
-During execution, the WAM's HB register is compared against the value of H to determine
+The \texttt{HB} register serves the same purpose as the standard \texttt{HB} register in a WAM choice point.
+During execution, the WAM's \texttt{HB} register is compared against the value of \texttt{H} to determine
 if a variable is \textit{conditional}, that is, if a variable needs to be trailed, so that
 when execution backtracks to a previous choice
 point we can reset variable bindings. In our case, instead of executing WAM code, we unify a time stamped node,
@@ -805,10 +804,10 @@ When a choice point frame is popped from the stack, the state of the computation
 by executing the following actions:
 
 \begin{itemize}
-  \item the current node and parent node are reset;
+  \item the current and parent nodes are reset;
   \item all terms stored in the term log stack are pushed back to the term stack;
-  \item the trail is unwound to reset the variables that were bound after choice point creation;
-  \item registers H and HB are also reseted to previous values.
+  \item the trail is unwound to reset the variables that were bound after the choice point creation;
+  \item registers \texttt{H} and \texttt{HB} are also reseted to previous values.
 \end{itemize}
 
 \subsection{Unification of Constant Terms}
@@ -961,7 +960,7 @@ is composed by nodes $n2$ and $n3$. Node $n2$ is discarded because its time stam
 but node $n3$ has a valid time stamp and its symbol matches \texttt{a} (Figure~\ref{fig:tst_constant_b}).
 
 On node $n3$, only our first alternative, node $n4$, has a valid time stamp and, after doing
-\texttt{trie\_deref} we find an unbound variable, \texttt{VAR0}, which is represented
+\texttt{trie\_deref}, we find an unbound variable, \texttt{VAR0}, which is represented
 by the first position of the variable bindings vector.
 This variable is trailed and bound to \texttt{b},
 resulting in what is presented in Figure~\ref{fig:tst_constant_c}.
@@ -1101,7 +1100,7 @@ is empty (Figure~\ref{fig:tst_functor_b}). Here, only node $n2$ satisfies the ti
 ($2 > 1$).
 
 Node (b) contains a trie variable and the current term is \texttt{STR 3} or \texttt{f(VAR)}.
-In this situation, the variable bindings position for \textbf{VAR0} is trailed and bound to \texttt{STR 3}
+In this situation, the variable bindings position for \texttt{VAR0} is trailed and bound to \texttt{STR 3}
 (Figure~\ref{fig:tst_functor_c}).
 
 Next, node $n4$ contains the symbol \texttt{g/1} and the current term is \texttt{STR 6}
@@ -1128,7 +1127,7 @@ situations may arise:
 
 \begin{enumerate}
   \item The current node is an hash table. In this situation we can select the next transitions
-   by using the time stamped index, which can efficiently prune based on the time stamp. Notice that we visit
+   by using the time stamp index, which can efficiently prune based on the time stamp. Notice that we visit
    an hash table only once, subsequent backtracking uses the time stamp index nodes;
   \item The current node is inside an hash table and thus indexed on the time stamp index.
    The node is matched against the variable and the alternative node is selected by following
@@ -1244,7 +1243,7 @@ The input answer template is \texttt{\{REF~2,REF~2,~b\}} and the target time sta
       \label{fig:tst_variable_e}%
       \includegraphics[scale=0.45]{collect_variable4.pdf}} \\
    
-   \caption{Unification of answer template \texttt{\{REF~2,REF~2,~b\}} with time stamp 2.}
+   \caption{Unification of answer template \texttt{\{REF~2,~REF~2,~b\}} with time stamp 2.}
    \label{fig:tst_variable}
 \end{figure}
 
@@ -1284,7 +1283,7 @@ the trie root $R$. Consuming $A$ amounts to unifying the symbols on the trie pat
 to the answer template $AT$ that was built for the consumer choice point. In such a way that, in the end,
 the variables on $AT$ match the answer on the trie.
 
-As we are certain that $A$ unifies with $AT$, consumption is reduced to a simple unification
+As we are certain that $A$ unifies with $AT$, consumption is reduced to an unification operation
 between $AT$ and the trie nodes from $L$ to $R$.
 Implementation wise, we use the term stack that is initially pushed with $AT$
 and a symbol stack containing symbols from $L$ to $R$. Then, we proceed by
@@ -1294,7 +1293,7 @@ and unifying one against the other.
 In Figure~\ref{fig:consume_answer}, we present an example showing the data structures involved in consuming
 a subsumptive answer. The subsumptive subgoal is \texttt{p(X,Y,Z)} and the
 subsumed subgoal is \texttt{p(d,f(X),3)}. The answer to consume is \texttt{p(d,f(a),3)},
-which corresponds to the binding \texttt{\{X~=~a\}}.
+which corresponds to the substitution \texttt{\{X~=~a\}}.
 
 \begin{figure}[h]
   \centering
@@ -1316,7 +1315,7 @@ through the terms of a trie, each transition is taken at most only once.
 In Figure~\ref{fig:compiled_trie}, we represent a compiled answer trie for the subgoal
 \texttt{p(X,Y,Z)}. Notice that each node is extended with an instruction field.
 The instruction set follows the standard WAM instruction style with \textit{try},
-\textit{retry} and \textit{trust}. On a sibling chain the leftmost nodes are marked
+\textit{retry} and \textit{trust}. On a sibling chain, the leftmost nodes are marked
 with \textit{try} instructions and middle nodes with \textit{retry} instructions. Rightmost
 nodes use \textit{trust} instructions, while single nodes use \textit{do} instructions.
 
@@ -1338,7 +1337,7 @@ On structured terms, like functors or lists, the term is first built on the heap
 bound to the current variable, while the unbound arguments are then passed into the next trie levels
 to be instantiated.
 
-In XSB, time stamped tries are used to evaluate subsumed subgoals while the subsuming subgoal
+In XSB Prolog, time stamped tries are used to evaluate subsumed subgoals while the subsuming subgoal
 is incomplete, thus providing incremental retrieving of answers.
 When a subgoal $G$ completes, the engine uses the compiled answer trie from $G$
 to evaluate a subsumed subgoal $G'$, instead of loading each individual answer.
@@ -1362,11 +1361,11 @@ If we had a very long sibling chain, locating a specific term would have a linea
 hash tables provide $O(1)$ search complexity.
 Thus, instead of removing hash tables, they must be kept on a subsumptive tabling engine.
 To use the hash tables, we must extend the trie instruction set with a new instruction,
-\textit{do\_hash} (Figure~\ref{fig:compiled_hash}).
+the \textit{do\_hash} instruction (Figure~\ref{fig:compiled_hash}).
 
 \begin{figure}[h]
   \centering
-    \includegraphics[scale=0.6]{compiled_hash.pdf}
+    \includegraphics[scale=0.55]{compiled_hash.pdf}
   \caption{Compiled hash table.}
   \label{fig:compiled_hash}
 \end{figure}
@@ -1382,69 +1381,69 @@ by storing a choice point that keeps the next hash bucket to be executed.
 
 Our first attempt to extend the variant YapTab engine to support call by subsumption
 involved importing the subsumption related algorithms and data structures described in
-the previous sections from XSB into YapTab. These algorithms were imported as faithful as possible,
+the previous sections from XSB Prolog into Yap Prolog. These algorithms were imported as faithful as possible,
 hence very little modifications were made as C macros were used to translate the original
-code to YapTab. Sections of code specific to XSB or Yap were protected with conditional
+code to YapTab. Sections of code specific to XSB Prolog or Yap Prolog were protected with conditional
 compilation, thus enabling both Prolog systems to use the same code.
 
 In this section we will describe in more detail the modifications made to the following components of YapTab:
 tabled data structures, tabling operations and compiled tries.
-This new version of YapTab is called \textit{YapTab\_TST} and will be described in the next sections.
 
 \subsection{Data Structures}
 
 This section describes the modifications and extensions made to existent data structures
-in order to implement \textit{YapTab\_TST}.
+in order to implement call subsumption.
 
 \subsubsection{Table Entry}
 
-Each table entry contains a bit field called \textbf{mode\_flags} which stores information about
+Each table entry contains a bit field called \texttt{mode\_flags} which stores information about
 the behavior of the corresponding tabled predicate. The original YapTab supports the
 following mutually exclusive flags: \textbf{batched} / \textbf{local}, for defining the scheduling strategy;
 and \textbf{load answers} / \textbf{exec answers}, the later makes the engine to use compiled tries,
 while the first forces the engine to load a completed table by loading answers individually.
 
-Two new mutually exclusive flags were created for \textit{YapTab\_TST}: \textbf{variant},
+Two new mutually exclusive flags were created: \textbf{variant},
 which forces the predicate to use variant tabling and \textbf{subsumptive} to use subsumptive tabling.
 
 \subsubsection{Trie Nodes}
 
 YapTab uses two types of trie nodes: subgoal trie nodes, for subgoal tries; and answer trie nodes, for
 answer tries. In terms of hash tables, the same data structures are used for both subgoal and answer
-hash tables. \textit{YapTab\_TST} extends the answer and subgoal trie nodes with a \textbf{status}
-bit field and implements the time stamped trie nodes as answer trie nodes extended with a \textbf{timestamp} field.
-The \textbf{status} bit field is used to identify the type of trie node, i.e., if it is
+hash tables. Both answer and subgoal trie nodes were extended with a \texttt{status}
+bit field and the answer trie nodes were extended with a \texttt{timestamp} field in order to create a
+time stamped trie from the standard answer trie.
+The \texttt{status} bit field is used to identify the type of trie node, i.e., if it is
 an hash table, a leaf node or an hashed node.
 For hash tables, we extended the answer hash table with the time stamp indexes to create the
-time stamped hash table. The index data structure was integrally copied from XSB.
+time stamped hash table. The index data structure was integrally copied from XSB Prolog.
 
 \subsubsection{Subgoal Frames}
 
 The subgoal frame structure in YapTab is a main component of the table space.
-It contains the fields: \textbf{answer\_trie}, a pointer to the answer trie;
-\textbf{state}, the state flag; \textbf{first\_answer} and \textbf{last\_answer},
-as the answer return list; \textbf{next}, a pointer to the next executing subgoal;
-and \textbf{generator\_cp}, which points to the generator choice point.
+It contains the following fields: \texttt{answer\_trie}, a pointer to the answer trie;
+\texttt{state}, the state flag; \texttt{first\_answer} and \texttt{last\_answer},
+as the answer return list; \texttt{next}, a pointer to the next executing subgoal;
+and \texttt{generator\_cp}, which points to the generator choice point.
 
 Two new kinds of subgoal frame were created: the \textit{subsumptive generator subgoal frame} and
 the \textit{subsumed consumer subgoal frame}.
 
 The subsumptive generator subgoal frame extends the original variant subgoal frame
-with the field \textbf{consumers}. This field points to a consumer subgoal frame and works
+with the field \texttt{consumers}. This field points to a consumer subgoal frame and works
 as a chain link to the subsumed subgoal frames of the generator subgoal.
 
 The subsumptive consumer subgoal frame does not extend the variant subgoal frame, because
 some variant fields are not needed.
-The consumer frame contains the following fields: \textbf{state}, the state of execution;
-\textbf{generator}, a pointer to the subsumptive generator subgoal frame; \textbf{consumer\_cp},
-a pointer to the first consumer choice point; \textbf{first\_answer} and \textbf{last\_answer},
+The consumer frame contains the following fields: \texttt{state}, the state of execution;
+\texttt{generator}, a pointer to the subsumptive generator subgoal frame; \texttt{consumer\_cp},
+a pointer to the first consumer choice point; \texttt{first\_answer} and \texttt{last\_answer},
 as the answer return list; \textbf{ts}, the consumer time stamp;
-\textbf{next}, a pointer to the next evaluating consumer subgoal frame; \textbf{answer\_template},
-a pointer to the answer template built on the heap; and \textbf{consumers},
+\texttt{next}, a pointer to the next evaluating consumer subgoal frame;
+a pointer to the answer template built on the heap called \texttt{answer\_template}; and \texttt{consumers},
 to link consumer subgoals of the generator subgoal frame.
 
-Each subgoal frame was also extended with a \textbf{type} field, which identifies the subgoal frame type.
-The variant subgoal frame now uses an answer return list instead of using the \textbf{child} field of
+Each subgoal frame was also extended with a \texttt{type} field, which identifies the subgoal frame type.
+The variant subgoal frame now uses an answer return list instead of using the \texttt{child} field of
 each trie node to link answers.
 
 Figure~\ref{fig:subgoal_frames} illustrates a subgoal trie for the predicate \texttt{p/2}
@@ -1463,16 +1462,16 @@ with the following subgoals: \texttt{p(X,Y)}, as a generator subgoal; and \textt
 The tabled subgoal call operation is one of the four main tabling operations. In YapTab,
 if a subgoal call is already on the table space, a new consumer node is allocated and
 the execution runs the answer resolution operation, in order to consume answers.
-Otherwise, a new generator node is allocated and the subgoal compiled code is executed.
+Otherwise, a new generator node is allocated and the subgoal code is executed.
 
 Figure~\ref{fig:tabled_subgoal_call} presents the pseudo-code for the original tabled subgoal call operation.
 In the consumer case, we use the \texttt{find\_dependency\_node} and \texttt{find\_leader\_node} procedures
-to locate the leader node for this consumer. The function \texttt{find\_dependency\_node} simply
+to locate the leader node for this consumer. The function \texttt{find\_dependency\_node}
 returns the choice point of the generator node for this subgoal, while \texttt{find\_leader\_node}
 iterates the dependency space between \texttt{dependency} and the new dependency frame for this consumer,
 to locate a dependency frame in which the leader is outside this range. If no such dependency frame
 exists, the leader node is set as the generator choice point found in \texttt{find\_dependency\_node},
-else we use the leader of the dependency frame that satisfied the previous condition. \cite{Rocha-PhD}
+else we use the leader of the dependency frame that satisfied the previous condition \cite{Rocha-PhD}.
 
 \begin{figure}[ht]
 \begin{Verbatim}
@@ -1500,7 +1499,7 @@ tabled_subgoal_call(table_entry, arguments) {
 \label{fig:tabled_subgoal_call}
 \end{figure}
 
-\textit{YapTab\_TST} extends the tabled subgoal call operation to deal with either subsumptive and variant subgoals,
+The new YapTab engine extends the tabled subgoal call operation to deal with either subsumptive and variant subgoals,
 and if a predicate uses call by subsumption, we call the \texttt{subsumptive\_subgoal\_search} procedure
 (Figure~\ref{fig:subsumptive_subgoal_search}) to look on the subgoal trie for subsuming subgoals.
 If no subsuming path is found, we insert the subgoal path on the subgoal trie and create a new generator
@@ -1564,30 +1563,30 @@ while each consumer node uses its own answer template built on the local stack t
 consume answers, because it references variables
 and terms from the arguments.
 
-\begin{figure}[H]
+\begin{figure}[ht]
   \centering
     \includegraphics[scale=0.6]{structural_copy.pdf}
   \caption{Making a structural copy of the answer template \texttt{\{X,~f(a)\}}.}
   \label{fig:structural_copy}
 \end{figure}
 
-The field \textbf{consumer\_cp} of the consumer subgoal frame is set to point to the first call
+The field \texttt{consumer\_cp} of the consumer subgoal frame is set to point to the first call
 of the consumer subgoal and will be used to access the value of \texttt{H} stored on the choice point.
 This value of \texttt{H} points to the top of the heap during the choice point creation which corresponds
-to the answer template copied before. The field \textbf{answer\_template} points to \texttt{H}
+to the answer template copied before. The field \texttt{answer\_template} points to \texttt{H}
 and is used to avoid accessing the choice point, thus it must be recalculated during garbage collection.
 
-This differs from XSB \cite{Johnson-00} where a \textit{non-structural copy} of the answer template
+YapTab thus differs from SLG-WAM \cite{Johnson-00} where a \textit{non-structural copy} of the answer template
 is built on the heap for each consumer node. A non-structural copy is made by making references from
 the heap to the terms on the heap. Figure~\ref{fig:non_structural_copy} illustrates a non-structural
 copy of the answer template \texttt{\{X,~f(a)\}}. 
-while making non-structural copies is faster than doing structural copies, collecting relevant answers
+While making non-structural copies is faster than doing structural copies, collecting relevant answers
 can, potentially, involve more environment switching, because we must reconstitute the environment of
 the consumer to ensure that the answer template is valid, which involves using the trail to unbind
 and/or rebind variables. Our approach has the disadvantage of making structural copies, but only one
 copy is done and there is no need to invoke the algorithm within the environment of the subsumed call.
 
-\begin{figure}[H]
+\begin{figure}[ht]
   \centering
     \includegraphics[scale=0.6]{non_structural_copy.pdf}
   \caption{Making a non-structural copy of the answer template \texttt{\{X,~f(a)\}}.}
@@ -1603,7 +1602,7 @@ subgoal operation.
 tabled_subgoal_call(table_entry, arguments) {
   subgoal_trie = subgoal_trie(table_entry)
   
-  if(mode_flag(table_entry) == VARIANT)
+  if(mode_flags(table_entry) == VARIANT)
     subgoal_frame = variant_subgoal_search(subgoal_trie, arguments)
   else
     subgoal_frame = subsumptive_subgoal_search(subgoal_trie, arguments)
@@ -1713,14 +1712,14 @@ we created a function that distinguishes between both variant and subsumptive ca
 The function accepts a dependency frame (note that there is a dependency frame for
 each consumer node) and returns an answer continuation.
 An answer continuation is represented by a pointer to a linked list with two fields:
-\textbf{answer}, the answer itself; and \textbf{next}, which points to the next element of the list,
+\texttt{answer}, the answer itself; and \texttt{next}, which points to the next element of the list,
 if any.
 
 \begin{figure}[ht]
 \begin{Verbatim}
 get_next_answer_continuation(dependency_frame) {
   sg_fr = sg_fr(dependency_frame)
-  last_continuation = last(dependency_frame)
+  last_continuation = last_answer(dependency_frame)
   next_continuation = next(last_continuation)
   
   if (type(sg_fr) == VARIANT or type(sg_fr) == PRODUCER)
@@ -1756,11 +1755,11 @@ get_next_answer_continuation(dependency_frame) {
 \label{fig:get_next_answer_continuation}
 \end{figure}
 
-With subsumptive consumer nodes we first verify if the answer return list of the
+With subsumed consumer nodes we first verify if the answer return list of the
 consumer subgoal frame contains more answers from the saved continuation. If there is
 any, we return the next answer from this list and consume it. If the list has no more answers,
 we inspect if the consumer time stamp is equal to the generator time stamp, which means
-that no new answers were generated for the general subgoal. In the other hand, if new
+that no new answers were generated for the general subgoal. On the other hand, if new
 answers are available, we run \texttt{tst\_collect\_relevant\_answers} to collect any
 relevant answers for this consumer that can be appended into the answer return list
 and returned for consumption.
@@ -1769,7 +1768,7 @@ repeated answers in future iterations. Remember that once a single consumer node
 collects newer answers, every consumer node of a subsumed subgoal will see them, thus
 enabling sharing of answers among the consumer nodes.
 Note that in order to run this algorithm, the dependency frame data structure was extended
-with a new \textbf{sg\_fr} field.
+with a new \texttt{sg\_fr} field.
 
 Figure~\ref{fig:completion_operation} presents the new completion operation,
 using the devised abstractions.
@@ -1802,18 +1801,18 @@ Hence, some modifications must be made to complete subsumed consumer subgoal fra
 
 In YapTab each variant subgoal frame is stacked into the \textit{subgoal frame stack} during execution.
 The top of the stack can be accessed by using \texttt{TOP\_SG\_FR}.  On completion, the subgoal frame
-stack is iterated until the leader subgoal frame is reached. We used this stack to complete for both
+stack is iterated until the leader subgoal frame is reached. We used this stack to complete both
 variant and subsumptive generator subgoal frames.
 
 Subsumed consumer subgoal frames are pushed into a stack called \textit{consumer subgoal frame stack}.
-During completion, the subgoal frames with a consumer choice point (\texttt{consumer\_cp})
+During completion, the subgoal frames with a consumer choice point
 younger than the completion point are completed. Figure~\ref{fig:completion_space} illustrates the
 subgoal frame stack, the consumer subgoal frame stack and the dependency space.
 
 Some data structures, like the time stamp indexes, are deleted during completion from the
 subsumptive generator subgoal frames.
 
-\begin{figure}[H]
+\begin{figure}[ht]
   \centering
     \includegraphics[scale=0.5]{completion_space.pdf}
   \caption{Subsumptive generator and consumers before completion.}
@@ -1837,10 +1836,10 @@ exist and are different. For variables, the choice point is always stored. The i
 set to execute upon backtracking is \texttt{trie\_retry\_hash}.
 
 An hash choice point is an WAM choice point extended with two new fields:
-\textbf{last\_bucket} and \textbf{final\_bucket}.
-The field \textbf{last\_bucket} points to the last executed bucket on case 1 or the
+\texttt{last\_bucket} and \texttt{final\_bucket}.
+The field \texttt{last\_bucket} points to the last executed bucket on case 1 or the
 variable bucket for case 2.
-The second field, \textbf{final\_bucket}, helps differentiate between
+The second field, \texttt{final\_bucket}, helps differentiate between
 case 1 and 2, as in case 2 its value is NULL. In case 1 points to the final hash table bucket,
 hence it is easy to know when to remove the choice point.
 

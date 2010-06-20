@@ -15,7 +15,7 @@ when it is called for the first time and a more general subgoal $G'$ is not foun
 When $G'$ exists, $G$ is considered a consumer subgoal and a new consumer node is allocated to consume
 answers from the subsuming subgoal $G'$.
 
-Consider two subgoals, \texttt{p(X,1,2)} and \texttt{p(X,1,Z)} , and that subgoal \texttt{p(X,1,2)} is called first,
+Consider two subgoals, \texttt{p(X,1,2)} and \texttt{p(X,1,Z)}, and that subgoal \texttt{p(X,1,2)} is called first,
 followed by \texttt{p(X,1,Z)}. When \texttt{p(X,1,2)} is called, it is considered a generator subgoal as no subgoals
 exist on the subgoal trie. The subgoal \texttt{p(X,1,Z)} is also considered a generator, because
 \texttt{p(X,1,2)} does not subsume \texttt{p(X,1,Z)}. However, If the call order is swapped, \texttt{p(X,1,Z)} is still
@@ -48,13 +48,13 @@ but consumes answers from the more general subgoal.
 Consider the program in Figure~\ref{fig:retro_program1} that uses RCS and the query goal `\texttt{a(X),~p(Y,Z)}'.
 The goal \texttt{a(X)} starts by calling \texttt{p(1,X)}, which succeeds with the answer \texttt{\{X~=~3\}}.
 By following forward execution, \texttt{p(Y,Z)} is called in the continuation and it then verifies if any subsumed
-subgoal is currently running (Figure \ref{fig:retro_eval1}~(a)). It finds \texttt{p(1,X)} and thus it marks this
+subgoal is currently running (Figure \ref{fig:retro_eval1}a). It finds \texttt{p(1,X)} and thus it marks this
 subgoal frame as a consumer subgoal frame that will consume from \texttt{p(Y,Z)}.
 In order for \texttt{p(1,X)} to act as a consumer, its generator choice point is transformed into
 a \textit{retroactive choice point}, which amounts to update the \textit{continuation alternative}
-(\textbf{CP\_AP} choice point field) to a pseudo-instruction called \textit{retroactive\_resolution},
+(\texttt{CP\_AP} choice point field) to a pseudo-instruction called \textit{retroactive\_resolution},
 which implements the needed mechanisms to control the evaluation of a \textit{retroactive node}
-(Figure \ref{fig:retro_eval1}~(b)).
+(Figure \ref{fig:retro_eval1}b).
 
 \begin{figure}[ht]
 \begin{Verbatim}
@@ -107,7 +107,7 @@ in a pruned branch and a mechanism that can tell us if a certain choice point is
 
 To solve the problem of determining if a tabled node is internal to a subgoal,
 we construct a \emph{subgoal dependency tree} by extending the subgoal frame and the
-dependency frame data structures with a new field called \textbf{top\_gen}. This field is a pointer to
+dependency frame data structures with a new field called \texttt{top\_gen}. This field is a pointer to
 the top generator subgoal $G$ in evaluation, if any, from which the corresponding tabled node is
 internal to the evaluation of $G$.
 Hence, we can use the subgoal dependency tree to know if a subgoal $A$ is internal
@@ -135,13 +135,13 @@ is_internal_subgoal_frame(target_fr, sg_fr) {
 \label{fig:is_internal_subgoal_frame}
 \end{figure}
 
-When a new subgoal frame or dependency frame is stored, the \textbf{top\_gen} field is initialized
+When a new subgoal frame or dependency frame is stored, the \texttt{top\_gen} field is initialized
 with the value of a global variable called \texttt{TOP\_GEN}. The \texttt{TOP\_GEN} variable is updated in the following
 situations: (1) when a tabled subgoal call creates a new generator node we update
 \texttt{TOP\_GEN} to the corresponding new subgoal frame; (2) when the new answer tabled operation
-is executed we set \texttt{TOP\_GEN} to the value of the subgoal frame's \textbf{top\_gen}
+is executed we set \texttt{TOP\_GEN} to the value of the subgoal frame's \texttt{top\_gen}
 field; (3) finally, when a consumer node is resumed we set \texttt{TOP\_GEN} to the value
-of its dependency frame's \textbf{top\_gen} field.
+of its dependency frame's \texttt{top\_gen} field.
 
 \subsection{Computing Stack Limits}
 
@@ -149,12 +149,12 @@ One important input parameter of pruning is the youngest choice point that is af
 by the computation of the subsumed subgoal and is known as \texttt{top\_cp\_in\_range}.
 This parameter, along the generator choice point of the subsumed subgoal, represent the
 range of choice points to be pruned.
-The \texttt{top\_cp\_in\_range} parameter is updated to the youngest value of \textbf{B\_FZ}
-or \textbf{B} in the following situations:
+The \texttt{top\_cp\_in\_range} parameter is updated to the youngest value of \texttt{B\_FZ}
+or \texttt{B} in the following situations:
 (1) when a new answer is generated, (2) when a new clause is executed, or (3) when completion
 is attempted. While this is a simple approach, some parts of the local stack can belong to an
 \textit{external generator}. Updating the \texttt{top\_cp\_in\_range} choice point to
-\textbf{B\_FZ} allow us to cover areas of the stack that were frozen during evaluation of the subgoal.
+\texttt{B\_FZ} allow us to cover areas of the stack that were frozen during evaluation of the subgoal.
 
 \subsection{Basic Issues}
 
@@ -288,9 +288,9 @@ abolish_dependency_frames(subsumed_sg, top_cp_in_range) {
 Figure~\ref{fig:abolish_dependency_frames} shows the procedure \texttt{abolish\_dependency\_frames}
 that abolishes internal dependency frames given the subsumed subgoal to prune, \texttt{subsumed\_sg} and
 the youngest choice point address from the range of choice points to selectively prune, \texttt{top\_cp\_in\_range}.
-First, we ignore dependency frames younger than the \texttt{top\_cp\_in\_range} choice point.
+First, we ignore dependency frames that are younger than the \texttt{top\_cp\_in\_range} choice point.
 Next, we iterate the dependency frames inside the range and check if they are internal to the choice point
-by using the \texttt{is\_internal\_dependency\_frame} procedure. This procedure uses the \texttt{top\_gen}
+by using a procedure called \texttt{is\_internal\_dependency\_frame}. This procedure uses the \texttt{top\_gen}
 field of the dependency frame to traverse the chain of subgoal frames in order to reach the \texttt{subsumed\_sg}
 subgoal frame. If we reach it, we remove the dependency frame from the dependency space. Otherwise,
 the dependency frame is not internal and is not pruned.
@@ -368,7 +368,7 @@ Next, we call \texttt{p(D,E)} and \texttt{p(1,A)} must be pruned (Figure~\ref{fi
 
 The generator \texttt{t(1,Y,Z)} is internal to \texttt{p(1,A)} and has two external consumers: one variant
 and one subsumed consumer, \texttt{t(1,2,B)}. Here, we modify the state of subsumptive subgoal \texttt{t(1,Y,Z})
-to \textit{pruned} and turn each external consumer node into a retroactive node. We are hoping that \texttt{t(1,Y,Zå)}
+to \textit{pruned} and turn each external consumer node into a retroactive node. We are hoping that \texttt{t(1,Y,Z)}
 will be reactivated and that \texttt{t(1,2,B)} will still consume from it. Figure~\ref{fig:retro_sub2}
 shows the state of computation after pruning.
 
@@ -460,7 +460,7 @@ consumer will participate in the completion operation as usual; or (3) a generat
 if the pruned generator was not reactivated until then. This latter situation only occurs with
 variant or subsumptive tabling. With retroactive tabling, the execution of a subsuming subgoal
 that prunes a generator call $G$, will necessarily call in its evaluation the same or a more general
-than $G$, and the subsuming subgoal will update the \textbf{generator} field
+than $G$, and the subsuming subgoal will update the \texttt{generator} field
 of any subsumed subgoal frame, including orphaned consumers.
 
 By default, orphaned consumers always keep their frames on the dependency frame stack. The frame is only
@@ -559,7 +559,7 @@ p(1, 3, 2).
 Subgoal \texttt{p(D,E,F)} is then called and the evaluation of \texttt{p(1,A,B)} must be pruned 
 (Figure~\ref{fig:retro_pseudo_completion1}). The subgoal frame for the subgoal \texttt{p(1,A,B)} is
 transformed into a consumer subgoal frame, and the subgoal frames for the subgoals \texttt{p(1,3,C)} and
-\texttt{p(1,A,B)} have the \textbf{generator} field made to point to the subgoal frame of \texttt{p(D,E,F)}. 
+\texttt{p(1,A,B)} have the \texttt{generator} field made to point to the subgoal frame of \texttt{p(D,E,F)}. 
 
 \begin{figure}[ht]
   \centering
@@ -577,13 +577,13 @@ other way to reach that node.
 Notice that when consumer $C1$ has been created its leader node was
 \texttt{p(1,A,B)}. Hence, before loading all answers in \texttt{p(1,A,B)}, we act as a \textit{pseudo-leader}
 (since no upper dependencies exist) and we look for younger retroactive nodes with unconsumed answers on the dependency
-frame stack. When we find node $C1$, we set the field \textbf{backchain\_cp} of the its dependency
+frame stack. When we find node $C1$, we set the field \texttt{backchain\_cp} of the its dependency
 frame to the choice point of the pseudo-leader, and computation is first resumed at $C1$
 (Figure \ref{fig:retro_pseudo_completion2}).
 
 After $C1$ is solved through retroactive resolution, it loads all its answers and, instead of backtracking,
-jumps to the choice point saved in the \textbf{backchain\_cp} field, thus allowing the pseudo-leader to resume
-other retroactive nodes in the same situation. The reason to use the \textbf{backchain\_cp} field instead of
+jumps to the choice point saved in the \texttt{backchain\_cp} field, thus allowing the pseudo-leader to resume
+other retroactive nodes in the same situation. The reason to use the \texttt{backchain\_cp} field instead of
 backtracking, is because any choice point between the pseudo-leader and the target consumer as been already fully
 exploited, thus we must jump explicitly between nodes. The process of resuming consumers through a pseudo-leader
 is called \textit{pseudo-completion}.
@@ -600,9 +600,9 @@ is called \textit{pseudo-completion}.
 Each dependency frame contains the value of the leader node during the creation of the consumer node.
 External consumers can reference as a leader either: (1) a pruned generator choice point; or (2) any other generator.
 In the second case we keep the dependency frame unmodified. In the first case, we update the leader choice point
-field (\textbf{leader\_cp}) to point to the consumer node itself.
+field (\texttt{leader\_cp}) to point to the consumer node itself.
 
-The reason we update the \textbf{leader\_cp} field is to avoid the leader computation algorithm to compute
+The reason we update the \texttt{leader\_cp} field is to avoid the leader computation algorithm to compute
 a leader that simply does not exist, making completion impossible.
 For an example describing this problem, consider the program in Figure~\ref{fig:retro_leader_program}
 and the query goal `\texttt{p(1,A),~a(B,C),~a(1,D),~p(E,F)}'.
@@ -626,7 +626,7 @@ During the evaluation of the subgoal \texttt{p(1,A)}, a generator node
 for \texttt{a(1,A)} is created. Next, a new generator is allocated for \texttt{a(B,C)},
 followed by a consumer for \texttt{a(1,D)}. When \texttt{p(E,F)} is called to
 prune \texttt{p(1,A)} (Figure~\ref{fig:retro_leader_recomputation}), the generator \texttt{a(1,A)}
-must also be pruned, but the \textbf{leader\_cp} field of the consumer \texttt{a(1,D)} still points
+must also be pruned, but the \texttt{leader\_cp} field of the consumer \texttt{a(1,D)} still points
 to \texttt{a(1,A)}. During execution of \texttt{p(E,F)} a new consumer is allocated for \texttt{a(E,F)} that
 will compute that its leader is the pruned \texttt{a(1,A)} generator, because below
 the generator node \texttt{a(B,C)} for the new consumer node \texttt{a(E,F)} there is a consumer node,
@@ -655,7 +655,7 @@ state of the computation at that point.
 \begin{figure}[ht]
   \centering
     \includegraphics[scale=0.6]{retro_leader_recomputation2.pdf}
-  \caption{Updating the \textbf{leader\_cp} field to avoid the leader re-computation problem.}
+  \caption{Updating the \texttt{leader\_cp} field to avoid the leader re-computation problem.}
   \label{fig:retro_leader_recomputation2}
 \end{figure}
 
@@ -719,8 +719,7 @@ completion is attempted again. With no more unconsumed answers, the subgoal
 \texttt{path(X,3)} (step 13).
 Here, the retroactive node first determines the relevant answers from the set of
 answers generated for \texttt{path(X,Z)}, namely, \texttt{\{X~=~1\}} and \texttt{\{X~=~2\}}. Next,
-the retroactive node is transformed into a loader node, thus loading its answers
-(step 14).
+the retroactive node is transformed into a loader node and loads its answers (step 14).
 
 \begin{figure}[ht]
   \centering
@@ -863,7 +862,7 @@ will also prune the other internal subgoals as a side-effect. The \texttt{is\_in
 to determine if the subsuming subgoal is internal to the argument subgoal and differs from the
 \texttt{is\_internal\_subgoal\_frame} by not making use of the subgoal dependency tree (see Section~\ref{sec:faster_test}
 for more details). Notice also that we change the corresponding subgoal frame
-type of all subsumed subgoals to \texttt{RETROACTIVE\_CONSUMER} and update the \textbf{generator} field to
+type of all subsumed subgoals to \texttt{RETROACTIVE\_CONSUMER} and update the \texttt{generator} field to
 point to the subsuming subgoal.
 
 Next, in phase 2, we check if the list of subgoals is empty, and, if this is the case,
@@ -879,8 +878,8 @@ In phase 4, we iterate over the resulting list of subgoals and also based on Obs
 we remove the subgoals that are internal to another one in the list.
 Finally, we apply external pruning to each remaining subgoal.
 
-For an example, consider the program in Figure~\ref{fig:retro_mix_program} and the query goal
-`\texttt{p(2,X),~p(4,Y)}'. Initially, execution creates the generator \texttt{p(2,X)} followed by the internal
+For an example, consider the query goal `\texttt{p(2,X),~p(4,Y)}' and the program in Figure~\ref{fig:retro_mix_program}.
+Initially, execution creates the generator \texttt{p(2,X)} followed by the internal
 generator \texttt{p(3,X)}. Next, the subgoal \texttt{p(4,Y)} is called and the first matching alternative calls the
 subgoal \texttt{p(5,Z)}, that immediately generates the answer \texttt{\{Z~=~2\}}. In the continuation, subgoal
 \texttt{p(\_,Y)} is called, which subsumes all the previous subgoals (Figure~\ref{fig:retro_mix_multiple_before}).
@@ -950,13 +949,13 @@ for a tabled predicate \texttt{p/3} with the subgoals \texttt{p(1,VAR0)}, \textt
   \label{fig:stst}
 \end{figure}
 
-In terms of implementation, the STST is accessed by using the \textbf{sibling} field of the root
+In terms of implementation, the STST is accessed by using the \texttt{sibling} field of the root
 trie node of the subgoal trie.
 For the subgoal frames, we have extended each retroactive subgoal
-frame with a \textbf{timestamp} field that stores the time stamp of the last answer
+frame with a \texttt{timestamp} field that stores the time stamp of the last answer
 generated or consumed.
 At any time, the answers in the answer return list are thus the matching 
-answers from the STST that have a time stamp between 0 and \textbf{timestamp}.
+answers from the STST that have a time stamp between 0 and \texttt{timestamp}.
 When we turn a subgoal frame from generator to consumer,
 we can collect new answers by using the time stamp stored in the subgoal frame, which was the
 time stamp of the last answer successfully inserted on the STST.
@@ -966,7 +965,7 @@ time stamp of the last answer successfully inserted on the STST.
 On a traditional call subsumption engine, that uses an answer trie per generator subgoal,
 the answer template for each consumer subgoal is built accordingly to its generator subgoal.
 For \textit{retroactive answer templates}, the answer template is simply built by copying
-the full set of argument registers for the consumer call. This is a very efficient operation
+the full set of argument registers for the consumer and also the generator call. This is a very efficient operation
 compared to traditional call subsumption.
 
 Notice that we need the full answer template because the answers stored on the STST contain
@@ -1005,8 +1004,8 @@ if we called \texttt{p(X)} with an empty STST, only the answer \texttt{true} wou
 \subsection{Inserting Answers}
 
 The insertion of answers on a STST works like the insertion of answers on standard TSTs, but special care
-must be taken when updating the subgoal frame \textbf{timestamp} field.
-When only one subgoal is adding answers to the STST, the subgoal frame \textbf{timestamp} field
+must be taken when updating the subgoal frame \texttt{timestamp} field.
+When only one subgoal is adding answers to the STST, the subgoal frame \texttt{timestamp} field
 is incremented each time an answer is inserted. Repeated answers are easily recognized
 by testing if the answer is new or not. The problem arises when various subgoals are inserting answers,
 as it may be difficult to determine when an answer is new or repeated for a certain subgoal.
@@ -1051,7 +1050,7 @@ which inserts an answer on the STST. The pseudo-code is organized into four case
 \begin{enumerate}
    \item Answers are inserted in order by the same subgoal. This is the most common situation.
    \item The answer being inserted is the only answer that the current subgoal has still not considered.
-   It is trivially set as a new answer.
+   It is trivially marked as a new answer.
    \item The time stamp of the answer being inserted is older than the subgoal frame time stamp.
    The pending answer index must be consulted.
    \item The time stamp of the answer being inserted is younger than the subgoal frame time stamp $t$.
@@ -1110,7 +1109,7 @@ can be used as usual, without awareness of the pending answer index.
 
 Our system only compiles the STST when the most general subgoal is completed.
 This avoids problems when a subgoal is executing compiled code and another
-is inserting answers, leading to the loss of answers as hash tables can be
+subgoal is inserting answers, leading to the loss of answers as hash tables can be
 dynamically created and expanded.
 
 We also implemented the \textit{completed table optimization}. This optimization throws
@@ -1128,15 +1127,15 @@ algorithm to search for these subgoals.
 \subsection{Subgoal Trie Data Structure}
 
 Each subgoal trie node was extended with a new field, named
-\textbf{in\_eval}, which stores the number of subgoals, represented below the
+\texttt{in\_eval}, which stores the number of subgoals, represented below the
 node, that are in evaluation. This field is used to, during the search
 for subsumed subgoals, prune the subgoal trie branches without
-evaluating subgoals, i.e., the ones with $\textbf{in\_eval} = 0$.
+evaluating subgoals, i.e., the ones with $\texttt{in\_eval} = 0$.
 
 When a subgoal starts being evaluated, all subgoal trie nodes in its
-subgoal trie path get the \textbf{in\_eval} field incremented. When a subgoal
+subgoal trie path get the \texttt{in\_eval} field incremented. When a subgoal
 completes its evaluation, the path is decremented. Hence, for each
-subgoal leaf trie node, the \textbf{in\_eval} field can be equal to either:
+subgoal leaf trie node, the \texttt{in\_eval} field can be equal to either:
 1, when the corresponding subgoal is in evaluation; or 0, when the
 subgoal is completed. For the root subgoal trie node, we know that it
 will always contain the total number of subgoals being currently
@@ -1147,7 +1146,7 @@ one completed subgoal for a tabled predicate \texttt{p/2}.
 \begin{figure}[ht]
 \centering
 \includegraphics[scale=0.6]{in_eval_trie}
-\caption{The \textbf{in\_eval} field in a subgoal trie representing a \texttt{p/2}
+\caption{The \texttt{in\_eval} field in a subgoal trie representing a \texttt{p/2}
   tabled predicate.}
 \label{fig:in_eval_trie}
 \end{figure}
@@ -1155,7 +1154,7 @@ one completed subgoal for a tabled predicate \texttt{p/2}.
 Consider now, that a new subgoal \texttt{p(f(3),5)} enters the
 evaluation. One new subgoal trie node is created on the subgoal trie
 to represent the new subgoal call and all the trie nodes from the leaf
-node to the root node get the \textbf{in\_eval} field incremented
+node to the root node get the \texttt{in\_eval} field incremented
 (Figure~\ref{fig:in_eval_add}). Note also how the root node is
 incremented from 4 to 5, meaning that 5 subgoals are now in
 evaluation.
@@ -1170,7 +1169,7 @@ evaluation.
 
 When a chain of sibling nodes is organized in a linked list, it is
 easy to select the trie branches with evaluating subgoals by looking
-for the nodes with $\textbf{in\_eval} > 0$. But, when the sibling nodes are
+for the nodes with $\texttt{in\_eval} > 0$. But, when the sibling nodes are
 organized in an hash table, it can become very slow to inspect each
 node as the number of siblings increase. In order to solve this
 problem, we designed a new data structure, called \textit{evaluation
@@ -1178,22 +1177,22 @@ index}, in a similar manner to the time stamp index of the TST design.
 
 An evaluation index is a double linked list that is built for each
 hash table and is used to chain the subgoal trie nodes where the
-\textbf{in\_eval} field is greater than 0. Note that this linked list is not
-ordered by the \textbf{in\_eval} value. Each evaluation index node contains
-the following fields: \textbf{prev}, a pointer to the previous evaluation
-index node, if any; \textbf{next}, a pointer to the next evaluation index
-node, if any; \textbf{node}, a pointer to the subgoal trie node the index
-node represents; and \textbf{in\_eval}, the number of evaluating subgoals
+\texttt{in\_eval} field is greater than 0. Note that this linked list is not
+ordered by the \texttt{in\_eval} value. Each evaluation index node contains
+the following fields: \texttt{prev}, a pointer to the previous evaluation
+index node, if any; \texttt{next}, a pointer to the next evaluation index
+node, if any; \texttt{node}, a pointer to the subgoal trie node the index
+node represents; and \texttt{in\_eval}, the number of evaluating subgoals
 under the corresponding subgoal trie node. We also extended the hash
-table with a field named \textbf{index} to point to the evaluation index.
+table with a field named \texttt{index} to point to the evaluation index.
 
 Figure~\ref{fig:hash_table_evaluation_index} shows an hash table and
 the corresponding evaluation index. Note that an indexed subgoal trie
-node now uses the \textbf{in\_eval} field to point to the index node, while a
-trie node with $\textbf{in\_eval} = 0$ is not indexed. To compute the
-\textbf{in\_eval} value of a trie node, we first use the \textbf{status} field to
+node now uses the \texttt{in\_eval} field to point to the index node, while a
+trie node with $\texttt{in\_eval} = 0$ is not indexed. To compute the
+\texttt{in\_eval} value of a trie node, we first use the \texttt{status} field to
 determine if the node is inside an hash table or not, and then we use the
-\textbf{in\_eval} field accordingly.
+\texttt{in\_eval} field accordingly.
 
 \begin{figure}[ht]
   \centering
@@ -1210,12 +1209,12 @@ indexes must be maintained.
 
 Figure~\ref{fig:increment_in_eval} presents the pseudo-code for the
 \texttt{increment\_in\_eval} procedure. This procedure iterates over the
-subgoal trie path and increments the \textbf{in\_eval} field from the leaf to
+subgoal trie path and increments the \texttt{in\_eval} field from the leaf to
 the root node. When we find hashed trie nodes, we must check if the
 node is currently being indexed. If this is the case, we simply
-increment the \textbf{in\_eval} field of the index node, otherwise we create
+increment the \texttt{in\_eval} field of the index node, otherwise we create
 a new index node on the evaluation index pointing to the current
-subgoal trie node and the \textbf{in\_eval} field of the subgoal trie node is
+subgoal trie node and the \texttt{in\_eval} field of the subgoal trie node is
 made to point to the index node.
 
 \begin{figure}[ht]
@@ -1259,10 +1258,10 @@ indexed.
 The procedure in Figure~\ref{fig:decrement_in_eval},
 \texttt{decrement\_in\_eval}, does the inverse job of procedure
 \texttt{increment\_in\_eval}. When decrementing an indexed subgoal trie
-node, if the \textbf{in\_eval} field reaches 0, the trie node no longer needs
+node, if the \texttt{in\_eval} field reaches 0, the trie node no longer needs
 to be indexed, and hence we must remove the index node from the
 evaluation index. In the other cases, we simply decrement the
-respective \textbf{in\_eval} field.
+respective \texttt{in\_eval} field.
 
 \begin{figure}[ht]
 \begin{Verbatim}
@@ -1295,7 +1294,7 @@ decrement_in_eval(leaf_node, root_node) {
 The algorithm that finds the currently running subgoals that are
 subsumed by a more general subgoal $S$ works by matching the subgoal
 arguments $SA$ of $S$ against the trie symbols in the subgoal trie
-$T$. By using the \textbf{in\_eval} field as described previously, we can
+$T$. By using the \texttt{in\_eval} field as described previously, we can
 prune irrelevant branches as we descend the trie. When reaching a leaf
 node, we append the corresponding subgoal frame in a result list that
 is returned once the process finishes. If the matching process fails
@@ -1355,8 +1354,8 @@ summarized in the following steps:
 \item setup WAM machinery and push subgoal arguments into the term
   stack.
 \item fetch a term $T$ from the term stack;
-\item search for a trie node $N$ where the \textbf{in\_eval} field is not 0.
-\item search for the next node with a valid \textbf{in\_eval} field to be
+\item search for a trie node $N$ where the \texttt{in\_eval} field is not 0.
+\item search for the next node with a valid \texttt{in\_eval} field to be
   pushed on the choice point stack, if any;
 \item match $T$ against the trie symbol of $N$;
 \item proceed into the child of $N$ or, if steps 3 or 5 fail,
@@ -1412,11 +1411,11 @@ To store alternative branches for exploration, we use a choice point stack.
 Each choice point frame
 (see Figure~\ref{fig:choice_point_stack2})
 stores the following fields:
-\textbf{alt\_node}, the alternative node to explore;
-\textbf{term\_stack\_top}, the top of the term stack;
-\textbf{term\_log\_stack\_top}, the top of the term log stack;
-\textbf{trail\_top}, the current trail position;
-and \textbf{saved\_HB}, the register HB. Note that we use the same choice point stack
+\texttt{alt\_node}, the alternative node to explore;
+\texttt{term\_stack\_top}, the top of the term stack;
+\texttt{term\_log\_stack\_top}, the top of the term log stack;
+\texttt{trail\_top}, the current trail position;
+and \texttt{saved\_HB}, the register \texttt{HB}. Note that we use the same choice point stack
 from Section~\ref{sec:cpstack_section}.
 
 \begin{figure}[ht]
@@ -1426,7 +1425,7 @@ from Section~\ref{sec:cpstack_section}.
   \label{fig:choice_point_stack2}
 \end{figure}
 
-The HB register is used to detect conditional bindings in same manner as for the HB register in
+The \texttt{HB} register is used to detect conditional bindings in same manner as for the \texttt{HB} register in
 WAM choice points, that is, we use it do know if a term variable needs to be trailed.
 When a choice point frame is popped from the stack, the state of the computation is restored
 by executing the following actions:
@@ -1437,13 +1436,13 @@ by executing the following actions:
   term stack;
 \item the trail is unwound to reset the variables that were bound
   after choice point creation;
-\item registers H and HB are reset to their previous values.
+\item registers \texttt{H} and \texttt{HB} are reset to their previous values.
 \end{itemize}
 
 Since constant and structured terms can have at most one matching
 alternative in a trie level, choice point frames are only pushed when
 the current term is a variable. Remember that if a node satisfies the
-\textbf{in\_eval} requisite, variable terms can match all types of trie
+\texttt{in\_eval} requisite, variable terms can match all types of trie
 symbols, including trie variables.
 
 \subsection{Matching Constant and Structured Terms}
@@ -1501,12 +1500,12 @@ by three main cases, depending on the type of the current node, namely:
 \begin{enumerate}
 \item the node is an hash table. For faster access of valid trie  nodes, we use the evaluation index, which gives us all the valid
   trie nodes in a linked list. We set the next alternative node to be  pushed on the choice point stack by using the function
-  \texttt{next\_valid\_index\_node} that uses the \textbf{next} pointer of the  first index node to locate the alternative trie node.
+  \texttt{next\_valid\_index\_node} that uses the \texttt{next} pointer of the  first index node to locate the alternative trie node.
 \item the node is an hashed node, thus is on the evaluation index of  the corresponding hash table. In this case, we also use the
   \texttt{next\_valid\_index\_node} function to identify the next
   alternative trie node.\item the node is part of a simple linked list. Here we must use the
   function \texttt{next\_valid\_node} to find the next valid trie node
-  ($\textbf{in\_eval} > 0$). The alternative trie node is also set using this
+  ($\texttt{in\_eval} > 0$). The alternative trie node is also set using this
   function on the sibling node.
 \end{enumerate}
 
@@ -1702,53 +1701,53 @@ In order to be able to transform a consumer node into a retroactive node and the
 all consumer choice points are allocated, by default, as generator choice points.
 
 A generator choice points extends a WAM choice point with two extra fields:
-\textbf{sg\_fr}, a pointer to the subgoal frame; \textbf{dep\_fr}, a pointer to a dependency frame,
+\texttt{sg\_fr}, a pointer to the subgoal frame; \textbf{dep\_fr}, a pointer to a dependency frame,
 if evaluating using local scheduling. Allocated along the generator choice point we also have the answer
 template and the subgoal arguments. In order for a consumer choice point be of the same size as a
-generator choice point, we extended the consumer choice point with the \textbf{sg\_fr} field and
+generator choice point, we extended the consumer choice point with the \texttt{sg\_fr} field and
 the subgoal arguments are also pushed into the local stack.
 
 \subsection{Reference Counting}
 
-We extended the subgoal frame data structure with a field called \textbf{num\_deps}. This field
+We extended the subgoal frame data structure with a field called \texttt{num\_deps}. This field
 counts the number of variant consumers that depend on this subgoal. Therefore, while updating
 external consumers to transform them into retroactive nodes, we count the number of external consumers
 already processed, and thus we can exit early when the count reaches the target number.
 
-For subsumptive generator subgoal frames, we extended them with an extra field called \textbf{num\_sub\_deps}, that
+For subsumptive generator subgoal frames, we extended them with an extra field called \texttt{num\_sub\_deps}, that
 counts the number of subsumed consumers. By knowing how many variant consumers and subsumed consumers we
 have for a generator we can easily decide when to transform subsumed consumer nodes if the generator gets
 pruned and no variant external consumers exist anymore.
 
 \subsection{Faster External or Internal Test}\label{sec:faster_test}
 
-While the subgoal dependency tree works is a reasonably way to test for internal/external
+While the subgoal dependency tree is a reasonably way to test for internal/external
 subgoals, it is possible to implement a faster mechanism to test if a more general subgoal
 is internal or external to a target subsumed subgoal.
 
-This mechanism extends each subgoal frame with two new fields: \textbf{start\_code}
-and \textbf{end\_code}, that initially are standard WAM variables.
-The \textbf{start\_code} field is bound to an arbitrary value when the subgoal starts
+This mechanism extends each subgoal frame with two new fields: \texttt{start\_code}
+and \texttt{end\_code}, that initially are standard WAM variables.
+The \texttt{start\_code} field is bound to an arbitrary value when the subgoal starts
 executing and unbound when the subgoal backtracks, therefore allowing us to detect
-if the subgoal is in the current branch. The \textbf{end\_code} field is bound
+if the subgoal is in the current branch. The \texttt{end\_code} field is bound
 when a new answer is found, i.e., when the code has reached the end of a program
 clause, thus allowing us to easily detect if a pruned subgoal is external or external.
 
 \subsection{Data Structure Modifications}
 
 In order to be able to set a predicate to use variant, call subsumption, or retroactive call
-subsumption, we added three new flags to the \textbf{mode\_flag} field of the table entry: the flags
+subsumption, we added three new flags to the \texttt{mode\_flags} field of the table entry: the flags
 \textbf{variant}, \textbf{subsumptive}, and \textbf{retroactive}.
 
-The dependency frame was extended with a bit field \textbf{flags}. Among other things,
+The dependency frame was extended with a bit field called \texttt{flags}. Among other things,
 one bit marks if the corresponding consumer is a potential lost consumer, therefore allowing
 the completion operation to easily detect such consumers.
-The retroactive subgoal frame was extended with a \textbf{try\_answer} field. This field is used
+The retroactive subgoal frame was extended with a \texttt{try\_answer} field. This field is used
 to consume the available answers from the answer trie that are relevant to the subgoal
 before attempting to execute the predicate clauses.
 
-We also extended both the subgoal and the dependency frame with two new fields, \textbf{previous} and
-\textbf{next}, that are used to double link the frames on the respective stacks. These pointers
+We also extended both the subgoal and the dependency frame with two new fields, \texttt{previous} and
+\texttt{next}, that are used to double link the frames on the respective stacks. These pointers
 make the operation of removing a frame from the respective stack more efficient.
 
 \subsection{Tabling Operations}
@@ -1772,15 +1771,15 @@ which will load all the available answers and then execute the program clauses.
 tabled_subgoal_call(table_entry, arguments) {
   subgoal_trie = subgoal_trie(table_entry)
   
-  if(mode_flag(table_entry) == VARIANT)
+  if(mode_flags(table_entry) == VARIANT)
     subgoal_frame = variant_subgoal_search(subgoal_trie, arguments)
-  else if (mode_flag(table_entry) == SUBSUMPTIVE)
+  else if (mode_flags(table_entry) == SUBSUMPTIVE)
     subgoal_frame = subsumptive_subgoal_search(subgoal_trie, arguments)
-  else if (mode_flag(table_entry) == RETROACTIVE)                 // NEW
+  else if (mode_flags(table_entry) == RETROACTIVE)                 // NEW
     subgoal_frame = retroactive_subgoal_search(subgoal_trie, arguments)
   
   if (is_new_generator_call(subgoal_frame))
-    store_generator_node(mode_flag(table_entry), arguments, subgoal_frame)
+    store_generator_node(mode_flags(table_entry), arguments, subgoal_frame)
     if (type(subgoal_frame) == RETROACTIVE_GENERATOR)             // NEW
       subgoals = collect_subsumed_subgoals(subgoal_trie, arguments)
       increment_in_eval(subgoal_trie_leaf(subgoal_frame), subgoal_trie_root(table_entry))
@@ -1813,7 +1812,7 @@ tabled_subgoal_call(table_entry, arguments) {
 
 When trying to complete by traversing the dependency space for unconsumed answers, we must
 also check for lost consumers. These consumers must be restarted as generators in order for
-computation be completed. Figure~\ref{fig:completion_operation_retro} presents the new completion
+the computation to be completed. Figure~\ref{fig:completion_operation_retro} presents the new completion
 operation. Note that we detect a lost consumer we call the \texttt{retroactive\_resolution}
 instruction in order to restart the consumer.
 

@@ -13,11 +13,11 @@ its operational semantics is based one a relatively simple refutation strategy c
 (SLD) \cite{Lloyd-87}, which is a well defined evaluation method for logic programs that
 is particularly well suited to stack based machines.
 Furthermore, Prolog defines a few extra-logical constructs, such as the \emph{cut operator}
-that give the programmer more control over the evaluation. Both the SLD operational semantics
-and the cut operator make the programmer more aware of the actual evaluation process in detriment to the
+or the \emph{assertion} facilities that give the programmer more control over the evaluation. Both the SLD operational semantics
+and these extra-logical features make the programmer more aware of the actual evaluation process in detriment to the
 declarative aspect of the language that is naturally non-deterministic. It is possible to exploit
-these deterministic rules to speedup execution, and thus, for example
-solve problems related to redundant sub-computations. Notwithstanding, standard Prolog has
+these deterministic rules to speedup execution or solve
+problems related to redundant sub-computations. Notwithstanding, standard Prolog has
 still some deficiencies. For instance, writing left-recursive programs can lead to infinite loops.
 
 There have been some attempts in making Prolog less prone to problems related to recursion
@@ -43,12 +43,12 @@ we can distinguish between two main approaches for call similarity:
 \begin{itemize}
    \item \emph{Variant-based tabling}: $A$ and $B$ are variants if they can be made identical
    through variable renaming as proposed by Bachmair \textit{et al} \cite{Bachmair-93}.
-   For example, subgoals $p(X,1,Y)$ and $p(Y,1,Z)$ are \emph{variants},
-   because both can be transformed into $p(VAR_0,1,VAR_1)$;
+   For example, subgoals \texttt{p(X,1,Y)} and \texttt{p(Y,1,Z)} are \emph{variants},
+   because both can be transformed into \texttt{p(VAR0,1,VAR1)};
    \item \emph{Subsumption-based tabling} or \emph{tabling by call subsumption}: Subgoal $A$ is considered similar
    to $B$ if $A$ is \emph{subsumed} by $B$ (or $B$ \emph{subsumes} $A$), i.e., if $A$ is more specific than $B$
-   (or an instance of). For example, subgoal $p(X,1,2)$ is subsumed by subgoal $p(Y,1,Z)$ because there
-   is a substitution $\{Y~=~X,~Z~=~2\}$ that makes $p(X,1,2)$ an instance of $p(Y,1,Z)$. Tabling by call
+   (or an instance of). For example, subgoal \texttt{p(X,1,2)} is subsumed by subgoal \texttt{p(Y,1,Z)} because there
+   is a substitution \texttt{\{Y~=~X,~Z~=~2\}} that makes \texttt{p(X,1,2)} an instance of \texttt{p(Y,1,Z)}. Tabling by call
    subsumption is based on the principle that if $A$ is subsumed by $B$ and $S_A$ and $S_B$ are the respective
    answer sets, then $S_A \subseteq S_B$.
 \end{itemize}
@@ -62,23 +62,21 @@ such as YapTab \cite{Rocha-00a}, B-Prolog \cite{Zhou-00}, and ALS-Prolog \cite{G
 To the best of our knowledge, the SLG-WAM \cite{Sagonas-98} engine from XSB Prolog is the sole tabling system that supports
 subsumption-based tabling, initially by using an organization of the table space called
 \emph{Dynamic Threaded Sequential Automata (DTSA)}~\cite{Rao-96}, and later by using an alternative design called
-\emph{Time Stamped Tries (TST)}~\cite{Johnson-99}.
-While the DTSA design was more efficient, it had bigger space requirements and thus is was replaced by the simpler
-TST approach which uses far less memory.
+\emph{Time Stamped Tries (TST)}~\cite{Johnson-99}, which is a simpler approach and uses far less memory.
 
 \section{Thesis Purpose}
 
 In this thesis we address the design, implementation, integration and evaluation of two subsumption-based engines
 built on top of YapTab \cite{Rocha-00a}, the tabling system that is part of Yap Prolog. For the first engine, we
-reused and integrated the Time Stamped Tries approach from XSB Prolog into Yap Prolog.
+reused and integrated the Time Stamped Tries approach from SLG-WAM into YapTab.
 We studied how subsumption-based and variant-based tabling were seamlessly
 integrated into the SLG-WAM engine and we attempted to reuse most of the original code and data structures when
 integrating these new mechanisms into YapTab.  Consequently, we made minimal modifications to the YapTab engine
 that enabled it to support a mix of variant and subsumptive subgoals on the same program.
 Our performance results show that our integration efforts were successful, with comparable
-speedups to the SLG-WAM when using subsumptive tabling against variant tabling.
+speedups to the SLG-WAM when using subsumptive-based tabling against variant-based tabling.
 
-For the second system, we designed a novel extension for subsumptive tabling called
+For the second system, we designed a novel extension for subsumptive-based tabling called
 \emph{Retroactive Call Subsumption} (RCS).
 This extension attempts to solve one major problem in traditional call subsumption: the order in
 which subgoals are called during a particular evaluation can greatly affect the success and applicability
@@ -109,7 +107,7 @@ In the following list we describe each chapter of this thesis.
 
    \item[Chapter 1: Introduction.] Is this chapter.
    
-   \item[Chapter 2: Logic Programming and Tabling.] Provides a overview of the main topics of this thesis.
+   \item[Chapter 2: Logic Programming and Tabling.] Provides an overview of the main topics of this thesis.
    The subjects discussed are logic programming, Prolog, and tabling for logic programs. A brief description
    of the YapTab and SLG-WAM tabling engines is also presented.
    

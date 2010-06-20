@@ -1,16 +1,16 @@
 
 In this chapter we summarize the work developed in this thesis. First, we list the various contributions
-present in the thesis and then we suggest open problems for future research involving the work
+presented in the thesis and then we suggest open problems for future research involving the work
 developed in this thesis.
 
 \section{Main Contributions}
 
 We can identify two main contributions of this thesis. The first main contribution is the integration of
-the TST approach for a call subsumption into YapTab's engine. The second main contribution is the design and implementation
+the TST approach for call subsumption into YapTab's engine. The second main contribution is the design and implementation
 of a new tabling execution mechanism called Retroactive Call Subsumption, that maximizes the sharing of answers
 between subsumed/subsuming subgoals. In order to implement the subsumption algorithms and data structures for
-these two mechanisms we took advantage of the Time Stamped Tries original proposal from XSB.
-This process made us to also understand the differences and similarities between the YapTab and the SLG-WAM tabling engines.
+these two mechanisms we took advantage of the Time Stamped Tries original proposal from XSB Prolog.
+This process also helped us understand the differences and similarities between the YapTab and the SLG-WAM tabling engines.
 
 We next detail the most important aspects of the work developed during this thesis:
 
@@ -33,8 +33,8 @@ We next detail the most important aspects of the work developed during this thes
    WAM machinery and data areas. In order to prune the search space, we extended the subgoal trie data structure with
    information about the status of the subgoals under a subgoal trie node.
    
-   \item[Single Time Stamped Trie table space organization.] In the STST table space organization we have a single answer
-   trie for each predicate. The answer trie is itself a time stamped trie and permits greater reuse of answers between
+   \item[Single Time Stamped Trie table space organization.] In the STST table space organization we have a single time
+   stamped answer trie for each predicate. This permits greater reuse of answers between
    the subgoals of the same predicate, as answers are represented only once. The design facilitates the pruning of
    subsumed subgoals because the subgoals can easily identify which answers have already been consumed or generated.
    We also designed a new optimization, where we throw away the subgoal trie when the most general subgoal completes,

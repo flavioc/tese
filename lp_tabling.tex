@@ -3,7 +3,7 @@ The purpose of this chapter is to give an overview of the research areas
 involved in this dissertation. First we explain the fundamental ideas of logic
 programming and Prolog; next, the main concepts behind tabling evaluation are described,
 focusing on the execution rules and strategies; finally, we introduce
-the Yap and XSB Prolog systems, focusing on the tabling engines designed for both systems.
+the Yap Prolog and XSB Prolog systems, focusing on the tabling engines designed for both systems.
 
 \section{Logic Programming}
 
@@ -19,12 +19,12 @@ next (2) we use this theory to search for alternative ways in which an arbitrary
 
 Logic programming is often mentioned to include the following advantages \cite{Carlsson-PhD}:
 
-\begin{itemize}
-  \item \textbf{Simple declarative semantics}: a logic program is simply a collection of predicate logic clauses.
-  \item \textbf{Simple procedural semantics}: a logic program can be read as a collection of recursive procedures. In Prolog, for instance, clauses are tried in the order they are written and goals within a clause are executed from left to right.
-  \item \textbf{High expressive power}: Logic programs can be seen as executable specifications that despite their simple procedural semantics allow for designing complex and efficient algorithms.
-  \item \textbf{Inherent non-determinism}. Since in general several clauses can match a goal, problems involving search are easily programmed in these kind of languages.
-\end{itemize}
+\begin{description}
+  \item[Simple declarative semantics:] a logic program is simply a collection of predicate logic clauses.
+  \item[Simple procedural semantics:] a logic program can be read as a collection of recursive procedures. In Prolog, for instance, clauses are tried in the order they are written and goals within a clause are executed from left to right.
+  \item[High expressive power:] logic programs can be seen as executable specifications that despite their simple procedural semantics allow for designing complex and efficient algorithms.
+  \item[Inherent non-determinism:] because several clauses can match a goal, problems involving search are easily programmed in these kind of languages.
+\end{description}
 
 \subsection{Logic Programs}
 
@@ -66,22 +66,23 @@ Goals are \textit{rules} without the \textit{head} component and are also named 
 
 Each literal in a Horn clause has the form $f(t_{1}, ..., t_{n})$, where $f$ is the \textit{functor} symbol
 and each $t_{i}$ are \textit{terms}. A term can be a \textit{constant} (or \textit{atom}), a \textit{variable}
-or a \textit{compound} term. Compound terms follow the functor structure, recursively.
+or a \textit{structured} (or \emph{compound}) term. Structured terms follow the functor structure, recursively.
 Variables are assumed to be universally quantified and have the following major characteristics:
 
 \begin{itemize}
-  \item Variables are logical variables that can instantiated only once.
+  \item Variables are logical variables that can be instantiated only once.
   \item Variables are untyped until instantiated.
   \item Variables are instantiated via \textit{unification}, a pattern matching operation that finds the most general common instance of two data objects. 
 \end{itemize}
 
 A sequence of clauses with the same functor in the head form a \textit{predicate}. The ordering
 of these clauses can have some implications depending on the resolution semantics of the underlying language.
-Prolog for instance, uses a top-down resolution mechanism known as \textit{SLD} (Selective Linear Definite) resolution \cite{Lloyd-87}.
+Prolog for instance, uses a top-down resolution mechanism known as \emph{Selective Linear Definite} (SLD)
+resolution \cite{Lloyd-87}.
 
 SLD starts by matching the first subgoal query to the first clause of the respective predicate,
 generating a new query using the body of the clause, which is added to the remaining query subgoals.
-During this process a finite set of pairs $\theta$ called \textit{substitution} is built.
+During this process, a finite set of pairs $\theta$ called \textit{substitution} is built.
 Each pair has the form $X = t$, where $X$ is a variable and $t$ is a term. No variable in the left-hand side
 of a pair appears on the right-hand side and no two pairs have the same variable as left-hand side \cite{Sterling-94}. 
 When the clause body is reused as query, all the variables present in the terms are replaced using the
@@ -99,8 +100,9 @@ Prolog is one of the first logic programming languages and arguably the most suc
 The first implementation of Prolog was Marseille Prolog, developed in 1972 by Alain Colmerauer and Robert Kowalski \cite{Kowalski-74}.
 
 The use of Prolog as a practical and efficient language was made viable by David Warren in 1977, when he built a compiler that could
-compete with other languages like Lisp \cite{Warren-77}. Then in 1983, David Warren formulated an abstract machine known as WAM
-(\textit{Warren Abstract Machine}) \cite{Warren-83} that is still widely used in modern Prolog implementations.
+compete with other languages like Lisp \cite{Warren-77}. Then in 1983, David Warren formulated an abstract machine
+known as the \emph{Warren's Abstract Machine} (WAM) \cite{Warren-83} that is still widely used in modern Prolog
+implementations.
 
 \subsubsection{Prolog}
 
@@ -143,29 +145,27 @@ alternatives, completing the depth first search in the tree.
 
 The cut operator is not the only special instruction in Prolog, more built-in predicates are also available:
 
-\begin{itemize}
-  \item \textbf{Meta-logical predicates}: inquire the state of the computation and manipulate terms.
-  \item \textbf{Extra-logical predicates}: manipulate the Prolog database, adding or removing clauses from
+\begin{description}
+  \item[Meta-logical predicates:] inquire the state of the computation and manipulate terms.
+  \item[Extra-logical predicates:] manipulate the Prolog database, adding or removing clauses from
   the program being executed. Input/Output operators are another example of extra-logical predicates.
-  \item \textbf{Other predicates}: predicates to perform arithmetic operations, to compare terms, to support debugging, etc.
-\end{itemize}
+  \item[Other predicates:] predicates to perform arithmetic operations, to compare terms, to support debugging, etc.
+\end{description}
 
 These special operators make programming more practical and useful in real world applications.
 
 \subsubsection{WAM}
 
-The \textit{Warren Abstract Machine} (WAM) is a stack-based architecture
+The Warren's Abstract Machine is a stack-based architecture
 with various data areas, registers, and low level instructions that can be efficiently executed, manipulated and optimized.
 A simplified layout is presented in Figure~\ref{fig:wam}.
 
-\begin{samepage}
-   
 In terms of execution stacks, the WAM defines the following:
 
-\begin{itemize}
-  \item \textbf{PDL}: a push down list used by the unification process.
-  \item \textbf{Trail}: stores the addresses of the variables that must be reset when backtracking.
-  \item \textbf{Stack}: stores \textit{environment} and \textit{choice point} frames.
+\begin{description}
+  \item[PDL:] a push down list used by the unification process.
+  \item[Trail:] stores the addresses of the variables that must be reset when backtracking.
+  \item[Stack:] stores \textit{environment} and \textit{choice point} frames.
          Environments track the flow control in a program and consist of: the stack address of the
          previous environment; a pointer to the next instruction to execute upon return of the invoked
          clause; and a set of \textit{permanent variables} \footnote{A permanent variable is a variable
@@ -176,12 +176,10 @@ In terms of execution stacks, the WAM defines the following:
          the current execution branch fails.
          A choice point is created when there are more than one alternative for a subgoal call.
          We pop the choice point from the stack when the last alternative clause is attempted. 
-  \item \textbf{Heap}: array of data cells used to store variables and compound terms that cannot
+  \item[Heap:] array of data cells used to store variables and structured terms that cannot
          be stored in the stack.
-  \item \textbf{Code Area}: contains the compiled instructions.
-\end{itemize}
-
-\end{samepage}
+  \item[Code Area:] contains the compiled instructions.
+\end{description}
 
 \begin{figure}[ht]
   \centering
@@ -192,18 +190,18 @@ In terms of execution stacks, the WAM defines the following:
 
 For the registers, WAM defines the following:
 
-\begin{itemize}
-  \item \textbf{P}: points to the current WAM instruction.
-  \item \textbf{CP}: stores the value of \textbf{P} before the current invoked call and it is used to restore the execution point.
-  \item \textbf{TR}: points to the top of the trail stack.
-  \item \textbf{E}: points to the current active environment.
-  \item \textbf{B}: the active choice point.
-  \item \textbf{B0}: the choice point to return to upon backtracking over a cut.
-  \item \textbf{H}: points to the top of the heap stack
-  \item \textbf{HB}: marks the value of the register \textbf{H} at the time of the latest choice point. It is used to
+\begin{description}
+  \item[P:] points to the current WAM instruction.
+  \item[CP:] stores the value of \texttt{P} before the current invoked call and it is used to restore the execution point.
+  \item[TR:] points to the top of the trail stack.
+  \item[E:] points to the current active environment.
+  \item[B:] the active choice point.
+  \item[B0:] the choice point to return to upon backtracking over a cut.
+  \item[H:] points to the top of the heap stack
+  \item[HB:] marks the value of the register \texttt{H} at the time of the latest choice point. It is used to
   determine \textit{conditional} variable bindings that affect variables existing before the creation of the choice point.
-  \item \textbf{S}: used during the unification of compound terms.
-\end{itemize}
+  \item[S:] used during the unification of structured terms.
+\end{description}
 
 WAM instructions can be grouped into four main groups: choice point instructions to manipulate choice points; control
 instructions to manage environments and control the execution flow; unification instructions that implement
@@ -222,7 +220,7 @@ In comparison to the traditional SLD resolution method, tabling can reduce the s
 avoids looping and has better termination properties \cite{Tamaki-86}.
 
 In a nutshell, tabling is a refinement of the SLD resolution that consists in storing intermediate answers for
-subgoals so that they can be reused when a repeated subgoal appears in the resolution process.
+subgoals so that they can be reused when a \emph{repeated} (or \emph{similar}) subgoal appears in the resolution process.
 The use of tabling enables the programmer to write more expressive, but still valid, logical programs.
 
 One classical example that is used to demonstrate the advantages of using tabling is presented
@@ -275,7 +273,7 @@ resolved as usual. We use the first \texttt{edge/2} clause with \texttt{\{X~=~a,
 are carried to \texttt{path(b,Z)} (step 3). This goal is not yet in the table space, hence we add a new entry for it.
 
 Goal \texttt{path(b,Z)} is then resolved against the first clause of \texttt{path/2} (step 4).
-Ñext, \texttt{edge(b,Y)} fails against the first clause but succeeds with \texttt{\{Y~=~a\}} for
+Next, \texttt{edge(b,Y)} fails against the first clause but succeeds with \texttt{\{Y~=~a\}} for
 the second clause. A new tabled subgoal \texttt{path(a,Z)} is registered in the tabled space (step 6)
 and resolved against the first clause of \texttt{path/2} (step 7). This time the \texttt{edge/2}
 subgoal matches with the first clause with \texttt{\{Y~=~b\}}. This originates a repeated tabled subgoal
@@ -318,7 +316,6 @@ We thus resume the computation at node 8 to consume the answer \texttt{\{Z~=~b\}
 \texttt{path(a,Z)} at node 6 (step 19). Here, we note that it is a repeated answer
 to this subgoal by checking the table space, and thus we fail (step 19).
 Failing repeated answers is crucial to avoid unnecessary computations and sometimes looping.
-
 Then, we fetch the next available answer, \texttt{\{Z~=~a\}}, that is propagated
 to node 6, generating a new answer to \texttt{path(a,Z)} (step 20). This binding
 is once again propagated, now for node 3 but it is a repeated answer, and thus
@@ -326,7 +323,7 @@ the computation fails (step 21). With no more unconsumed answers, we
 return back to node 3 to re-attempt completion. This time, no consumers have
 unconsumed answers and we can safely complete all the subgoals in the current SCC
 (step 22). Subgoals \texttt{path(b,Z)} (node 3) and \texttt{path(a,Z)} (node 6)
-are marked as \textbf{complete} in the table space and no new answers are accepted.
+are marked as \emph{complete} in the table space and no new answers are accepted.
 
 Next, we backtrack to node 2 to try the second \texttt{edge/2} clause. A new consumer node is allocated (step 23) and answers can be
 promptly consumed from the table space as the subgoal \texttt{path(a,Z)} is already completed.
@@ -341,12 +338,12 @@ From the described example we can summarize four main operations needed to suppo
 
 \begin{itemize}
   \item The \textit{tabled subgoal call} operation represents a call to a tabled subgoal.
-  If the subgoal is already in the table space, it creates a new consumer node to consume answers.
+  If a similar subgoal is already in the table space, it creates a new consumer node to consume answers.
   If it is a new subgoal call it creates a new generator node and adds a new entry to the table space.
   Each new entry is initialized with an empty set $S$ that will contain the answers for the subgoal. 
   
   \item The \textit{new answer} operation adds a new answer $s$ to the table space. If the answer is repeated the operation fails,
-  otherwise a new answer set $S'$ for the subgoal is generated: $S' \equiv S \cup {s}$.
+  otherwise a new answer set $S'$ for the subgoal is generated: $S' \equiv S \cup \{s\}$.
   
   \item The \textit{answer resolution} operation checks whether new answers from the table space are available for consumption.
   When no new answers are available, the consumer node is \textit{suspended} and execution proceeds using a specific strategy.
@@ -431,7 +428,7 @@ three situations may arise:
 
 Note that batched scheduling was the strategy used in the evaluation of the example in Figure~\ref{fig:tabling_path}.
 
-For some problems, local scheduling is better suited because it tries to evaluate a single exact SCC at a time, preserving the dynamic
+For some problems, local scheduling is better suited because it tries to evaluate a single SCC at a time, preserving the dynamic
 SCC ordering during the evaluation. In other words, in a local evaluation, answers are returned to consuming nodes outside of an SCC only after that
 SCC is completely evaluated \cite{Freire-96}.
 It differs from batched scheduling in that once the answers are found, they are added to the table space, but execution
@@ -439,7 +436,7 @@ It differs from batched scheduling in that once the answers are found, they are 
 
 \subsection{Variant Tabling} \label{sec:variant_tabling}
 
-When the subgoal \texttt{path(X,Z)} is called, a check for the presence of this subgoal in the table space is done first.
+When the subgoal \texttt{path(X,Z)} is called, we first check for an identical subgoal in the table space.
 In the example in Figure~\ref{fig:tabling_path}, this was done by checking whether a \textit{variant} of the new goal already
 exists in the table. We say that two terms $t_1$ and $t_2$ are variants of each other if they are identical up to renaming of their
 variables.
@@ -447,7 +444,7 @@ variables.
 For example, \texttt{path(X,Z)} is variant of the subgoal \texttt{path(X,Y)}, as they represent the same subgoal if we try
 to rename their variables to a standardized format. One format was proposed by Bachmair \textit{et al} \cite{Bachmair-93}. Formally,
 we have a set $V$ of variables present in a term and a function $renameVar$, such that the first term variable $v0 \in V$
-results in $renameVar(v0) = VAR0$ and the following distinct variables are named incrementally ($VAR1, VAR2, ...$).
+results in $renameVar(v0) = VAR0$ and the next distinct variables are named incrementally ($VAR1, VAR2, ...$).
 Using this mechanism, \texttt{path(X,Z)} and \texttt{path(X,Y)} both result in \texttt{path(VAR0,VAR1)}. The resulting
 standardized subgoal is then checked against the table space to verify if it is a repeated subgoal call.
 
@@ -475,23 +472,24 @@ $B$ ($A$ is a consumer) and $B$ generates its own answers.
   DCGs, saved states, co-routining, arrays, threads and tabling.
   It is based on the WAM and follows the Edinburgh tradition. Most of the ISO-Prolog standard is implemented.
   
-  Tabling in Yap is implemented through the YapTab sub-system \cite{Rocha-05a}, a suspension based tabling engine supporting evaluation of
-  definite programs. YapTab follows the seminal SLG-WAM (Linear resolution with Selection function for General logic programs in WAM)
-  design from XSB Prolog \cite{Sagonas-96, Sagonas-98},
-  but it innovates by proposing a new fix-point check algorithm, and by considering that the control of fix-point detection should be
-  performed at the level of the data structures corresponding to suspended sub-computations. YapTab was originally designed to achieve
-  good results in sequential tabling, but could be extended with the OPTYap engine, for parallel execution \cite{Rocha-05a}.
-  Other innovations in YapTab include: support for a dynamic combination of batched and local scheduling \cite{Rocha-05c}
-  and efficient handling of \textit{incomplete tables} \cite{Rocha-06b}. Incomplete tables are created when the current computation is pruned from the execution stacks, keeping the pruned subgoals from retrieving
-  the complete answer set. Currently, only call by variant checking is supported.
+  Tabling in Yap is implemented through the YapTab sub-system \cite{Rocha-05a}, a suspension based tabling engine
+  supporting evaluation of definite programs. YapTab follows the seminal SLG-WAM (Linear resolution with Selection
+  function for General logic programs in WAM) design from XSB Prolog \cite{Sagonas-96, Sagonas-98},
+  but it innovates by proposing a new fix-point check algorithm, and by considering that the control of fix-point
+  detection should be performed at the level of the data structures corresponding to suspended sub-computations.
+  YapTab was originally designed to achieve good results in sequential tabling, but could be extended with the OPTYap
+  engine, for parallel execution \cite{Rocha-05a}. Other innovations in YapTab include: support for a dynamic
+  combination of batched and local scheduling \cite{Rocha-05c} and efficient handling of \textit{incomplete tables}
+  \cite{Rocha-06b}. Incomplete tables are created when the current computation is pruned from the execution stacks,
+  keeping the pruned subgoals from retrieving the complete answer set. Currently, only call by variant checking is supported.
   
   XSB is a research-oriented logic programming system for Unix and Windows based systems. In addition to providing all
   the functionality of the Prolog language, XSB contains several features not usually found in logic programming systems,
   namely, evaluation according to the Well-Founded Semantics (tabling with negation) \cite{Gelder-91} through the use of
-  a delaying-based tabling engine, the SLG-WAM.
-  Other features of XSB include: a fully threaded engine, constraint handling for tabled programs on a engine level, a variety of indexing
-  techniques, interfaces to other languages, various compiler directives like \texttt{auto\_table}, which does static
-  analysis to decide which predicates to table, etc. \cite{system-xsb}.
+  a delaying-based tabling engine, the SLG-WAM. Other features of XSB include: a fully threaded engine, constraint
+  handling for tabled programs at the engine level, a variety of indexing
+  techniques, interfaces to other languages, and various compiler directives like \texttt{auto\_table}, which does static
+  analysis to decide which predicates to table, etc \cite{system-xsb}.
   
   SLG-WAM supports both tabling by variant checking and by subsumption checking.
   Tabling by call-subsumption was initially implemented by a technique called
@@ -511,7 +509,7 @@ $B$ ($A$ is a consumer) and $B$ generates its own answers.
 
   The forward trail is used to restore all the variable bindings to their state at the time the computation was suspended.
   Thus, the WAM trail is extended with parent trail entry pointers to create this new trail.
-  Also, a new register is created, the \textbf{TR\_FZ} trail freeze register.
+  Also, a new register is created, the \texttt{TR\_FZ} trail freeze register.
 
   The differences between SLG-WAM and YapTab reside in the data structures and algorithms used to control the process of leader detection
   and the scheduling of unconsumed answers. These differences are described next in more detail.
@@ -532,18 +530,19 @@ $B$ ($A$ is a consumer) and $B$ generates its own answers.
 
   A one-to-one correspondence exist between completion stack frames and generator nodes, as the completion stack frame
   is pushed onto the stack when a new tabled subgoal is called. A completion frame is popped off when a subgoal is
-  completed. Also, each subgoal frame contains a pointer to completion frame.
+  completed. Also, for each tabled subgoal there is a data structure called \emph{subgoal frame} that is associated
+  with a completion frame.
 
   Consumer and generator choice points are extended to support the suspend and resume mechanism.
   The generator choice contains the following extra data: an explicit pointer of the failure continuation to take
   upon backtracking out of the choice point; a cell that records the value of a new global register,
-  called the \textbf{RS} (\textit{root subgoal register}) register,
-  which points to the root subgoal of the node currently under execution;
-  a pointer to the subgoal frame; a set of freeze registers, so that the stored values can be restored later on;
-  and an area called the \textit{substitution factor}, the set of free variables which exist in the terms in the argument registers.
+  called the \texttt{RS} (\textit{root subgoal register}) register, which points to the root subgoal of the node
+  currently under execution; a pointer to the subgoal frame; a set of freeze registers, so that the stored values
+  can be restored later on; and an area called the \textit{substitution factor}, the set of free variables which
+  exist in the terms in the argument registers.
 
-  The consumer choice point is extended with: a copy of the \textbf{RS} register; a pointer of the failure continuation to take
-  upon backtracking; a substitution factor; the last consumed answer continuation; and a pointer to chain
+  The consumer choice point is extended with: a copy of the \texttt{RS} register; a pointer of the failure continuation
+  to take upon backtracking; a substitution factor; the last consumed answer continuation; and a pointer to chain
   together all consumer choice points of the same subgoal. 
 
   \subsubsection{YapTab}
@@ -557,8 +556,8 @@ $B$ ($A$ is a consumer) and $B$ generates its own answers.
   thus they are linked together, forming the \textit{dependency space}.
 
   Generator choice points are WAM choice points extended with the substitution factor area, a pointer
-  to the subgoal frame and, a pointer to a dependency frame. This pointer
-  is only used when local scheduling is employed. A generator node for local scheduling only exports its answers to the calling
+  to the subgoal frame, and a pointer to a dependency frame. This pointer
+  is only used when local scheduling is employed. A generator node using local scheduling only exports its answers to the calling
   environment when all clauses for the subgoal have been exhausted, hence it must act like a consumer.
 
   In SLG-WAM, if we want to release space previously frozen and restore the freeze registers, we use the
@@ -566,21 +565,21 @@ $B$ ($A$ is a consumer) and $B$ generates its own answers.
   are not saved there, we use the top stack values kept in the youngest consumer choice point younger than the current completion point.
 
   YapTab reduces the size of consumer choice points by using dependency frames. Each frame contains the
-  following fields: \textbf{last\_answer} field that stores the last answer consumed by the choice point;
-  the \textbf{consumer\_cp} field that points to the consumer choice point; the \textbf{leader} field which
-  points to the leader node at creation time; and the \textbf{back\_leader} field that changes during
+  following fields: \texttt{last\_answer} field that stores the last answer consumed by the choice point;
+  the \texttt{consumer\_cp} field that points to the consumer choice point; the \texttt{leader\_cp} field which
+  points to the leader node at creation time; and the \texttt{backchain\_cp} field that changes during
   evaluation, pointing to the leader node where we performed the last unsuccessful completion operation.
-  A new global register, called \textbf{TOP\_DF}, always points to the youngest dependency frame.
+  A new global register, called \texttt{TOP\_DF}, always points to the youngest dependency frame.
 
 \section{Chapter Summary}
 
 In this chapter we introduced logic programming and Prolog. We discussed the shortcomings of the
-SLD resolution and then we presented tabling, which is a technique that solves these problems.
+SLD resolution and then we presented tabling, a technique that solves these problems.
 
 Next, we discussed how tabled programs are evaluated, by introducing the concepts of generator,
 consumer, scheduling strategies, such as batched scheduling and local scheduling, and
 the call similarity property in variant and subsumption-based tabling engines.
-We also discussed two of the most widely known Prolog systems that implement tabling, Yap and XSB Prolog.
+We also discussed two of the most widely known Prolog systems that implement tabling, Yap Prolog and XSB Prolog.
 
 In the next chapter we will throughly discuss and analyze how the table space is organized to efficiently
 implement variant-based tabling and then subsumption-based tabling.
