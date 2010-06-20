@@ -221,7 +221,7 @@ $C$ will be resolved using \textit{answer clause resolution}, thus consuming ans
 If no subgoal $C'$ is found, then a new entry, representing $C$, is inserted into the table space and
 $C$ will be evaluated using program clause resolution.
 
-\item The \textit{answer resolution} operation checks wether new answers from the table space are
+\item The \textit{answer resolution} operation checks whether new answers from the table space are
 available for consumption. Each subsumptive consumer node uses an answer continuation that represents
 the set of remaining answers to be consumed. Given this answer continuation, we inspect the answer trie
 from the subsuming subgoal and retrieve the next answer that matches with the subsumed goal. Once the

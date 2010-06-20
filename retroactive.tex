@@ -1787,14 +1787,14 @@ tabled_subgoal_call(table_entry, arguments) {
       prune_subgoal_list(subgoal_frame, subgoals)
       collect_available_retroactive_answers(subgoal_frame)
       if (get_first_answer(subgoal_frame))
-        // consume pre stored answers
+        // consume pre-stored answers
         first = get_first_answer(subgoal_frame)
         load_answer_from_trie(first)
         try_answer(subgoal_frame) = first
         CP_AP(B) = table_try_answer
         goto continuation_instruction()
   else if (state(subgoal_frame) == pruned)         // NEW
-    // consume pre stored answers
+    // consume pre-stored answers
     state(subgoal_frame) = evaluating
     first = get_first_answer(subgoal_frame)
     load_answer_from_trie(first)

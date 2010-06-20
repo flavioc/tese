@@ -53,7 +53,7 @@ we can distinguish between two main approaches for call similarity:
    answer sets, then $S_A \subseteq S_B$.
 \end{itemize}
 
-In general, subsumption-based tabling has the following advantages over variant-tabling:
+In general, subsumption-based tabling has the following advantages over variant tabling:
 superior time performance, because less program resolution is required; and less space requirements,
 as it allows greater reuse of answers, since the answer sets for the subsumed subgoals are not stored.
 However, the mechanisms to efficiently support subsumption-based tabling are more complex and harder to
@@ -76,9 +76,9 @@ integrated into the SLG-WAM engine and we attempted to reuse most of the origina
 integrating these new mechanisms into YapTab.  Consequently, we made minimal modifications to the YapTab engine
 that enabled it to support a mix of variant and subsumptive subgoals on the same program.
 Our performance results show that our integration efforts were successful, with comparable
-speedups to the SLG-WAM when using subsumptive-tabling against variant-tabling.
+speedups to the SLG-WAM when using subsumptive tabling against variant tabling.
 
-For the second system, we designed a novel extension for subsumptive-tabling called
+For the second system, we designed a novel extension for subsumptive tabling called
 \emph{Retroactive Call Subsumption} (RCS).
 This extension attempts to solve one major problem in traditional call subsumption: the order in
 which subgoals are called during a particular evaluation can greatly affect the success and applicability

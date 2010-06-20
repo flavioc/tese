@@ -18,7 +18,7 @@ is an important part of a subsumptive tabling engine, as it makes possible to
 identify a subsumptive relation between $G'$ and $G$.
 
 In the SLG-WAM, the search is performed by recursively backtracking through the subgoal trie $C$, trying
-to match the node symbols with subterms from $G$. The process stops once a leaf node is reached.
+to match the node symbols with sub-terms from $G$. The process stops once a leaf node is reached.
 
 The matching process gives priority to match non-variable terms from $G$
 with an identical symbol from $C$.
@@ -425,7 +425,7 @@ For subgoals with more general subgoals, subsumed subgoals or variants of subsum
 the answer template must specialize the generator answer template
 from the most general subgoal, and is called a \textit{consumer answer template}.
 Consumer answer templates have the exact same size of their corresponding generator answer templates
-and instead of being composed only with variables, they can also include other types of subterms.
+and instead of being composed only with variables, they can also include other types of sub-terms.
 
 Consider a generator subgoal \texttt{p(X,f(Y))} and that the subgoal \texttt{p(a,f(g(2,X)))}
 is then called. The corresponding answer template \texttt{[a,~g(2,X)]} is derived by instantiating
@@ -807,7 +807,7 @@ by executing the following actions:
 \begin{itemize}
   \item the current node and parent node are reset;
   \item all terms stored in the term log stack are pushed back to the term stack;
-  \item the trail is unwinded to reset the variables that were bound after choice point creation;
+  \item the trail is unwound to reset the variables that were bound after choice point creation;
   \item registers H and HB are also reseted to previous values.
 \end{itemize}
 

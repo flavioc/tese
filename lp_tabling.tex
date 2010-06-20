@@ -348,7 +348,7 @@ From the described example we can summarize four main operations needed to suppo
   \item The \textit{new answer} operation adds a new answer $s$ to the table space. If the answer is repeated the operation fails,
   otherwise a new answer set $S'$ for the subgoal is generated: $S' \equiv S \cup {s}$.
   
-  \item The \textit{answer resolution} operation checks wether new answers from the table space are available for consumption.
+  \item The \textit{answer resolution} operation checks whether new answers from the table space are available for consumption.
   When no new answers are available, the consumer node is \textit{suspended} and execution proceeds using a specific strategy.
   Given the last consumed answer, we determine the unconsumed answer
   set $R$ ($R \subseteq S$) and fetch the element $r \in R$, which is the first element from the set $R$. The last consumed answer
@@ -440,7 +440,7 @@ It differs from batched scheduling in that once the answers are found, they are 
 \subsection{Variant Tabling} \label{sec:variant_tabling}
 
 When the subgoal \texttt{path(X,Z)} is called, a check for the presence of this subgoal in the table space is done first.
-In the example in Figure~\ref{fig:tabling_path}, this was done by checking wether a \textit{variant} of the new goal already
+In the example in Figure~\ref{fig:tabling_path}, this was done by checking whether a \textit{variant} of the new goal already
 exists in the table. We say that two terms $t_1$ and $t_2$ are variants of each other if they are identical up to renaming of their
 variables.
 
@@ -452,7 +452,7 @@ Using this mechanism, \texttt{path(X,Z)} and \texttt{path(X,Y)} both result in \
 standardized subgoal is then checked against the table space to verify if it is a repeated subgoal call.
 
 The variant approach is widely used in tabling systems, but other approaches do exist. One approach named
-\textit{call by subsumption} works by checking wether the new goal is subsumed by another goal in the table space.
+\textit{call by subsumption} works by checking whether the new goal is subsumed by another goal in the table space.
 In other words, we verify if there is a more general subgoal than the one being called. For example
 \texttt{path(b,Z)} is subsumed by the subgoal \texttt{path(X,Z)}.
 
