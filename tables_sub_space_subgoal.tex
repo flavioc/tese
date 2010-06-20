@@ -1,0 +1,35 @@
+\begin{table}[ht]
+\centering
+\small{
+  \begin{tabular}{cc|ccc}
+   \hline
+    \hline
+    \multicolumn{2}{c|}{\multirow{2}{*}{\normalsize{\textbf{Data}}}} & \multicolumn{3}{c}{\normalsize{\textbf{YapTab}}} \\
+     \multicolumn{2}{c|}{} & \textit{\small{Var}} & \textit{\small{Sub}} & \textit{\small{Ratio}} \\
+   \hline
+   \hline
+
+   left\_first &  \footnotesize{...} &  3 & 3 & 1.00000 \\
+   \hline
+   right\_first &  \footnotesize{...} &  ... & ... &  1.00000 \\
+   \hline
+double\_first &  \footnotesize{...} &  ... & ... &  1.00000 \\
+\hline
+
+samegen & \footnotesize{...} &  ... & ... &  1.00000 \\
+\hline
+\multirow{5}{*}{genome} &  \footnotesize{chain (16384)} &  16390 & 8 &  0.00049 \\
+&  \footnotesize{cycle (8192)} &  8199 & 8 &  0.00098 \\
+&  \footnotesize{grid (64)} &  4103 & 8 &  0.00195 \\
+&  \footnotesize{pyramid (4096)} &  8198 & 8 &  0.00098 \\
+&  \footnotesize{tree (32768)} &  32773 & 8 &  0.00024 \\
+\hline
+
+\multicolumn{2}{c|}{flora} & 28471 & 19057 & 0.70096 \\
+\hline 
+\hline
+\end{tabular}
+}
+\caption{Number of stored subgoal trie nodes for variant and subsumption-based tabling in YapTab.}
+\label{tbl:results_detail_space_sub_subgoal}
+\end{table}

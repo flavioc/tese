@@ -3,7 +3,7 @@ We divided this chapter into four sections. The first section describes the
 set of tabled benchmark programs used. The second
 section evaluates the engine supporting traditional call subsumption that was implemented by integrating the
 Time Stamped Tries algorithms and data structures from XSB into Yap. This includes analyzing the memory gains
-of call subsumption by measuring the size of the answer tries and comparing it to variant-based tabling.
+of call subsumption by measuring the size of subgoal and answer tries and comparing it to variant-based tabling.
 In the third section, we evaluate the retroactive-based tabling engine for programs that do not benefit
 from the new mechanisms and for programs that can take advantage of this new evaluation method. Finally,
 in the fourth section, we evaluate the STST table space overhead in a potentially not so good scenario,
@@ -72,9 +72,9 @@ The scheduling strategy used by default was batched scheduling.
 
 In this section, we first evaluate the performance of YapTab against the SLG-WAM,
 by comparing the gains obtained by using call subsumption instead of variant checks.
-In the second part of this section, we measure the impact in terms of space of using call subsumption.
-For this, we compared the number of answer trie nodes created by using variant checks and by using subsumptive
-checks.
+In the second part of this section, we measure the impact in terms of space of using
+call subsumption. For this, we compared the number of answer and subgoal trie nodes
+created by using variant checks and by using subsumptive checks.
 
 \subsection{Performance Evaluation}
 
@@ -187,7 +187,8 @@ For the model checking programs, the results were not so good with close speedup
 \subsection{Memory Usage}
 
 In this section we measure the size of the table space for the variant and the subsumptive engine.
-As a metric, we use the number of allocated answer trie nodes across all answer tries.
+As a metric, we use the number of allocated answer trie nodes across all answer tries
+and the number of allocated subgoal trie nodes across all tabled predicates.
 For this, we used the following benchmarks:
 
 \begin{itemize}
@@ -195,14 +196,15 @@ For this, we used the following benchmarks:
    all the data sets and the query `\texttt{?-~path(X,Y).}'. Note that there is no need to use
    the \textbf{last} versions of these programs, because they will result in the same number of answer trie nodes.
    
-   \item The \texttt{samegen/2} program with all data sets and the query goal `\texttt{?-~samegen(X,Y).}'.
+   \item The \textbf{samegen} program with all data sets and the query goal `\texttt{?-~samegen(X,Y).}'.
    
-   \item The \texttt{genome/1} program with all data sets and the query goal `\texttt{?-~genome(X).}'.
+   \item The \textbf{genome} program with all data sets and the query goal `\texttt{?-~genome(X).}'.
    
    \item The \textbf{flora} program with the query goal `\texttt{?-~\'\_\$\_\$\_flora\_isa\_rhs\'(\_,direct).}'.
 \end{itemize}
 
-Table~\ref{tbl:results_detail_space_sub} presents the results we obtained. From the table, we can see that,
+Table~\ref{tbl:results_detail_space_sub} presents the results we obtained for the number of created
+answer trie nodes. From the table, we can see that,
 for the \texttt{left\_first} program, where no subsumed subgoals are called, the number of answer trie nodes created is
 exactly same when compared to variant-based tabling. Please notice that, while the number of trie nodes is
 the same, the size of the nodes in subsumption-based tabling (they have an extra \textbf{timestamp} field) make
@@ -222,8 +224,34 @@ data sets. In these cases, the program generates an answer that subsumes all the
 every other subgoal call is subsumed by the top subgoal, resulting in only 3 answer trie nodes created,
 the root node, and the two nodes for the two terms of the general solution. Compared to tabling with
 variant checks, this result in an impressive space saving.
-The \textbf{flora} benchmark also shows a reduced table space size, which shows that subsumption-based
-tabling can be successfully applied to complex programs.
+
+Table~\ref{tbl:results_detail_space_sub_subgoal} present the results for the number of
+allocated subgoal trie nodes for the benchmarks shown in Table~\ref{tbl:results_detail_space_sub}.
+
+\input{tables_sub_space_subgoal}
+
+The programs \textbf{left\_first},
+\textbf{right\_first} and \textbf{double\_first} all create the same number of subgoal trie nodes
+for all data sets. The \textbf{left\_first} program allocates a generator and one variant consumer,
+therefore only 3 subgoal trie nodes are needed.
+When using subsumptive-tabling, both the
+programs \textbf{right\_first} and \textbf{double\_first} create subsumed consumers that are
+represented on the subgoal trie, but for variant-based tabling, these consumers are actually
+generators that are also represented in the subgoal trie. Because the two engines create the same
+number of subgoal trie nodes, we argue that using subsumptive-based tabling on these programs
+does not decrease the number of unique called subgoals.
+
+For the \textbf{genome} benchmark, we observe that there is an impressive reduction in stored
+subgoal trie nodes. Because the subgoal \texttt{path(2,X)} is called and completed early in the
+program, subsequent consumers of this subgoal are not inserted on the subgoal trie, but they
+directly execute compiled trie code. Therefore, for subsumptive-based tabling only three subgoals
+are represented on the subgoal tries: \texttt{genome(X)}, \texttt{path(1,X)}, \texttt{path(2,X)}
+and a fourth subgoal for the predicate \texttt{path/2} that is instantiated in the two arguments.
+
+For the \textbf{flora} benchmark, we observe a considerable reduction in both subgoal and answer trie nodes
+when using subsumptive-based tabling. The \textbf{flora} benchmark shows that it is possible to
+apply call subsumption in complex programs in order to reduce the table space and the number of
+tabled subgoals and thus maximize the sharing of answers.
 
 \section{Retroactive Call Subsumption with STST}
 
