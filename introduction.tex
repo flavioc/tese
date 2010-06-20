@@ -62,7 +62,7 @@ such as YapTab \cite{Rocha-00a}, B-Prolog \cite{Zhou-00}, and ALS-Prolog \cite{G
 To the best of our knowledge, the SLG-WAM \cite{Sagonas-98} engine from XSB Prolog is the sole tabling system that supports
 subsumption-based tabling, initially by using an organization of the table space called
 \emph{Dynamic Threaded Sequential Automata (DTSA)}~\cite{Rao-96}, and later by using an alternative design called
-\emph{Time-Stamped Tries (TST)}~\cite{Johnson-99}.
+\emph{Time Stamped Tries (TST)}~\cite{Johnson-99}.
 While the DTSA design was more efficient, it had bigger space requirements and thus is was replaced by the simpler
 TST approach which uses far less memory.
 
@@ -70,7 +70,7 @@ TST approach which uses far less memory.
 
 In this thesis we address the design, implementation, integration and evaluation of two subsumption-based engines
 built on top of YapTab \cite{Rocha-00a}, the tabling system that is part of Yap Prolog. For the first engine, we
-reused and integrated the \emph{Time-Stamped Tries} (TST) approach from XSB Prolog into Yap Prolog.
+reused and integrated the Time Stamped Tries approach from XSB Prolog into Yap Prolog.
 We studied how subsumption-based and variant-based tabling were seamlessly
 integrated into the SLG-WAM engine and we attempted to reuse most of the original code and data structures when
 integrating these new mechanisms into YapTab.  Consequently, we made minimal modifications to the YapTab engine
