@@ -1,8 +1,8 @@
 A tabulação é um método de resolução particularmente bem sucedido que resolve algumas das limitações
 do método de avaliação SLD encontrado em sistemas Prolog, no tratamento de computações recursivas e/ou redundantes.
 Na tabulação, as primeiras chamadas a subgolos tabelados são avaliadas normalmente através da execução do código do
-programa, enquanto que \emph{chamadas similares} são avaliadas através do consumo das respostas geradas
-pelo subgolo similar correspondente.
+programa, enquanto que \emph{chamadas similares} são avaliadas através do consumo das respostas guardadas
+na \emph{tabela} e que foram geradas pelo subgolo similar correspondente.
 Em geral, podemos distinguir entre duas formas de determinar se um subgolo $A$ é similar a um subgolo $B$:
 \emph{tabulação por variantes} e \emph{tabulação por subsumpção}.
 Na tabulação por variantes, $A$ é similar a $B$ quando eles são iguais por renomeação das variáveis.
