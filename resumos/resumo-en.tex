@@ -1,0 +1,124 @@
+%-----------------------------------------------
+% Template para criação de resumos de projectos/dissertação
+% jlopes AT fe.up.pt,   Fri Jul  3 11:08:59 2009
+%-----------------------------------------------
+
+\documentclass[9pt,a4paper]{extarticle}
+
+%% English version: comment first, uncomment second
+\usepackage[portuguese]{babel}  % Portuguese
+%\usepackage[english]{babel}     % English
+\usepackage{graphicx}           % images .png or .pdf w/ pdflatex OR .eps w/ latex
+\usepackage{times}              % use Times type-1 fonts
+\usepackage[utf8]{inputenc}     % 8 bits using UTF-8
+\usepackage{url}                % URLs
+\usepackage{multicol}           % twocolumn, etc
+\usepackage{float}              % improve figures & tables floating
+\usepackage[tableposition=top]{caption} % captions
+%% English version: comment first (maybe)
+\usepackage{indentfirst}        % portuguese standard for paragraphs
+%\usepackage{parskip}
+
+%% page layout
+\usepackage[a4paper,margin=30mm,noheadfoot]{geometry}
+
+%% space between columns
+\columnsep 12mm
+
+%% headers & footers
+\pagestyle{empty}
+
+%% figure & table caption
+\captionsetup{figurename=Fig.,tablename=Tab.,labelsep=endash,font=bf,skip=.5\baselineskip}
+
+%% heading
+\makeatletter
+\renewcommand*{\@seccntformat}[1]{%
+  \csname the#1\endcsname.\quad
+}
+\makeatother
+
+%% avoid widows and orphans
+\clubpenalty=300
+\widowpenalty=300
+
+\begin{document}
+
+\title{\vspace*{-8mm}\textbf{\textsc{Call Subsumption Mechanisms for Tabled Logic Programs}}}
+\author{\emph{Flávio Manuel Fernandes Cruz}\\[2mm]
+\small{Projecto/Dissertação realizado sob a orientação do \emph{Prof.\ Ricardo Rocha}}\\
+\small{no \emph{CRACS / FCUP}}}
+\date{}
+\maketitle
+%no page number 
+\thispagestyle{empty}
+
+\vspace*{-4mm}\noindent\rule{\textwidth}{0.4pt}\vspace*{4mm}
+
+\begin{multicols}{2}
+
+\section{Background}
+
+Tabling is a particularly successful resolution mechanism that overcomes some limitations
+of the SLD resolution method found in Prolog systems \cite{Chen-96}, namely, in dealing with
+recursion and redundant sub-computations. In comparison to the traditional SLD resolution method, tabling can reduce the search space to cut redundant computations,
+avoids looping and has better termination properties \cite{Tamaki-86}.
+In tabling, first calls to tabled subgoals are evaluated
+through program resolution, while \emph{similar calls} are evaluated by consuming answers stored
+in the table space by the corresponding similar subgoal.
+In general, we can distinguish between two main approaches to determine if a subgoal $A$ is
+similar to a subgoal $B$: \emph{variant-based tabling} and \emph{subsumption-based tabling}.
+In variant-based tabling, $A$ is similar to $B$ if they are the same
+up to variable renaming. In subsumption-based tabling, $A$ is similar to $B$ when $A$ is subsumed
+by $B$ (or $B$ subsumes $A$). This stems from a simple principle: if $A$ is subsumed by $B$ and
+$S_A$ and $S_B$ are the respective answer sets, then $S_A \subseteq S_B$.
+While subsumption-based tabling (or \emph{call subsumption}) can yield superior time performance
+by allowing greater answer reuse, its efficient implementation is harder than variant-based tabling,
+which makes tabling engines with variant checks much more popular in the logic community.
+
+\section{Purpose}
+
+This thesis first addresses the porting and integration of the \emph{Time Stamped Tries} (TST)
+mechanism from the SLG-WAM \cite{Sagonas-PhD} into YapTab \cite{Rocha-00a}.  This mechanism was proposed by
+Ernie Johnson \textit{et al}. \cite{Johnson-99,Johnson-00} and implements the algorithms and data structures
+that support subsumption-based tabling. The TST technique is based on the idea of extending the table space with
+time information to distinguish between new answers from old answers.
+
+In the second part of this thesis we present the design, implementation, and evaluation of a novel extension
+based on subsumption-based tabling called \emph{Retroactive Call Subsumption} (RCS) \cite{cruz-jelia10}.
+RCS overcomes some limitations of traditional call subsumption, namely, the fact that the call order of the subgoals
+can greatly affect its success and applicability. RCS allows full sharing of answers,
+independently of the order they are called by selectively pruning and restarting the evaluation of
+subsumed subgoals. To implement retroactive-based tabling we developed a few novel ideas: (1) a novel algorithm
+to efficiently retrieve running \emph{instances} of a subgoal; (2) a novel table
+space organization, where answers are represented only once; and (3) a new evaluation strategy capable
+of pruning and transforming generator subgoals into consumer subgoals.
+   
+\section{Results}
+   
+Our performance results show that the integration of TST mechanisms and algorithms from the SLG-WAM
+to YapTab was largely successful, with comparable speedups when using subsumptive-based tabling
+against variant-based tabling.
+
+For the RCS engine, our results show that the overhead of the new mechanisms for RCS support are
+low enough in programs that do not benefit from it, which, combined with considerable gains for
+programs that can take advantage of them, validates this new evaluation technique.
+   
+\section{Conclusions}
+
+The main contributions of this thesis are the following: (1) support for subsumption-based tabling in Yap Prolog;
+(2) the novel RCS technique that permits bidirectional reuse of answers; (3) a novel table space
+organization that enhances answer reuse by allowing answer reuse on a predicate basis; and 
+(4) a tabling engine capable of mixing multiple evaluating strategies, such
+as variant, subsumption and retroactive-based tabling. Our final system enables the programmer to
+choose the best evaluation strategy per predicate, which arguably can augment the power of tabling
+for real world programming.
+
+%%English version: comment first, uncomment second
+%\bibliographystyle{unsrt-pt}  % numeric, unsorted refs
+\bibliographystyle{unsrt}  % numeric, unsorted refs
+\bibliography{refs}
+
+\end{multicols}
+
+\end{document}

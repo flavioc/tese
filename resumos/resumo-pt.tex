@@ -1,0 +1,123 @@
+%-----------------------------------------------
+% Template para criação de resumos de projectos/dissertação
+% jlopes AT fe.up.pt,   Fri Jul  3 11:08:59 2009
+%-----------------------------------------------
+
+\documentclass[9pt,a4paper]{extarticle}
+
+%% English version: comment first, uncomment second
+\usepackage[portuguese]{babel}  % Portuguese
+%\usepackage[english]{babel}     % English
+\usepackage{graphicx}           % images .png or .pdf w/ pdflatex OR .eps w/ latex
+\usepackage{times}              % use Times type-1 fonts
+\usepackage[utf8]{inputenc}     % 8 bits using UTF-8
+\usepackage{url}                % URLs
+\usepackage{multicol}           % twocolumn, etc
+\usepackage{float}              % improve figures & tables floating
+\usepackage[tableposition=top]{caption} % captions
+%% English version: comment first (maybe)
+\usepackage{indentfirst}        % portuguese standard for paragraphs
+%\usepackage{parskip}
+
+%% page layout
+\usepackage[a4paper,margin=30mm,noheadfoot]{geometry}
+
+%% space between columns
+\columnsep 12mm
+
+%% headers & footers
+\pagestyle{empty}
+
+%% figure & table caption
+\captionsetup{figurename=Fig.,tablename=Tab.,labelsep=endash,font=bf,skip=.5\baselineskip}
+
+%% heading
+\makeatletter
+\renewcommand*{\@seccntformat}[1]{%
+  \csname the#1\endcsname.\quad
+}
+\makeatother
+
+%% avoid widows and orphans
+\clubpenalty=300
+\widowpenalty=300
+
+\begin{document}
+
+\title{\vspace*{-8mm}\textbf{\textsc{Call Subsumption Mechanisms for Tabled Logic Programs}}}
+\author{\emph{Flávio Manuel Fernandes Cruz}\\[2mm]
+\small{Projecto/Dissertação realizado sob a orientação do \emph{Prof.\ Ricardo Rocha}}\\
+\small{no \emph{CRACS / FCUP}}}
+\date{}
+\maketitle
+%no page number 
+\thispagestyle{empty}
+
+\vspace*{-4mm}\noindent\rule{\textwidth}{0.4pt}\vspace*{4mm}
+
+\begin{multicols}{2}
+
+\section{Estado da Arte}
+
+A tabulação é um método de resolução particularmente bem sucedido que resolve algumas das limitações
+do método de avaliação SLD encontrado em sistemas Prolog \cite{Chen-96}, no tratamento de computações recursivas e/ou redundantes. Em comparação com o método SLD, a tabulação consegue reduzir o espaço de procura, evitar computações
+redundantes e tem melhores propriedades de terminação \cite{Tamaki-86}.
+Na tabulação, as primeiras chamadas a subgolos tabelados são avaliadas normalmente através da execução do código do
+programa, enquanto que \emph{chamadas similares} são avaliadas através do consumo das respostas guardadas
+na \emph{tabela} e que foram geradas pelo subgolo similar correspondente.
+Em geral, podemos distinguir entre duas formas de determinar se um subgolo $A$ é similar a um subgolo $B$:
+\emph{tabulação por variantes} e \emph{tabulação por subsumpção}.
+Na tabulação por variantes, $A$ é similar a $B$ quando eles são iguais por renomeação das variáveis.
+Na tabulação por subsumpção, $A$ é similar a $B$ quando $A$ é mais específico do que $B$ (ou $B$ é mais geral do que $A$).
+Isto acontece pelo simples princípio de que se $A$ é mais específico do que $B$ e $S_A$ e $S_B$ são os respectivos
+conjuntos de respostas, então $S_A \subseteq S_B$.
+Embora a tabulação por subsumpção consiga atingir maiores ganhos em termos do tempo de execução, devido
+à maior partilha de respostas, a implementação eficiente dos mecanismos necessários para seu suporte é bastante
+mais difícil em comparação com tabulação por variantes, o que faz com que este último seja bastante mais popular
+entre os motores de tabulação disponíveis.
+
+\section{Objectivos}
+
+Esta tese descreve a migração e integração do mecanismo de \emph{Time Stamped Tries} (TST) do motor de tabulação
+SLG-WAM \cite{Sagonas-PhD} no motor de tabulação YapTab \cite{Rocha-00a}. Este mecanismo foi proposto
+por Ernie Johnson \textit{et al.} \cite{Johnson-99,Johnson-00} e implementa os algoritmos e estruturas
+de dados que suportam tabulação por subsumpção. A técnica TST é baseada na ideia de estender a tabela com
+informação temporal para se distinguir respostas novas das antigas.
+
+Na segunda parte desta tese apresenta-se o desenho, implementação e avaliação de uma nova extensão baseada na tabulação
+por subsumpção chamada \emph{Tabulação por Subsumpção Retroactiva} (TSR) \cite{cruz-jelia10}. A TSR resolve algumas limitações da
+tabulação por subsumpção tradicional, nomeadamente, o facto de a ordem da chamada dos subgolos poder afectar o seu sucesso e
+aplicação. A TSR permite uma partilha completa e bidireccional de respostas entre subgolos, independentemente da
+sua ordem de chamada através do corte da avaliação dos golos mais específicos.
+Para implementar tabulação retroactiva foram desenvolvidas algumas novas ideias: (1) um
+algoritmo eficiente para pesquisar, na tabela, subgolos mais específicos; (2) uma nova organização da tabela,
+onde as respostas são representadas apenas uma vez; (3) uma nova estratégia de execução capaz de cortar
+e transformar a execução de um subgolo gerador em consumidor.
+   
+\section{Resultados}
+
+Os nossos resultados mostram que a integração dos mecanismos e algoritmos da TST da SLG-WAM para o YapTab
+foram bem sucedidos, com desempenhos comparáveis aos da SLG-WAM na execução entre tabulação por variantes e
+tabulação por subsumpção.
+
+Para a TSR, os nossos resultados mostram ganhos consideráveis para os programas que conseguem tirar
+partido do novo mecanismo, enquanto que o custo associado aos programas que dele não conseguem beneficiar
+é quase insignificante.
+   
+\section{Conclusões}
+
+As contribuições desta tese são as seguintes: (1) suporte para tabulação por subsumpção implementada no Yap Prolog;
+(2) a nova técnica TSR que permite partilha bidireccional de respostas; (3) uma nova organização da tabela que
+permite uma melhor partilha entre subgolos de um predicado; e (4) um motor de tabulação capaz de usar diferentes
+técnicas de execução, tais como tabulação por variantes, por subsumpção e por subsumpção retroactiva. O nosso sistema final
+permite que o programador escolha a melhor estratégia por predicado, o que torna a tabulação mais prática e
+usável em problemas reais.
+
+%%English version: comment first, uncomment second
+\bibliographystyle{unsrt-pt}  % numeric, unsorted refs
+%\bibliographystyle{unsrt}  % numeric, unsorted refs
+\bibliography{refs}
+
+\end{multicols}
+
+\end{document}
