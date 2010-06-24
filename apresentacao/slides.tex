@@ -457,7 +457,7 @@ p(1, X) :- b(X).
       evitar que a execução salte para ramos mortos}
       \only<11>{Transformar o nó \texttt{p(1,X)} em nó retroactivo e remover o \emph{subgoal frame} da
       pilha respectiva}
-      \only<12>{Novo consumidor \texttt{a(_,W)}}
+      \only<12>{Novo consumidor \texttt{a(\_,W)}}
       \only<13>{Gerador \texttt{b(V0)} é reactivado e completa}
       \only<14>{Subgolo \texttt{p(Z,W)} tenta completar mas não é líder}
       \only<15>{Após backtracking, o nó retroactivo \texttt{b(Y)} executa a instrução de resolução retroactiva
