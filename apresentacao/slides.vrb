@@ -1,0 +1,66 @@
+\frametitle {Corte Externo}
+   \begin{columns}[]
+   \column{.35\textwidth}
+   \begin{block}{Programa}
+     {\Tiny
+     \begin{verbatim}
+:- use_variant_tabling [a/2, b/1].
+:- use_retroactive_tabling p/2.
+
+a(X, Y) :- p(1, X), b(Y).
+a(3, 4).
+b(1). b(2).
+p(1, X) :- a(_, X).
+p(1, X) :- b(X).
+      \end{verbatim}
+     }
+   \end{block}
+   \column{0.55\textwidth}
+   {\small
+   \begin{block}{TSR}
+      \only<1>{Novo gerador \texttt{a(X,Y)}}
+      \only<2>{Novo gerador \texttt{p(1,X)}}
+      \only<3>{Novo consumidor \texttt{a(\_,X)}}
+      \only<4>{Novo gerador \texttt{b(X)}}
+      \only<5>{Novo consumidor \texttt{b(Y)}}
+      \only<6>{Novo gerador mais geral \texttt{p(Z,W)}}
+      \only<7>{Determinar ramos a cortar}
+      \only<8>{Consumidores como o \texttt{a(\_,X)} são simplesmente removidos do \emph{dependency space}}
+      \only<9>{\texttt{b(X)} é um subgolo gerador interno, mudar o seu estado para \emph{pruned}.
+      Transformar \emph{consumidores externos} (\emph{orphaned consumers}) em nós retroactivos}
+      \only<10>{O nó \texttt{b(Y)} é um \emph{nó fronteira}. É necessário ligá-lo ao nó \texttt{p(1,X)} para
+      evitar que a execução salte para ramos mortos}
+      \only<11>{Transformar o nó \texttt{p(1,X)} em nó retroactivo e remover o \emph{subgoal frame} da
+      pilha respectiva}
+      \only<12>{Novo consumidor \texttt{a(_,W)}}
+      \only<13>{Gerador \texttt{b(V0)} é reactivado e completa}
+      \only<14>{Subgolo \texttt{p(Z,W)} tenta completar mas não é líder}
+      \only<15>{Após backtracking, o nó retroactivo \texttt{b(Y)} executa a instrução de resolução retroactiva
+      e transforma-se num nó carregador (\emph{loader})}
+      \only<16>{Ao chegar-mos ao nó \texttt{p(1,X)}, este é transformado num consumidor, pois \texttt{p(Z,W)}
+      ainda não completou}
+      \only<17>{O subgolo \texttt{a(X,Y)} como líder poderá depois completar a computação em segurança}
+   \end{block}
+   }
+\end{columns}
+   \begin{example}
+      \begin{center}
+         \includegraphics<1>[height=4.1cm]{issues1.pdf}%
+         \includegraphics<2>[height=4.1cm]{issues2.pdf}%
+         \includegraphics<3>[height=4.1cm]{issues3.pdf}%
+         \includegraphics<4>[height=4.1cm]{issues4.pdf}%
+         \includegraphics<5>[height=4.1cm]{issues5.pdf}%
+         \includegraphics<6>[height=4.1cm]{issues6.pdf}%
+         \includegraphics<7>[height=4.1cm]{issues7.pdf}%
+         \includegraphics<8>[height=4.1cm]{issues8.pdf}%
+         \includegraphics<9>[height=4.1cm]{issues9.pdf}
+         \includegraphics<10>[height=4.1cm]{issues10.pdf}
+         \includegraphics<11>[height=4.1cm]{issues11.pdf}
+         \includegraphics<12>[height=4.1cm]{issues12.pdf}
+         \includegraphics<13>[height=4.1cm]{issues13.pdf}
+         \includegraphics<14>[height=4.1cm]{issues14.pdf}
+         \includegraphics<15>[height=4.1cm]{issues15.pdf}
+         \includegraphics<16>[height=4.1cm]{issues16.pdf}
+         \includegraphics<17>[height=4.1cm]{issues17.pdf}
+      \end{center}
+   \end{example}
