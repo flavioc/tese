@@ -1,10 +1,14 @@
 \documentclass{beamer}
 
+\usepackage[portuguese]{babel}
 \usepackage{beamerthemeBoadilla}
 %\usepackage{beamerthemeCambridgeUS}
+%\usepackage{beamerthemeRochester}
+%\usepackage{beamerthemeSzeged}
+%\usepackage{beamerthemeMontpellier}
+%\usepackage{beamerthemedefault}
 \usepackage{url}
 \usepackage{verbatim}
-\usepackage[portuguese]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage{multirow}
 
@@ -28,24 +32,24 @@ Orientador: Ricardo Rocha {\small \texttt{<ricroc@dcc.fc.up.pt>}}}
 
 \frame{\titlepage}
 
-\section[Outline]{}
-\frame{\tableofcontents}
+\AtBeginSection[] { \begin{frame}<beamer>
+\frametitle{Plano} \tableofcontents[currentsection]
+\end{frame}}
 
-\section{Prolog e o método SLD}{}
+\section{Prolog e o método SLD}
 
 \frame
 {
   \frametitle{Prolog e o método SLD}
   \begin{itemize}
-     \item <+-> Na programação em lógica, o método de resolução SLD é um método inerentemente não-deterministico e do tipo \textit{top-down}.
-     \item <+-> Em Prolog usa-se o método SLD de forma determinística, avaliando as cláusulas de cima para baixo e da esquerda para a direita.
-     \item <+-> Esta forma de avaliação pode ser aplicado de forma eficiente em máquinas virtuais baseadas em stack, tais como a \emph{Warren's Abstract Machine} (WAM).
-     \item <+-> No entanto, este método tem diversas limitações, tais como o tratamento de ciclos infinitos (positivos ou negativos) e computações redundantes.
+     \item Na programação em lógica, o método de resolução SLD é um método inerentemente não-determinístico e do tipo \textit{top-down}.
+     \item Em Prolog usa-se o método SLD de forma determinística, avaliando as cláusulas de cima para baixo e da esquerda para a direita.
+     \item Esta forma de avaliação pode ser aplicado de forma eficiente em máquinas virtuais baseadas em stack, tais como a \emph{Warren's Abstract Machine} (WAM).
+     \pause
+     \item No entanto, este método tem diversas limitações, tais como o tratamento de ciclos infinitos (positivos ou negativos) e computações redundantes.
      
   \end{itemize}
 }
-
-\subsection{Limitações}
 
 \begin{frame}[fragile]
   \frametitle{Limitações do método SLD}
@@ -84,43 +88,43 @@ edge(2, 3).
 \begin{frame}
     \frametitle{Tabulação}
     \begin{itemize}
-       \item <+-> A tabulação é um refinamento do método de resolução SLD.
-       \item <+-> As primeiras chamadas a subgolos tabelados são avaliados normalmente através da execução do código do
+       \item A tabulação é um refinamento do método de resolução SLD.
+       \item As primeiras chamadas a subgolos tabelados são avaliados normalmente através da execução do código do
        programa.
-       \item <+-> As \emph{chamadas similares} são avaliadas através do consumo das respostas guardadas na \emph{tabela}
+       \item As \emph{chamadas similares} são avaliadas através do consumo das respostas guardadas na \emph{tabela}
        e que foram geradas pelo subgolo similar correspondente.
-       \item <+-> Permite que programas válidos em termos lógicos sejam executáveis.
+       \item Permite que programas lógicos válidos sejam executáveis.
     \end{itemize}
 \end{frame}
 
-\subsection{Similaridade de subgolos}
+\subsection{Similaridade de Subgolos}
 
 \begin{frame}
-   \frametitle{Similiaridade entre chamadas}
+   \frametitle{Similaridade entre Chamadas}
    Em geral, existem dois testes para verificar se um subgolo é similar a outro:
    \begin{itemize}
-      \item \emph{Tabulação por variantes:} $A$ é similar a $B$ quando eles são iguais por renomeação das variáveis.
+      \item \emph{Tabulação por variantes:} o subgolo $A$ é similar a $B$ quando eles são iguais por renomeação das variáveis.
       \pause
-      \begin{example}
-         $p(X,1,Y)$ e $p(Y,1,Z)$ são variantes porque ambas podem ser transformadas em $p(VAR_0,1,VAR_1)$
-      \end{example}
+      \begin{block}{Exemplo}
+         \texttt{p(X,1,Y)} e \texttt{p(Y,1,Z)} são variantes porque ambos podem ser transformados em \texttt{p(VAR0,1,VAR1)}
+      \end{block}
       \pause
-      \item A maioria dos motores de tabulação, incluindo o YapTab, apenas suportam este teste
+      \item A maioria dos motores de tabulação, incluindo o YapTab, apenas suportam este teste.
    \end{itemize}
 \end{frame}
 
 \begin{frame}
-   \frametitle{Similiaridade entre chamadas}
+   \frametitle{Similaridade entre Chamadas}
    \begin{itemize}
    \item \emph{Tabulação por subsumpção:} $A$ é similar a $B$ quando $A$ é mais específico do que $B$ (ou $B$ é mais geral do que $A$).
-   \begin{example}
-      $p(X,1,2)$ é mais específico do que $p(Y,1,Z)$ porque existe uma substituição $\{Y~=~X,~Z~=~2\}$
-      que torna $p(X,1,2)$ uma \emph{instância} de $p(Y,1,Z)$.
-   \end{example}
+   \begin{block}{Exemplo}
+      \texttt{p(X,1,2)} é mais específico do que \texttt{p(Y,1,Z)} porque existe uma substituição \texttt{\{Y~=~X,~Z~=~2\}}
+      que torna \texttt{p(X,1,2)} uma \emph{instância} de \texttt{p(Y,1,Z)}.
+   \end{block}
    \pause
-   \begin{theorem}
+   \begin{block}{Teorema}
       Se $A$ é mais específico do que $B$ e $S_A$ e $S_B$ são os respectivos conjuntos de respostas, então $S_A \subseteq S_B$.
-   \end{theorem}
+   \end{block}
    \pause
    \item Só o XSB Prolog implementa este tipo de tabulação, primeiro usando uma técnica chamada \textit{Dynamic Threaded Sequential Automata} (DTSA) e mais recentemente usando a técnica de \textit{Time Stamped Tries} (TST).
 \end{itemize}
@@ -156,7 +160,7 @@ edge(1, 2). edge(2, 3).
          \end{block}
      \end{columns}
      }
-   \begin{example}
+   \begin{block}{Exemplo}
       \begin{center}
       \includegraphics<1>[height=4.5cm]{tabled_evaluation1.pdf}%
       \includegraphics<2>[height=4.5cm]{tabled_evaluation2.pdf}%
@@ -170,15 +174,15 @@ edge(1, 2). edge(2, 3).
       \includegraphics<10>[height=4.5cm]{tabled_evaluation10.pdf}%
       \includegraphics<11>[height=4.5cm]{tabled_evaluation11.pdf}%
    \end{center}
-   \end{example}
+   \end{block}
 \end{frame}
 \end{comment}
 
 \begin{frame}[fragile]
-   \frametitle{Exemplo por subsumpção}
+   \frametitle{Exemplo por Subsumpção}
    {\tiny
    \begin{columns}[t]
-         \column{.35\textwidth}
+         \column{.55\textwidth}
          \begin{block}{Respostas}
            {%\tiny
            \begin{itemize}
@@ -190,7 +194,7 @@ edge(1, 2). edge(2, 3).
            \end{itemize}
            }
          \end{block}
-         \column{.55\textwidth}
+         \column{.35\textwidth}
          \begin{block}{Programa}
            {%\tiny
            \begin{verbatim}
@@ -203,7 +207,7 @@ edge(1, 2). edge(2, 3).
          \end{block}
      \end{columns}
      }
-   \begin{example}
+   \begin{block}{Exemplo}
       \begin{center}
       \includegraphics<1>[height=5.0cm]{sub1.pdf}%
       \includegraphics<2>[height=5cm]{sub2.pdf}%
@@ -217,12 +221,11 @@ edge(1, 2). edge(2, 3).
       \includegraphics<10>[height=5cm]{sub10.pdf}%
       \includegraphics<11>[height=5.0cm]{sub11.pdf}%
    \end{center}
-   \end{example}
+   \end{block}
 \end{frame}
 
 \begin{frame}
-   \frametitle{Espaço das tabelas}
-   Como são implementadas as tabelas?
+   \frametitle{Espaço das Tabelas}
    \begin{itemize}
       \item Tries: estruturas em árvore onde os prefixos comuns dos termos são representados apenas uma vez.
       \pause
@@ -232,54 +235,54 @@ edge(1, 2). edge(2, 3).
             \item \emph{Answer trie}: guardas as respostas.
          \end{itemize}
       \pause
-      \item Num nó folha da subgoal trie existe uma estrutura chamada \emph{subgoal frame} que contém informação sobre o subgolo respectivo.
    \end{itemize}
+   \begin{block}{Exemplo}
+     \begin{figure}[ht]
+        \centering
+          \includegraphics[scale=0.45]{two_level_tries.pdf}
+      \end{figure}
+    \end{block}
 \end{frame}
 
-\begin{frame}
-  \frametitle{Espaço das tabelas}
-  \begin{example}
-  \begin{figure}[ht]
-     \centering
-       \includegraphics[scale=0.6]{two_level_tries.pdf}
-   \end{figure}
- \end{example}
-\end{frame}
-
-\section{Time Stamped tries}
+\section{Tabulação por Subsumpção}
 
 \begin{frame}
   \frametitle{Time Stamped Tries}
   \begin{itemize}
      \item Estende-se a answer trie com informação temporal: \emph{timestamps}.
-     \item Quando uma resposta é inserida, incrementa-se o timestamp da resposta.
-     \item O objectivo é permitir uma pesquisa incremental de respostas para os subgolos mais específicos.
-     \item O subgolo específico guarda o timestamp da última procura para evitar respostas repetidas no futuro.
-     \item O algoritmo de pesquisa faz corte dos ramos pelo timestamp e através de operações de unificação ao longo da trie.
+     \item<2-> Quando uma resposta é inserida, incrementa-se o timestamp da resposta.
   \end{itemize}
+  \begin{columns}[t]
+        \column{.4\textwidth}
+        \begin{block}{Time Stamped Trie}
+          \begin{figure}[ht]
+            \centering
+              \includegraphics[scale=0.4]{tst_1.pdf}
+          \end{figure}
+        \end{block}
+        \pause
+        \column{.5\textwidth}
+        \begin{block}{Inserir \textbf{p(a, b, c)}}
+          \begin{figure}[ht]
+            \centering
+              \includegraphics[scale=0.4]{tst_2.pdf}
+          \end{figure}
+        \end{block}
+    \end{columns}
 \end{frame}
 
 \begin{frame}
   \frametitle{Time Stamped Tries}
   \begin{itemize}
-    \item Time stamped trie do subgolo \texttt{p(X, Y, Z)}:
+     \item O subgolo específico guarda o timestamp da última procura para permitir uma pesquisa incremental.
+     \item O algoritmo de pesquisa faz corte dos ramos pelo timestamp e através de operações de unificação.
   \end{itemize}
-  \begin{columns}[t]
-      \column{.4\textwidth}
-      \begin{example}[antes]
-        \begin{figure}[ht]
-          \centering
-            \includegraphics[scale=0.4]{tst_1.pdf}
-        \end{figure}
-      \end{example}
-      \column{.5\textwidth}
-      \begin{example}[inserir \textbf{p(a, b, c)}]
-        \begin{figure}[ht]
-          \centering
-            \includegraphics[scale=0.4]{tst_2.pdf}
-        \end{figure}
-      \end{example}
-  \end{columns}
+  \begin{block}{Time Stamped Trie}
+      \begin{figure}[ht]
+        \centering
+          \includegraphics[scale=0.4]{tst_1.pdf}
+      \end{figure}
+    \end{block}
 \end{frame}
 
 \subsection{Implementação}
@@ -287,6 +290,7 @@ edge(1, 2). edge(2, 3).
 \begin{frame}
    \frametitle{Implementação no YapTab}
    \begin{itemize}
+      \item Para implementar tabulação por subsumpção usou-se a técnica das TSTs.
       \item Reutilizou-se o código de forma quase integral do XSB Prolog: foram usados macros para
       permitir que ambos os sistemas Prolog usassem o mesmo código.
       \item As alterações nas operações principais de tabulação foram mínimas.
@@ -300,9 +304,10 @@ edge(1, 2). edge(2, 3).
          \pause
          \item Calcular a próxima resposta a consumir.
          \pause
+         \item Instruções da trie completa.
       \end{itemize}
-      \item Todas as instruções da trie tiveram que ser alteradas para usar unificação por forma a serem usadas em subgolos específicos quando completas.
-      \item O sistema permite usar uma mistura de predicados por variantes e por subsumpção.
+      \pause
+      \item \textbf{O sistema permite usar uma mistura de predicados por variantes e por subsumpção.}
    \end{itemize}
 \end{frame}
 
@@ -311,22 +316,18 @@ edge(1, 2). edge(2, 3).
 \subsection{Motivação}
 
 \begin{frame}
-   \frametitle{Problemas na tabulação por subsumpção}
+   \frametitle{Problemas na Tabulação por Subsumpção}
    \begin{itemize}
       \item Apesar da tabulação por subsumpção atingir bons resultados, sofre de um problema:
       a ordem na qual os subgolos são chamados pode afectar a performance do sistema.
       
-      \begin{example}
+      \begin{block}{Exemplo}
          Se \texttt{p(1,X)} for chamado antes de \texttt{p(X,Y)}, \texttt{p(1,X)} não usará as respostas de
          \texttt{p(X,Y)}, mas irá executar o código para gerar as suas próprias respostas.
-      \end{example}
-      
-      \item Assim, para existir partilha de respostas entre subgolos subsumptivos é estritamente necessário
-      que o golo mais específico apareça depois do subgolo mais geral.
+      \end{block}
+
    \end{itemize}
 \end{frame}
-
-\subsection{Tabulação por Subsumpção Retroactiva}
 
 \begin{frame}
    \frametitle{Como solucionar este problema?}
@@ -335,27 +336,43 @@ edge(1, 2). edge(2, 3).
       \pause
       \item Quando um subgolo $G$ é chamado, cortam-se os ramos de execução do subgolo mais
       específico $G'$ para transformar $G'$ num consumidor.
-      \item Assim, $G'$ passa a usar as soluções de $G$ e deixa de gerar as suas próprias soluções.
-      \item O corte de ramos de execução potencia ganhos de tempo de execução e a partilha de respostas ganhos
-      em termos de utilização de memória.
       \pause
-      \item Desafios:
+      \item Ganhar tempo de execução e aumentar partilha de respostas.
+   \end{itemize}
+\end{frame}
+
+\begin{frame}
+   \frametitle{Desafios}
+   \begin{itemize}
+      \item Determinar que subgolos geradores e consumidores pertencem à execução do subgolo $G'$.
       \begin{itemize}
-         \item Determinar que subgolos geradores e consumidores pertencem à execução do subgolo $G'$.
-         \begin{itemize}
-            \pause
-            \item Construindo uma árvore das dependências dos subgolos.
-         \end{itemize}
          \pause
-         \item Manter a execução consistente devido aos cortes.
-         \begin{itemize}
-            \pause
-            \item Considerando intervalos de pontos de escolha.
-         \end{itemize}
+         \item Construindo uma árvore das dependências dos subgolos.
+         \pause
+         \item Considerando intervalos de pontos de escolha da máquina virtual.
+      \end{itemize}
+      \pause
+      \item Manter a execução consistente devido aos cortes.
+      \begin{itemize}
+         \pause
+         \item Através do desenho de estratégias de controlo de execução para a resolução retroactiva.
+      \end{itemize}
+      \pause
+      \item Evitar que o novo consumidor consuma respostas já geradas.
+      \begin{itemize}
+         \pause
+         \item Nova organização do espaço de tabelas.
+      \end{itemize}
+      \pause
+      \item Saber de forma eficiente que subgolos geradores mais específicos estão a executar.
+      \begin{itemize}
+         \pause
+         \item Novo algoritmo.
       \end{itemize}
    \end{itemize}
 \end{frame}
 
+\begin{comment}
 \begin{frame}[fragile]
    \frametitle{Exemplo de TSR}
    \begin{columns}[]
@@ -381,49 +398,19 @@ p(1, 3). p(2, 3). p(1, 2).
    \end{block}
    }
 \end{columns}
-   \begin{example}
+   \begin{block}{Exemplo}
       \begin{center}
       \includegraphics<1>[height=4.5cm]{retro1.pdf}%
       \includegraphics<2>[height=4.5cm]{retro2.pdf}%
       \includegraphics<3>[height=4.5cm]{retro3.pdf}%
    \end{center}
-   \end{example}
+   \end{block}
 \end{frame}
+\end{comment}
 
-\subsection{Corte da execução}
-
-\begin{frame}
-   \frametitle{Corte da execução}
-   \begin{itemize}
-      \item Existem dois tipos de corte dependendo onde o subgolo mais geral aparece relativamente ao subgolo específico:
-      \begin{itemize}
-         \item Corte externo: se aparece fora.
-         \item Corte interno: se aparece dentro.
-      \end{itemize}
-      \pause
-      \item Independente do tipo de corte, existe um conjunto de problemas que advém do corte da execução
-      de geradores ou consumidores internos ao subgolo específico:
-      \begin{itemize}
-         \item \emph{Orphaned Consumers}
-         \item \emph{Lost consumers}
-         \item \emph{Pseudo-Completion}
-         \item \emph{Leader Re-Computation}
-      \end{itemize}
-      \pause
-      \item Após o corte, o ponto de escolha do subgolo específico é transformado num nó retroactivo,
-      para que possa haver \emph{resolução retroactiva}.
-      \begin{itemize}
-         \item A instrução que implementa resolução retroactiva é vital para a TSR, pois permite que
-         os nós de execução sejam transformados em tipos de nós correctos e desta forma, permitir
-         que a computação termine.
-      \end{itemize}
-   \end{itemize}
-\end{frame}
-
-\setbeamerfont{block}{size=\tiny}
 
 \begin{frame}[fragile]
-   \frametitle{Corte Externo}
+   \frametitle{Exemplo de Execução}
    \begin{columns}[]
    \column{.35\textwidth}
    \begin{block}{Programa}
@@ -457,18 +444,18 @@ p(1, X) :- b(X).
       evitar que a execução salte para ramos mortos}
       \only<11>{Transformar o nó \texttt{p(1,X)} em nó retroactivo e remover o \emph{subgoal frame} da
       pilha respectiva}
-      \only<12>{Novo consumidor \texttt{a(\_,W)}}
-      \only<13>{Gerador \texttt{b(V0)} é reactivado e completa}
-      \only<14>{Subgolo \texttt{p(Z,W)} tenta completar mas não é líder}
-      \only<15>{Após backtracking, o nó retroactivo \texttt{b(Y)} executa a instrução de resolução retroactiva
-      e transforma-se num nó carregador (\emph{loader})}
-      \only<16>{Ao chegar-mos ao nó \texttt{p(1,X)}, este é transformado num consumidor, pois \texttt{p(Z,W)}
-      ainda não completou}
-      \only<17>{O subgolo \texttt{a(X,Y)} como líder poderá depois completar a computação em segurança}
+      %\only<12>{Novo consumidor \texttt{a(\_,W)}}
+      %\only<13>{Gerador \texttt{b(V0)} é reactivado e completa}
+      %\only<14>{Subgolo \texttt{p(Z,W)} tenta completar mas não é líder}
+      %\only<15>{Após backtracking, o nó retroactivo \texttt{b(Y)} executa a instrução de resolução retroactiva
+      %e transforma-se num nó carregador (\emph{loader})}
+      %\only<16>{Ao chegar-mos ao nó \texttt{p(1,X)}, este é transformado num consumidor, pois \texttt{p(Z,W)}
+      %ainda não completou}
+      %\only<17>{O subgolo \texttt{a(X,Y)} como líder poderá depois completar a computação em segurança}
    \end{block}
    }
 \end{columns}
-   \begin{example}
+   \begin{block}{Exemplo}
       \begin{center}
          \includegraphics<1>[height=4.1cm]{issues1.pdf}%
          \includegraphics<2>[height=4.1cm]{issues2.pdf}%
@@ -481,95 +468,118 @@ p(1, X) :- b(X).
          \includegraphics<9>[height=4.1cm]{issues9.pdf}
          \includegraphics<10>[height=4.1cm]{issues10.pdf}
          \includegraphics<11>[height=4.1cm]{issues11.pdf}
-         \includegraphics<12>[height=4.1cm]{issues12.pdf}
-         \includegraphics<13>[height=4.1cm]{issues13.pdf}
-         \includegraphics<14>[height=4.1cm]{issues14.pdf}
-         \includegraphics<15>[height=4.1cm]{issues15.pdf}
-         \includegraphics<16>[height=4.1cm]{issues16.pdf}
-         \includegraphics<17>[height=4.1cm]{issues17.pdf}
+         %\includegraphics<12>[height=4.1cm]{issues12.pdf}
+         %\includegraphics<13>[height=4.1cm]{issues13.pdf}
+         %\includegraphics<14>[height=4.1cm]{issues14.pdf}
+         %\includegraphics<15>[height=4.1cm]{issues15.pdf}
+         %\includegraphics<16>[height=4.1cm]{issues16.pdf}
+         %\includegraphics<17>[height=4.1cm]{issues17.pdf}
       \end{center}
-   \end{example}
+   \end{block}
+\end{frame}
+
+\subsection{Corte da Execução}
+
+\begin{frame}
+   \frametitle{Corte da Execução}
+   \begin{itemize}
+      \item Existem dois tipos de corte dependendo onde o subgolo mais geral aparece relativamente ao subgolo específico:
+      \begin{itemize}
+         \item Corte externo: se aparece fora (visto anteriormente).
+         \pause
+         \item Corte interno: se aparece dentro.
+      \end{itemize}
+      \pause
+      \item Independente do tipo de corte, existe um conjunto de problemas que advém do corte da execução
+      de geradores ou consumidores internos ao subgolo específico:
+      \begin{itemize}
+         \item \emph{Orphaned Consumers} (visto anteriormente)
+         \pause
+         \item \emph{Lost consumers}
+         \pause
+         \item \emph{Pseudo-Completion}
+         \pause
+         \item \emph{Leader Re-Computation}
+      \end{itemize}
+   \end{itemize}
 \end{frame}
 
 \begin{frame}
    \frametitle{Corte Interno}
    \begin{itemize}
-      \item O corte interno acontece quando o subgolo mais geral $G$ aparece dentro da execução do subgolo específico $G'$.
       \item Nesta situação cortam-se os ramos referentes a $G'$, excepto a parte que irá
       computar as soluções do subgolo $G$.
-      \pause
-      \item $G$ executa normalmente mas não devolve as soluções para o ambiente externo \footnote{O subgolo
-      executa usando \emph{local scheduling}}.
-      \item Quando $G$ ou completar ou não conseguir completar por ser o líder, salta-se para o ponto
-      de escolha do subgolo $G'$, onde este poderá carregar as suas soluções relevantes ou transformar-se em
-      consumidor.
-      \pause
-      \item O nosso sistema é capaz de detectar situações de cortes internos múltiplos.
+      \begin{itemize}
+         \item $G$ executa normalmente mas não devolve as soluções para o ambiente externo\footnote{O subgolo
+         executa usando \emph{local scheduling}}.
+      \end{itemize}
+      \item<2-> Quando $G$ ou completar ou não conseguir completar por ser o líder, salta-se para o ponto
+      de escolha do subgolo $G'$.
    \end{itemize}
+   \begin{columns}[t]
+         \column{.45\textwidth}
+         \begin{block}{Antes}
+           \begin{figure}[ht]
+             \centering
+               \includegraphics[scale=0.4]{internal1.pdf}
+           \end{figure}
+         \end{block}
+         \pause
+         \column{.45\textwidth}
+         \begin{block}{Depois}
+           \begin{figure}[ht]
+             \centering
+               \includegraphics[scale=0.30]{internal2.pdf}
+           \end{figure}
+         \end{block}
+     \end{columns}
 \end{frame}
 
-\subsection{Espaço das tabelas}
+\subsection{Espaço das Tabelas}
 \begin{frame}
-   \frametitle{Espaço das tabelas}
+   \frametitle{Espaço das Tabelas}
    \begin{itemize}
-      \item \emph{Single Time Stamped Trie}
-      \item Uma \emph{answer trie} única por predicado.
-      \pause
-      \item As respostas são representas apenas uma vez e referenciadas pelos subgolos que as usam.
-      \item Usa-se um timestamp por cada subgolo de forma a facilitar a transformação de gerador para consumidor.
+      \item \emph{Single Time Stamped Trie}: uma \emph{answer trie} única por predicado.
       \begin{itemize}
-         \item Situações em que diferentes subgolos estão a inserir respostas na trie requerem cuidado.
+         \item As respostas são representadas apenas uma vez e referenciadas pelos subgolos que as usam.
+         \item Usa-se um timestamp por cada subgolo de forma a facilitar a transformação de gerador para consumidor.
       \end{itemize}
-      \pause
-      \item Permite que se possam reutilizar respostas relevantes a um novo subgolo gerador antes de executar
+      \item<2-> Permite que se possam reutilizar respostas relevantes a um novo subgolo gerador antes de executar
       o código.
-      \begin{itemize}
-         \item Esta é uma forma elegante de reutilizar respostas e resolver o problema das tabelas incompletas.
-      \end{itemize}
-      \pause
-      \item Tem como desvantagem a necessidade de representar todos os argumentos de um dado subgolo e não
-      apenas o valor das variáveis.
    \end{itemize}
+   \begin{block}{Single Time Stamped Trie}
+     \begin{figure}[ht]
+       \centering
+         \includegraphics[scale=0.37]{stst.pdf}
+     \end{figure}
+   \end{block}
 \end{frame}
 
-\subsection{Procura de subgolos específicos}
+\subsection{Procura de Subgolos Específicos}
 \begin{frame}
-   \frametitle{Procura de subgolos específicos}
+   \frametitle{Procura de Subgolos Específicos}
    \begin{itemize}
-      \item Uma componente importante da TSR é o algoritmo que percorre a \emph{subgoal trie} para
-      encontrar subgolos mais específicos.
+      \item Percorrer a \emph{subgoal trie} para encontrar subgolos mais específicos.
       \pause
       \item O problema resume-se a encontrar atribuições para as variáveis do subgolo mais geral.
+      \item Usa-se a heap e a trilha da máquina virtual para maior eficiência.
       \pause
-      \item A pesquisa é feita navegando pela trie e usando backtracking sempre que a pesquisa falhar.
-      \item Usa-se uma pilha de nós alternativos de pesquisa.
+      \item Para melhorar a eficiência, estendeu-se cada nó da \emph{subgoal trie} com o número de
+      subgolos sobre aquele ramo da trie que estão a executar.
    \end{itemize}
-\end{frame}
-
-\begin{frame}
-   \frametitle{Procura de subgolos específicos}
-   \begin{itemize}
-      \item Dado que é necessário construir termos Prolog e registar atribuições de variáveis durante a pesquisa,
-      usa-se estruturas da máquina virtual, tais como a heap e a trilha.
-      \pause
-      \item Para melhorar a eficiência, estendeu-se cada nó da \emph{subgoal trie} com um campo chamado
-      \texttt{in\_eval} que registo o número de subgolos sobre aquele ramo da trie que estão a executar.
-   \end{itemize}
-   \pause
    \begin{columns}[t]
         \column{.45\textwidth}
         \begin{block}{Subgoal trie}
           \begin{figure}[ht]
             \centering
-              \includegraphics[scale=0.33]{in_eval_trie.pdf}
+              \includegraphics[scale=0.31]{in_eval_trie.pdf}
           \end{figure}
-        \pause
         \end{block}
          \column{.45\textwidth}
          \begin{block}{Novo gerador}
            \begin{figure}[ht]
              \centering
-               \includegraphics[scale=0.33]{in_eval_add.pdf}
+               \includegraphics[scale=0.31]{in_eval_add.pdf}
            \end{figure}
          \end{block}
 
@@ -579,14 +589,13 @@ p(1, X) :- b(X).
 \section{Resultados}
 
 \begin{frame}
-   \frametitle{Tabulação por subsumpção}
+   \frametitle{Tabulação por Subsumpção}
    \begin{itemize}
       \item Avaliou-se o desempenho do motor de tabulação por subsumpção e comparou-se com
       o motor de tabulação do XSB Prolog.
       \item Sendo que ambos usam os mesmos algoritmos e estruturas de dados, o desempenho é muito
       parecido.
    \end{itemize}
-   \pause
    {\footnotesize
    \begin{center}
      \begin{tabular}{ccc}
@@ -619,7 +628,6 @@ p(1, X) :- b(X).
       mecanismos.
       \item Comparou-se o desempenho com tabulação por subsumpção tradicional e tabulação por variantes.
    \end{itemize}
-   \pause
    \begin{center}
       {\footnotesize
      \begin{tabular}{ccc}
@@ -653,7 +661,6 @@ p(1, X) :- b(X).
    \begin{itemize}
       \item Por outro lado, comparou-se o desempenho para programas onde usar TSR é vantajoso.
    \end{itemize}
-   \pause
    \begin{center}
    {\footnotesize
      \begin{tabular}{ccc}
@@ -663,7 +670,7 @@ p(1, X) :- b(X).
        & \textit{\small{Var / Retro}} & \textit{\small{Sub / Retro}} \\
       \hline
       \hline
-   left\_first & 0.89 & 0.95 \\
+   left\_first\footnote{Para os programas do tipo \texttt{path/2} usou-se o golo \texttt{path(X,1)}.} & 0.89 & 0.95 \\
    left\_last & 0.88  & 0.90 \\
    double\_first & 1.07 & \textbf{1.09} \\
    double\_last & 1.05 & \textbf{1.10} \\
@@ -677,9 +684,6 @@ p(1, X) :- b(X).
    \hline
    \end{tabular}}
    \end{center}
-   \begin{itemize}
-      \item Para os programas do tipo \texttt{path/2} usou-se o golo \texttt{path(X,1)}.
-   \end{itemize}
 \end{frame}
 
 \section{Conclusões}
@@ -702,7 +706,6 @@ p(1, X) :- b(X).
          \item Melhoramento dos algoritmos do espaço das tabelas.
          \item Maior experimentação com aplicações reais.
          \item Explorar outros métodos de avaliação, como o \emph{Call Abstraction}.
-         \pause
       \end{itemize}
    \end{itemize}
 \end{frame}
