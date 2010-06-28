@@ -1,4 +1,4 @@
-\frametitle {Corte Externo}
+\frametitle {Exemplo de Execução}
    \begin{columns}[]
    \column{.35\textwidth}
    \begin{block}{Programa}
@@ -32,18 +32,18 @@ p(1, X) :- b(X).
       evitar que a execução salte para ramos mortos}
       \only<11>{Transformar o nó \texttt{p(1,X)} em nó retroactivo e remover o \emph{subgoal frame} da
       pilha respectiva}
-      \only<12>{Novo consumidor \texttt{a(_,W)}}
-      \only<13>{Gerador \texttt{b(V0)} é reactivado e completa}
-      \only<14>{Subgolo \texttt{p(Z,W)} tenta completar mas não é líder}
-      \only<15>{Após backtracking, o nó retroactivo \texttt{b(Y)} executa a instrução de resolução retroactiva
-      e transforma-se num nó carregador (\emph{loader})}
-      \only<16>{Ao chegar-mos ao nó \texttt{p(1,X)}, este é transformado num consumidor, pois \texttt{p(Z,W)}
-      ainda não completou}
-      \only<17>{O subgolo \texttt{a(X,Y)} como líder poderá depois completar a computação em segurança}
+      %\only<12>{Novo consumidor \texttt{a(\_,W)}}
+      %\only<13>{Gerador \texttt{b(V0)} é reactivado e completa}
+      %\only<14>{Subgolo \texttt{p(Z,W)} tenta completar mas não é líder}
+      %\only<15>{Após backtracking, o nó retroactivo \texttt{b(Y)} executa a instrução de resolução retroactiva
+      %e transforma-se num nó carregador (\emph{loader})}
+      %\only<16>{Ao chegar-mos ao nó \texttt{p(1,X)}, este é transformado num consumidor, pois \texttt{p(Z,W)}
+      %ainda não completou}
+      %\only<17>{O subgolo \texttt{a(X,Y)} como líder poderá depois completar a computação em segurança}
    \end{block}
    }
 \end{columns}
-   \begin{example}
+   \begin{block}{Exemplo}
       \begin{center}
          \includegraphics<1>[height=4.1cm]{issues1.pdf}%
          \includegraphics<2>[height=4.1cm]{issues2.pdf}%
@@ -56,11 +56,11 @@ p(1, X) :- b(X).
          \includegraphics<9>[height=4.1cm]{issues9.pdf}
          \includegraphics<10>[height=4.1cm]{issues10.pdf}
          \includegraphics<11>[height=4.1cm]{issues11.pdf}
-         \includegraphics<12>[height=4.1cm]{issues12.pdf}
-         \includegraphics<13>[height=4.1cm]{issues13.pdf}
-         \includegraphics<14>[height=4.1cm]{issues14.pdf}
-         \includegraphics<15>[height=4.1cm]{issues15.pdf}
-         \includegraphics<16>[height=4.1cm]{issues16.pdf}
-         \includegraphics<17>[height=4.1cm]{issues17.pdf}
+         %\includegraphics<12>[height=4.1cm]{issues12.pdf}
+         %\includegraphics<13>[height=4.1cm]{issues13.pdf}
+         %\includegraphics<14>[height=4.1cm]{issues14.pdf}
+         %\includegraphics<15>[height=4.1cm]{issues15.pdf}
+         %\includegraphics<16>[height=4.1cm]{issues16.pdf}
+         %\includegraphics<17>[height=4.1cm]{issues17.pdf}
       \end{center}
-   \end{example}
+   \end{block}

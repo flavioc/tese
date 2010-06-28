@@ -44,7 +44,7 @@ Orientador: Ricardo Rocha {\small \texttt{<ricroc@dcc.fc.up.pt>}}}
   \begin{itemize}
      \item Na programação em lógica, o método de resolução SLD é um método inerentemente não-determinístico e do tipo \textit{top-down}.
      \item Em Prolog usa-se o método SLD de forma determinística, avaliando as cláusulas de cima para baixo e da esquerda para a direita.
-     \item Esta forma de avaliação pode ser aplicado de forma eficiente em máquinas virtuais baseadas em stack, tais como a \emph{Warren's Abstract Machine} (WAM).
+     \item Esta forma de avaliação pode ser aplicada de forma eficiente em máquinas virtuais baseadas em stack, tais como a \emph{Warren's Abstract Machine} (WAM).
      \pause
      \item No entanto, este método tem diversas limitações, tais como o tratamento de ciclos infinitos (positivos ou negativos) e computações redundantes.
      
@@ -89,7 +89,7 @@ edge(2, 3).
     \frametitle{Tabulação}
     \begin{itemize}
        \item A tabulação é um refinamento do método de resolução SLD.
-       \item As primeiras chamadas a subgolos tabelados são avaliados normalmente através da execução do código do
+       \item As primeiras chamadas a subgolos tabelados são avaliadas normalmente através da execução do código do
        programa.
        \item As \emph{chamadas similares} são avaliadas através do consumo das respostas guardadas na \emph{tabela}
        e que foram geradas pelo subgolo similar correspondente.
@@ -109,7 +109,7 @@ edge(2, 3).
          \texttt{p(X,1,Y)} e \texttt{p(Y,1,Z)} são variantes porque ambos podem ser transformados em \texttt{p(VAR0,1,VAR1)}
       \end{block}
       \pause
-      \item A maioria dos motores de tabulação, incluindo o YapTab, apenas suportam este teste.
+      \item A maioria dos motores de tabulação, incluindo o YapTab, apenas suporta este teste.
    \end{itemize}
 \end{frame}
 
@@ -232,7 +232,7 @@ edge(1, 2). edge(2, 3).
       \item Normalmente, existem dois níveis de tries:
          \begin{itemize}
             \item \emph{Subgoal trie}: guarda os subgolos para um certo predicado (por exemplo \texttt{path/2}).
-            \item \emph{Answer trie}: guardas as respostas.
+            \item \emph{Answer trie}: guarda as respostas de um subgolo.
          \end{itemize}
       \pause
    \end{itemize}
@@ -250,7 +250,7 @@ edge(1, 2). edge(2, 3).
   \frametitle{Time Stamped Tries}
   \begin{itemize}
      \item Estende-se a answer trie com informação temporal: \emph{timestamps}.
-     \item<2-> Quando uma resposta é inserida, incrementa-se o timestamp da resposta.
+     \item<2-> Quando uma resposta é inserida, incrementa-se o seu timestamp.
   \end{itemize}
   \begin{columns}[t]
         \column{.4\textwidth}
@@ -292,8 +292,8 @@ edge(1, 2). edge(2, 3).
    \begin{itemize}
       \item Para implementar tabulação por subsumpção usou-se a técnica das TSTs.
       \item Reutilizou-se o código de forma quase integral do XSB Prolog: foram usados macros para
-      permitir que ambos os sistemas Prolog usassem o mesmo código.
-      \item As alterações nas operações principais de tabulação foram mínimas.
+      permitir que ambos os sistemas usassem o mesmo código.
+      \item As alterações nas operações principais de tabulação foram mínimas:
       \begin{itemize}
          \pause
          \item Cálculo do líder.
@@ -307,7 +307,7 @@ edge(1, 2). edge(2, 3).
          \item Instruções da trie completa.
       \end{itemize}
       \pause
-      \item \textbf{O sistema permite usar uma mistura de predicados por variantes e por subsumpção.}
+      \item O sistema permite usar uma mistura de predicados por variantes e por subsumpção.
    \end{itemize}
 \end{frame}
 
@@ -337,7 +337,7 @@ edge(1, 2). edge(2, 3).
       \item Quando um subgolo $G$ é chamado, cortam-se os ramos de execução do subgolo mais
       específico $G'$ para transformar $G'$ num consumidor.
       \pause
-      \item Ganhar tempo de execução e aumentar partilha de respostas.
+      \item Objectivo: ganhar tempo de execução e aumentar partilha de respostas.
    \end{itemize}
 \end{frame}
 
@@ -485,9 +485,9 @@ p(1, X) :- b(X).
    \begin{itemize}
       \item Existem dois tipos de corte dependendo onde o subgolo mais geral aparece relativamente ao subgolo específico:
       \begin{itemize}
-         \item Corte externo: se aparece fora (visto anteriormente).
+         \item Corte externo: quando aparece fora (visto anteriormente).
          \pause
-         \item Corte interno: se aparece dentro.
+         \item Corte interno: quando aparece dentro.
       \end{itemize}
       \pause
       \item Independente do tipo de corte, existe um conjunto de problemas que advém do corte da execução
@@ -507,13 +507,13 @@ p(1, X) :- b(X).
 \begin{frame}
    \frametitle{Corte Interno}
    \begin{itemize}
-      \item Nesta situação cortam-se os ramos referentes a $G'$, excepto a parte que irá
-      computar as soluções do subgolo $G$.
+      \item Nesta situação cortam-se os ramos referentes ao subgolo específico $G'$, excepto a parte que irá
+      computar as soluções do subgolo mais geral $G$.
       \begin{itemize}
          \item $G$ executa normalmente mas não devolve as soluções para o ambiente externo\footnote{O subgolo
          executa usando \emph{local scheduling}}.
       \end{itemize}
-      \item<2-> Quando $G$ ou completar ou não conseguir completar por ser o líder, salta-se para o ponto
+      \item<2-> Quando $G$ ou completar ou não conseguir completar por não ser o líder, salta-se para o ponto
       de escolha do subgolo $G'$.
    \end{itemize}
    \begin{columns}[t]
@@ -544,7 +544,7 @@ p(1, X) :- b(X).
          \item As respostas são representadas apenas uma vez e referenciadas pelos subgolos que as usam.
          \item Usa-se um timestamp por cada subgolo de forma a facilitar a transformação de gerador para consumidor.
       \end{itemize}
-      \item<2-> Permite que se possam reutilizar respostas relevantes a um novo subgolo gerador antes de executar
+      \item<2-> Permite que se possam reutilizar respostas relevantes num novo subgolo gerador antes de executar
       o código.
    \end{itemize}
    \begin{block}{Single Time Stamped Trie}
@@ -593,8 +593,7 @@ p(1, X) :- b(X).
    \begin{itemize}
       \item Avaliou-se o desempenho do motor de tabulação por subsumpção e comparou-se com
       o motor de tabulação do XSB Prolog.
-      \item Sendo que ambos usam os mesmos algoritmos e estruturas de dados, o desempenho é muito
-      parecido.
+      \item Sendo que ambos usam os mesmos algoritmos e estruturas de dados, o desempenho é parecido.
    \end{itemize}
    {\footnotesize
    \begin{center}
@@ -611,7 +610,7 @@ p(1, X) :- b(X).
    right\_last & 0.94 & \textbf{1.07} \\
    double\_first & 1.37 & \textbf{1.48} \\
    double\_last & 1.31 & \textbf{1.40} \\
-   samegen & \textbf{339.76} & 1.03 \\
+   %samegen & \textbf{339.76} & 1.03 \\
    genome & 559.54 & \textbf{648.51} \\
    reach\_first  & \textbf{0.96} & 0.94 \\
    reach\_last  & \textbf{0.97} & 0.90 \\
@@ -624,7 +623,7 @@ p(1, X) :- b(X).
 \begin{frame}
    \frametitle{Custo da TSR}
    \begin{itemize}
-      \item Foi medido o desempenho da TSR para programas que não tiram vantagens de usar os novos
+      \item Foi medido o desempenho da TSR para programas que não tiram vantagens em usar os novos
       mecanismos.
       \item Comparou-se o desempenho com tabulação por subsumpção tradicional e tabulação por variantes.
    \end{itemize}

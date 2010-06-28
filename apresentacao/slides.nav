@@ -1,90 +1,91 @@
 \beamer@endinputifotherversion {3.07pt}
 \headcommand {\slideentry {0}{0}{1}{1/1}{}{0}}
 \headcommand {\beamer@framepages {1}{1}}
-\headcommand {\sectionentry {1}{Outline}{2}{Outline}{0}}
+\headcommand {\sectionentry {1}{Prolog e o m\IeC {\'e}todo SLD}{2}{Prolog e o m\IeC {\'e}todo SLD}{0}}
 \headcommand {\beamer@sectionpages {1}{1}}
 \headcommand {\beamer@subsectionpages {1}{1}}
 \headcommand {\slideentry {1}{0}{2}{2/2}{}{0}}
 \headcommand {\beamer@framepages {2}{2}}
-\headcommand {\sectionentry {2}{Prolog e o m\IeC {\'e}todo SLD}{3}{Prolog e o m\IeC {\'e}todo SLD}{0}}
-\headcommand {\beamer@sectionpages {2}{2}}
-\headcommand {\beamer@subsectionpages {2}{2}}
-\headcommand {\slideentry {2}{0}{3}{3/6}{}{0}}
-\headcommand {\beamer@framepages {3}{6}}
-\headcommand {\beamer@subsectionentry {0}{2}{1}{7}{Limita\IeC {\c c}\IeC {\~o}es}}\headcommand {\beamer@subsectionpages {3}{6}}
-\headcommand {\slideentry {2}{1}{1}{7/8}{Limita\IeC {\c c}\IeC {\~o}es}{0}}
-\headcommand {\beamer@framepages {7}{8}}
-\headcommand {\sectionentry {3}{Tabula\IeC {\c c}\IeC {\~a}o}{9}{Tabula\IeC {\c c}\IeC {\~a}o}{0}}
-\headcommand {\beamer@sectionpages {3}{8}}
-\headcommand {\beamer@subsectionpages {7}{8}}
-\headcommand {\slideentry {3}{0}{2}{9/12}{}{0}}
-\headcommand {\beamer@framepages {9}{12}}
-\headcommand {\beamer@subsectionentry {0}{3}{1}{13}{Similaridade de subgolos}}\headcommand {\beamer@subsectionpages {9}{12}}
-\headcommand {\slideentry {3}{1}{1}{13/15}{Similaridade de subgolos}{0}}
-\headcommand {\beamer@framepages {13}{15}}
-\headcommand {\slideentry {3}{1}{2}{16/18}{Similaridade de subgolos}{0}}
-\headcommand {\beamer@framepages {16}{18}}
-\headcommand {\beamer@subsectionentry {0}{3}{2}{19}{Exemplo}}\headcommand {\beamer@subsectionpages {13}{18}}
-\headcommand {\slideentry {3}{2}{1}{19/29}{Exemplo}{0}}
-\headcommand {\beamer@framepages {19}{29}}
-\headcommand {\slideentry {3}{2}{2}{30/32}{Exemplo}{0}}
-\headcommand {\beamer@framepages {30}{32}}
-\headcommand {\slideentry {3}{2}{3}{33/33}{Exemplo}{0}}
-\headcommand {\beamer@framepages {33}{33}}
-\headcommand {\sectionentry {4}{Time Stamped tries}{34}{Time Stamped tries}{0}}
-\headcommand {\beamer@sectionpages {9}{33}}
-\headcommand {\beamer@subsectionpages {19}{33}}
-\headcommand {\slideentry {4}{0}{4}{34/34}{}{0}}
-\headcommand {\beamer@framepages {34}{34}}
-\headcommand {\slideentry {4}{0}{5}{35/35}{}{0}}
-\headcommand {\beamer@framepages {35}{35}}
-\headcommand {\beamer@subsectionentry {0}{4}{1}{36}{Implementa\IeC {\c c}\IeC {\~a}o}}\headcommand {\beamer@subsectionpages {34}{35}}
-\headcommand {\slideentry {4}{1}{1}{36/41}{Implementa\IeC {\c c}\IeC {\~a}o}{0}}
-\headcommand {\beamer@framepages {36}{41}}
-\headcommand {\sectionentry {5}{Tabula\IeC {\c c}\IeC {\~a}o por Subsump\IeC {\c c}\IeC {\~a}o Retroactiva}{42}{Tabula\IeC {\c c}\IeC {\~a}o por Subsump\IeC {\c c}\IeC {\~a}o Retroactiva}{0}}
-\headcommand {\beamer@sectionpages {34}{41}}
-\headcommand {\beamer@subsectionpages {36}{41}}
-\headcommand {\beamer@subsectionentry {0}{5}{1}{42}{Motiva\IeC {\c c}\IeC {\~a}o}}\headcommand {\beamer@subsectionpages {42}{41}}
-\headcommand {\slideentry {5}{1}{1}{42/42}{Motiva\IeC {\c c}\IeC {\~a}o}{0}}
-\headcommand {\beamer@framepages {42}{42}}
-\headcommand {\beamer@subsectionentry {0}{5}{2}{43}{Tabula\IeC {\c c}\IeC {\~a}o por Subsump\IeC {\c c}\IeC {\~a}o Retroactiva}}\headcommand {\beamer@subsectionpages {42}{42}}
-\headcommand {\slideentry {5}{2}{1}{43/48}{Tabula\IeC {\c c}\IeC {\~a}o por Subsump\IeC {\c c}\IeC {\~a}o Retroactiva}{0}}
-\headcommand {\beamer@framepages {43}{48}}
-\headcommand {\slideentry {5}{2}{2}{49/51}{Tabula\IeC {\c c}\IeC {\~a}o por Subsump\IeC {\c c}\IeC {\~a}o Retroactiva}{0}}
-\headcommand {\beamer@framepages {49}{51}}
-\headcommand {\beamer@subsectionentry {0}{5}{3}{52}{Corte da execu\IeC {\c c}\IeC {\~a}o}}\headcommand {\beamer@subsectionpages {43}{51}}
-\headcommand {\slideentry {5}{3}{1}{52/54}{Corte da execu\IeC {\c c}\IeC {\~a}o}{0}}
-\headcommand {\beamer@framepages {52}{54}}
-\headcommand {\slideentry {5}{3}{2}{55/71}{Corte da execu\IeC {\c c}\IeC {\~a}o}{0}}
-\headcommand {\beamer@framepages {55}{71}}
-\headcommand {\slideentry {5}{3}{3}{72/74}{Corte da execu\IeC {\c c}\IeC {\~a}o}{0}}
-\headcommand {\beamer@framepages {72}{74}}
-\headcommand {\beamer@subsectionentry {0}{5}{4}{75}{Espa\IeC {\c c}o das tabelas}}\headcommand {\beamer@subsectionpages {52}{74}}
-\headcommand {\slideentry {5}{4}{1}{75/78}{Espa\IeC {\c c}o das tabelas}{0}}
-\headcommand {\beamer@framepages {75}{78}}
-\headcommand {\beamer@subsectionentry {0}{5}{5}{79}{Procura de subgolos espec\IeC {\'\i }ficos}}\headcommand {\beamer@subsectionpages {75}{78}}
-\headcommand {\slideentry {5}{5}{1}{79/81}{Procura de subgolos espec\IeC {\'\i }ficos}{0}}
-\headcommand {\beamer@framepages {79}{81}}
-\headcommand {\slideentry {5}{5}{2}{82/85}{Procura de subgolos espec\IeC {\'\i }ficos}{0}}
-\headcommand {\beamer@framepages {82}{85}}
-\headcommand {\sectionentry {6}{Resultados}{86}{Resultados}{0}}
-\headcommand {\beamer@sectionpages {42}{85}}
-\headcommand {\beamer@subsectionpages {79}{85}}
-\headcommand {\slideentry {6}{0}{3}{86/87}{}{0}}
-\headcommand {\beamer@framepages {86}{87}}
-\headcommand {\slideentry {6}{0}{4}{88/89}{}{0}}
-\headcommand {\beamer@framepages {88}{89}}
-\headcommand {\slideentry {6}{0}{5}{90/91}{}{0}}
-\headcommand {\beamer@framepages {90}{91}}
-\headcommand {\sectionentry {7}{Conclus\IeC {\~o}es}{92}{Conclus\IeC {\~o}es}{0}}
-\headcommand {\beamer@sectionpages {86}{91}}
-\headcommand {\beamer@subsectionpages {86}{91}}
-\headcommand {\slideentry {7}{0}{6}{92/103}{}{0}}
-\headcommand {\beamer@framepages {92}{103}}
-\headcommand {\slideentry {7}{0}{7}{104/104}{}{0}}
-\headcommand {\beamer@framepages {104}{104}}
-\headcommand {\beamer@partpages {1}{104}}
-\headcommand {\beamer@subsectionpages {92}{104}}
-\headcommand {\beamer@sectionpages {92}{104}}
-\headcommand {\beamer@documentpages {104}}
-\headcommand {\def \inserttotalframenumber {27}}
+\headcommand {\slideentry {1}{0}{3}{3/4}{}{0}}
+\headcommand {\beamer@framepages {3}{4}}
+\headcommand {\slideentry {1}{0}{4}{5/6}{}{0}}
+\headcommand {\beamer@framepages {5}{6}}
+\headcommand {\sectionentry {2}{Tabula\IeC {\c c}\IeC {\~a}o}{7}{Tabula\IeC {\c c}\IeC {\~a}o}{0}}
+\headcommand {\beamer@sectionpages {2}{6}}
+\headcommand {\beamer@subsectionpages {2}{6}}
+\headcommand {\slideentry {2}{0}{5}{7/7}{}{0}}
+\headcommand {\beamer@framepages {7}{7}}
+\headcommand {\slideentry {2}{0}{6}{8/8}{}{0}}
+\headcommand {\beamer@framepages {8}{8}}
+\headcommand {\beamer@subsectionentry {0}{2}{1}{9}{Similaridade de Subgolos}}\headcommand {\beamer@subsectionpages {7}{8}}
+\headcommand {\slideentry {2}{1}{1}{9/11}{Similaridade de Subgolos}{0}}
+\headcommand {\beamer@framepages {9}{11}}
+\headcommand {\slideentry {2}{1}{2}{12/14}{Similaridade de Subgolos}{0}}
+\headcommand {\beamer@framepages {12}{14}}
+\headcommand {\beamer@subsectionentry {0}{2}{2}{15}{Exemplo}}\headcommand {\beamer@subsectionpages {9}{14}}
+\headcommand {\slideentry {2}{2}{1}{15/25}{Exemplo}{0}}
+\headcommand {\beamer@framepages {15}{25}}
+\headcommand {\slideentry {2}{2}{2}{26/28}{Exemplo}{0}}
+\headcommand {\beamer@framepages {26}{28}}
+\headcommand {\sectionentry {3}{Tabula\IeC {\c c}\IeC {\~a}o por Subsump\IeC {\c c}\IeC {\~a}o}{29}{Tabula\IeC {\c c}\IeC {\~a}o por Subsump\IeC {\c c}\IeC {\~a}o}{0}}
+\headcommand {\beamer@sectionpages {7}{28}}
+\headcommand {\beamer@subsectionpages {15}{28}}
+\headcommand {\slideentry {3}{0}{3}{29/29}{}{0}}
+\headcommand {\beamer@framepages {29}{29}}
+\headcommand {\slideentry {3}{0}{4}{30/31}{}{0}}
+\headcommand {\beamer@framepages {30}{31}}
+\headcommand {\slideentry {3}{0}{5}{32/32}{}{0}}
+\headcommand {\beamer@framepages {32}{32}}
+\headcommand {\beamer@subsectionentry {0}{3}{1}{33}{Implementa\IeC {\c c}\IeC {\~a}o}}\headcommand {\beamer@subsectionpages {29}{32}}
+\headcommand {\slideentry {3}{1}{1}{33/39}{Implementa\IeC {\c c}\IeC {\~a}o}{0}}
+\headcommand {\beamer@framepages {33}{39}}
+\headcommand {\sectionentry {4}{Tabula\IeC {\c c}\IeC {\~a}o por Subsump\IeC {\c c}\IeC {\~a}o Retroactiva}{40}{Tabula\IeC {\c c}\IeC {\~a}o por Subsump\IeC {\c c}\IeC {\~a}o Retroactiva}{0}}
+\headcommand {\beamer@sectionpages {29}{39}}
+\headcommand {\beamer@subsectionpages {33}{39}}
+\headcommand {\slideentry {4}{0}{2}{40/40}{}{0}}
+\headcommand {\beamer@framepages {40}{40}}
+\headcommand {\beamer@subsectionentry {0}{4}{1}{41}{Motiva\IeC {\c c}\IeC {\~a}o}}\headcommand {\beamer@subsectionpages {40}{40}}
+\headcommand {\slideentry {4}{1}{1}{41/41}{Motiva\IeC {\c c}\IeC {\~a}o}{0}}
+\headcommand {\beamer@framepages {41}{41}}
+\headcommand {\slideentry {4}{1}{2}{42/44}{Motiva\IeC {\c c}\IeC {\~a}o}{0}}
+\headcommand {\beamer@framepages {42}{44}}
+\headcommand {\slideentry {4}{1}{3}{45/53}{Motiva\IeC {\c c}\IeC {\~a}o}{0}}
+\headcommand {\beamer@framepages {45}{53}}
+\headcommand {\slideentry {4}{1}{4}{54/64}{Motiva\IeC {\c c}\IeC {\~a}o}{0}}
+\headcommand {\beamer@framepages {54}{64}}
+\headcommand {\beamer@subsectionentry {0}{4}{2}{65}{Corte da Execu\IeC {\c c}\IeC {\~a}o}}\headcommand {\beamer@subsectionpages {41}{64}}
+\headcommand {\slideentry {4}{2}{1}{65/70}{Corte da Execu\IeC {\c c}\IeC {\~a}o}{0}}
+\headcommand {\beamer@framepages {65}{70}}
+\headcommand {\slideentry {4}{2}{2}{71/72}{Corte da Execu\IeC {\c c}\IeC {\~a}o}{0}}
+\headcommand {\beamer@framepages {71}{72}}
+\headcommand {\beamer@subsectionentry {0}{4}{3}{73}{Espa\IeC {\c c}o das Tabelas}}\headcommand {\beamer@subsectionpages {65}{72}}
+\headcommand {\slideentry {4}{3}{1}{73/74}{Espa\IeC {\c c}o das Tabelas}{0}}
+\headcommand {\beamer@framepages {73}{74}}
+\headcommand {\beamer@subsectionentry {0}{4}{4}{75}{Procura de Subgolos Espec\IeC {\'\i }ficos}}\headcommand {\beamer@subsectionpages {73}{74}}
+\headcommand {\slideentry {4}{4}{1}{75/77}{Procura de Subgolos Espec\IeC {\'\i }ficos}{0}}
+\headcommand {\beamer@framepages {75}{77}}
+\headcommand {\sectionentry {5}{Resultados}{78}{Resultados}{0}}
+\headcommand {\beamer@sectionpages {40}{77}}
+\headcommand {\beamer@subsectionpages {75}{77}}
+\headcommand {\slideentry {5}{0}{2}{78/78}{}{0}}
+\headcommand {\beamer@framepages {78}{78}}
+\headcommand {\slideentry {5}{0}{3}{79/79}{}{0}}
+\headcommand {\beamer@framepages {79}{79}}
+\headcommand {\slideentry {5}{0}{4}{80/80}{}{0}}
+\headcommand {\beamer@framepages {80}{80}}
+\headcommand {\slideentry {5}{0}{5}{81/81}{}{0}}
+\headcommand {\beamer@framepages {81}{81}}
+\headcommand {\sectionentry {6}{Conclus\IeC {\~o}es}{82}{Conclus\IeC {\~o}es}{0}}
+\headcommand {\beamer@sectionpages {78}{81}}
+\headcommand {\beamer@subsectionpages {78}{81}}
+\headcommand {\slideentry {6}{0}{6}{82/82}{}{0}}
+\headcommand {\beamer@framepages {82}{82}}
+\headcommand {\slideentry {6}{0}{7}{83/84}{}{0}}
+\headcommand {\beamer@framepages {83}{84}}
+\headcommand {\slideentry {6}{0}{8}{85/85}{}{0}}
+\headcommand {\beamer@framepages {85}{85}}
+\headcommand {\beamer@partpages {1}{85}}
+\headcommand {\beamer@subsectionpages {82}{85}}
+\headcommand {\beamer@sectionpages {82}{85}}
+\headcommand {\beamer@documentpages {85}}
+\headcommand {\def \inserttotalframenumber {30}}
