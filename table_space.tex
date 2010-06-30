@@ -81,7 +81,7 @@ For both levels, each trie node usually contains four fields. The first field re
 and the third stores a pointer to the \texttt{parent} node.
 The fourth field points to a \texttt{sibling} node, if any.
 
-When the chain of sibling nodes gets too big, an hashing scheme is dynamically employed to provide direct
+When the chain of sibling nodes gets too big, a hashing scheme is dynamically employed to provide direct
 access to nodes, optimizing the search of transitions.
 
 Each tabled predicate contains a \textit{table entry} that points to a \textit{subgoal trie}.

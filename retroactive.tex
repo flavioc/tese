@@ -187,9 +187,9 @@ The first clause of \texttt{p/2} then executes \texttt{a(\_,X)}, which is a cons
 no answers are available to consume, execution suspends this node and backtracks to try the second clause
 of \texttt{p/2}. Here, \texttt{b(X)} is called for the first time, creating a new generator choice point.
 An answer for \texttt{b(X)} is then found, \texttt{\{X~=~1\}}, and by forward execution it is also an answer
-for \texttt{p(1,X)}. In the continuation, \texttt{b(Y)} is called, creating a new consumer node that consumes the answer
-\texttt{\{X~=~1\}} and by forward execution, a first answer for \texttt{a(X,Y)}, \texttt{\{X~=~1,~Y~=~1\}},
-is generated.
+for \texttt{p(1,X)}. In the continuation, \texttt{b(Y)} is called, creating a new consumer node that consumes
+the answer \texttt{\{X~=~1\}} and by forward execution, a first answer for \texttt{a(X,Y)},
+\texttt{\{X~=~1,~Y~=~1\}}, is generated.
 
 \begin{figure}[ht]
   \centering
@@ -1042,7 +1042,7 @@ we look up on the pending answer index to check if the answer is there. If so,
 we consider it a new answer and remove it from the index; if not, we consider it a repeated answer.
 
 The pending answer index is implemented as a single linked list, but can be transformed
-into an hash table if the list reaches a certain threshold.
+into a hash table if the list reaches a certain threshold.
 
 Figure~\ref{fig:stst_insert_answer} presents the code for the \texttt{stst\_insert\_answer} procedure,
 which inserts an answer on the STST. The pseudo-code is organized into four cases:
@@ -1170,7 +1170,7 @@ evaluation.
 When a chain of sibling nodes is organized in a linked list, it is
 easy to select the trie branches with evaluating subgoals by looking
 for the nodes with $\texttt{in\_eval} > 0$. But, when the sibling nodes are
-organized in an hash table, it can become very slow to inspect each
+organized in a hash table, it can become very slow to inspect each
 node as the number of siblings increase. In order to solve this
 problem, we designed a new data structure, called \textit{evaluation
 index}, in a similar manner to the time stamp index of the TST design.
@@ -1186,12 +1186,12 @@ node represents; and \texttt{in\_eval}, the number of evaluating subgoals
 under the corresponding subgoal trie node. We also extended the hash
 table with a field named \texttt{index} to point to the evaluation index.
 
-Figure~\ref{fig:hash_table_evaluation_index} shows an hash table and
+Figure~\ref{fig:hash_table_evaluation_index} shows a hash table and
 the corresponding evaluation index. Note that an indexed subgoal trie
 node now uses the \texttt{in\_eval} field to point to the index node, while a
 trie node with $\texttt{in\_eval} = 0$ is not indexed. To compute the
 \texttt{in\_eval} value of a trie node, we first use the \texttt{status} field to
-determine if the node is inside an hash table or not, and then we use the
+determine if the node is inside a hash table or not, and then we use the
 \texttt{in\_eval} field accordingly.
 
 \begin{figure}[ht]
@@ -1457,7 +1457,7 @@ symbols.
 
 Figure~\ref{fig:try_structured_term} presents the pseudo-code for the
 \texttt{try\_structured\_term} procedure. This procedure is divided into
-two steps. We arrive at step 1, if the current node is an hash
+two steps. We arrive at step 1, if the current node is a hash
 table. Here, first, we hash the term to get the hash bucket that might
 contain the matching trie node. If the bucket is empty we simply
 return \texttt{NULL}. Otherwise, we move into step 2. In step 2 we traverse a
@@ -1498,10 +1498,10 @@ pseudo-code for the \texttt{try\_variable\_term} procedure. It is defined
 by three main cases, depending on the type of the current node, namely:
 
 \begin{enumerate}
-\item the node is an hash table. For faster access of valid trie  nodes, we use the evaluation index, which gives us all the valid
+\item the node is a hash table. For faster access of valid trie  nodes, we use the evaluation index, which gives us all the valid
   trie nodes in a linked list. We set the next alternative node to be  pushed on the choice point stack by using the function
   \texttt{next\_valid\_index\_node} that uses the \texttt{next} pointer of the  first index node to locate the alternative trie node.
-\item the node is an hashed node, thus is on the evaluation index of  the corresponding hash table. In this case, we also use the
+\item the node is a hashed node, thus is on the evaluation index of  the corresponding hash table. In this case, we also use the
   \texttt{next\_valid\_index\_node} function to identify the next
   alternative trie node.\item the node is part of a simple linked list. Here we must use the
   function \texttt{next\_valid\_node} to find the next valid trie node

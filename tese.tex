@@ -18,12 +18,12 @@
 %\usepackage{fancyhdr} % para cabeçalhos mais elaborados
 \usepackage{subfig}
 \usepackage{amsthm}
-\usepackage[firstpage]{draftwatermark}
+%\usepackage[firstpage]{draftwatermark}
 
-\SetWatermarkScale{8}
-\SetWatermarkAngle{45}
-\SetWatermarkFontSize{72pt}
-\SetWatermarkText{DRAFT}
+%\SetWatermarkScale{8}
+%\SetWatermarkAngle{45}
+%\SetWatermarkFontSize{72pt}
+%\SetWatermarkText{DRAFT}
 
 \newtheorem{pruning_obs}{Observation}
 
@@ -47,10 +47,6 @@
 \supervisor{Ricardo Rocha}
 
 \beforepreface
-
-\newpage
-\thispagestyle{plain}
-\mbox{}
 
 \dedicationpage{\Large{To my parents}}
 
@@ -85,14 +81,34 @@
 \chapter{Introduction}
 \input{introduction}
 
+
+\newpage
+\thispagestyle{plain}
+\mbox{}
+
 \chapter{Logic Programming and Tabling}
 \input{lp_tabling}
+
+
+\newpage
+\thispagestyle{plain}
+\mbox{}
 
 \chapter{Table Space Organization}
 \input{table_space}
 
+
+\newpage
+\thispagestyle{plain}
+\mbox{}
+
 \chapter{Time Stamped Tries}
 \input{tst}
+
+
+\newpage
+\thispagestyle{plain}
+\mbox{}
 
 \chapter{Retroactive Call Subsumption}
 \input{retroactive}
@@ -100,11 +116,19 @@
 \chapter{Experimental Results}
 \input{results}
 
+\newpage
+\thispagestyle{plain}
+\mbox{}
+
 \chapter{Conclusions and Further Work}
 \input{conclusions}
 
 \appendix
 \input{appendix_code}
+
+\newpage
+\thispagestyle{plain}
+\mbox{}
   
 \renewcommand{\bibname}{References}
 \bibliographystyle{alpha}

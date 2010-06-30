@@ -194,7 +194,7 @@ First, the procedure checks if the match method is to exactly match the
 sub-term constant against a trie symbol, which means
 that this is the first time this trie level is explored (phase 1 in Figure~\ref{fig:match_constant}).
 If the current trie level is represented by a simple linked list, both \texttt{node} and \texttt{var\_chain}
-point to the start of the chain, but if the trie level is an hash table,
+point to the start of the chain, but if the trie level is a hash table,
 \texttt{node} will be made to point to the corresponding indexed bucket and \texttt{var\_chain}
 to the variable bucket, which is always the first bucket. This is accomplished by the \texttt{set\_node\_and\_var\_chain}
 procedure.
@@ -247,7 +247,7 @@ we call \texttt{find\_bound\_trie\_var} that will iterate over the \texttt{node}
 along a path is marked, so it is easy to check for old variables, which have already been bound
 to some term before arriving at the current node. The variable binding can be retrieved by
 checking the variable bindings vector for the position corresponding to this variable
-number, which points to an heap term. Given that we are trying to match a constant symbol,
+number, which points to a heap term. Given that we are trying to match a constant symbol,
 we verify if the bound term matches our symbol. In this case, we create a new choice point
 for the sibling node of the matched trie variable, and use the currently set variable chain.
 
@@ -538,20 +538,20 @@ implements this process and needs two arguments: the root of the answer trie \te
 the answer as a vector of terms, \texttt{ans\_vector}.
 
 When a chain of sibling nodes becomes larger than a threshold value, we dynamically index the
-nodes through an hash table to provide direct node access and therefore optimize the search. Given
-that an hash table can have a large number of answer nodes with different time stamp values, we maintain
+nodes through a hash table to provide direct node access and therefore optimize the search. Given
+that a hash table can have a large number of answer nodes with different time stamp values, we maintain
 a reference to these nodes, in decreasing order of their time stamp values in a double linked list
 called the \textit{time stamp index}.
 Besides the double linked list pointers, each index node contains a pointer to the corresponding
 answer node and the value of its time stamp. Each answer node indexed in the hash table has a different use
 for the \texttt{timestamp} field: instead of containing a positive integer, contains a pointer
 to the respective index node. The trie node field \texttt{status} distinguishes
-both cases. Figure~\ref{fig:hash_table_tst} illustrates an hash table with a time stamp index.
+both cases. Figure~\ref{fig:hash_table_tst} illustrates a hash table with a time stamp index.
 
 \begin{figure}[ht]
   \centering
     \includegraphics[scale=0.6]{hash_table_tst.pdf}
-  \caption{Indexing nodes through an hash table with time stamp indexes.}
+  \caption{Indexing nodes through a hash table with time stamp indexes.}
   \label{fig:hash_table_tst}
 \end{figure}
 
@@ -560,7 +560,7 @@ both cases. Figure~\ref{fig:hash_table_tst} illustrates an hash table with a tim
 Once the variant continuation is restored, the rest of the answer path can be inserted on the trie starting
 from the restored node. Inserting is then a simple operation because no checking for equal trie symbols is required.
 The first symbol will be inserted either into: (1) a childless parent node (i.e., the trie root);
-(2) a parent node pointing to a sibling chain list; (3) a parent node pointing to an hashed child node.
+(2) a parent node pointing to a sibling chain list; (3) a parent node pointing to a hashed child node.
 Every other symbols will be inserted on childless parents.
 
 Procedure \texttt{tst\_insert} (Figure~\ref{fig:tst_insert}) does the job of inserting
@@ -598,7 +598,7 @@ to a trie representation, which is usually called a \textit{symbol}. If the term
 the arguments are pushed into the stack of terms to be processed next.
 
 While appending a new node in a sibling list does not involve any
-time stamp indexing (see Figure~\ref{fig:tst_chain_insert}), inserting a new node into an hash table does,
+time stamp indexing (see Figure~\ref{fig:tst_chain_insert}), inserting a new node into a hash table does,
 because hash tables index nodes by time stamp.
 Figure~\ref{fig:hash_table_insert}
 illustrates the insertion of a symbol (\texttt{25}) and the creation of the respective
@@ -626,9 +626,9 @@ The time stamp for the new answer is calculated by inspecting the time stamp of 
 Next, we update the time stamps in the answer trie branch starting from the answer leaf node to the
 root node.
 
-If the current node is an hashed node with a time stamp index, the corresponding index node is moved to the head of
+If the current node is a hashed node with a time stamp index, the corresponding index node is moved to the head of
 the index's double linked list. We can test whether an answer node is indexed by
-an hash table by inspecting its \texttt{status} field.
+a hash table by inspecting its \texttt{status} field.
 Figure~\ref{fig:update_timestamps} contains the pseudo-code for procedure \texttt{update\_timestamps}.
 
 \begin{figure}[ht]
@@ -675,7 +675,7 @@ To efficiently locate all hash tables in an answer trie, we chain these hash tab
 using the \texttt{next} field and the start of this chain is stored
 in the \texttt{sibling} field of the root node.
 
-Creating the index for an hash table amounts to iterating over the hashed nodes
+Creating the index for a hash table amounts to iterating over the hashed nodes
 and orderly inserting new index nodes on the index chain.
 Later, when the subgoal completes, the time stamp indexes can be thrown away to save space,
 because they are only necessary during collection of relevant answers for consumer subgoals.
@@ -813,7 +813,7 @@ by executing the following actions:
 \subsection{Unification of Constant Terms}
 
 Once a trie node $N$ is reached we must select the next trie node $N'$ that unifies with our
-term and has a valid time stamp. Node $N$ can lead either to a simple node chain or an hash table.
+term and has a valid time stamp. Node $N$ can lead either to a simple node chain or a hash table.
 With constant terms we can index the hash table to prune the search space
 (procedure \texttt{set\_match\_and\_unify\_chains} in Figure~\ref{fig:unify_constant_term})
 by using the \textit{match bucket}.
@@ -864,7 +864,7 @@ search_chain_exact_match(term, match_chain, unify_chain, ts) {
 \end{figure}
 
 In Figure~\ref{fig:unify_constant_term} we present the pseudo-code for procedure
-\texttt{unify\_constant\_term}. First, we check for an hash table and inspect the match
+\texttt{unify\_constant\_term}. First, we check for a hash table and inspect the match
 bucket using \texttt{search\_chain\_exact\_match} (Figure~\ref{fig:search_chain_exact_match}).
 Next, if no match is found we execute \texttt{search\_chain\_unify\_with\_constant}
 (Figure~\ref{fig:search_chain_unify_with_constant}) on the unify chain. Otherwise, if no hash table
@@ -1043,7 +1043,7 @@ search_chain_unify_with_structured_term(term, chain, ts) {
         push_arguments(term_stack, term)
         return chain
       else if (unify(term, symbol)) // case (3)
-        // trie variable bound to an heap structured term
+        // trie variable bound to a heap structured term
         push_choice_point_frame(choice_point_stack, alt_chain)
         push(term_log_stack, term)
         return chain
@@ -1126,10 +1126,10 @@ Figure~\ref{fig:unify_variable_term} presents the procedure \texttt{unify\_varia
 situations may arise:
 
 \begin{enumerate}
-  \item The current node is an hash table. In this situation we can select the next transitions
+  \item The current node is a hash table. In this situation we can select the next transitions
    by using the time stamp index, which can efficiently prune based on the time stamp. Notice that we visit
-   an hash table only once, subsequent backtracking uses the time stamp index nodes;
-  \item The current node is inside an hash table and thus indexed on the time stamp index.
+   a hash table only once, subsequent backtracking uses the time stamp index nodes;
+  \item The current node is inside a hash table and thus indexed on the time stamp index.
    The node is matched against the variable and the alternative node is selected by following
    the index chain link;
   \item Current node is a simple sibling chain. Both the chain and the alternative chain are set by
@@ -1140,7 +1140,7 @@ situations may arise:
 \begin{Verbatim}
 unify_variable_term(variable, node, ts) {
   if (is_hash_table(node))
-     // case 1: current node is an hash table
+     // case 1: current node is a hash table
     index = index_head(node)
     if (timestamp(index) > ts)
       node = node(index)
@@ -1148,7 +1148,7 @@ unify_variable_term(variable, node, ts) {
     else
       return NULL
   else if (is_hashed_node(node))
-    // case 2: current node is an hashed node and has a corresponding index node
+    // case 2: current node is a hashed node and has a corresponding index node
     // can only be here via backtracking
     alt_chain = node(next_valid_index_node(index_node(node), ts))
   else
@@ -1179,7 +1179,7 @@ is dictated by the type of trie symbol. It follows the following rules:
   the variable to the heap location; else, we create a new structure (functor or list) on the heap and bind
   the variable to it, resulting in a term with various heap variables as arguments, which will be pushed into
   the term stack and will be used in the next iterations of the algorithm;
-  \item Variable: if the variable is a trie variable, we bind and trail it; if it is an heap variable that
+  \item Variable: if the variable is a trie variable, we bind and trail it; if it is a heap variable that
   was dereferenced from a trie variable using \texttt{trie\_deref}, \texttt{unify} chooses the binding direction,
   resulting in one of the variables being trailed.
 \end{itemize}
@@ -1197,7 +1197,7 @@ unify_with_variable(variable, symbol, node) {
       // push new structure arguments
       push_arguments(term_stack, deref(variable))
     else
-      // trie variable bound to an heap structure
+      // trie variable bound to a heap structure
       bind_and_conditionally_trail(variable, symbol)
   else if (is_variable(symbol))
     if (is_trie_variable(symbol))
@@ -1413,7 +1413,7 @@ hash tables. Both answer and subgoal trie nodes were extended with a \texttt{sta
 bit field and the answer trie nodes were extended with a \texttt{timestamp} field in order to create a
 time stamped trie from the standard answer trie.
 The \texttt{status} bit field is used to identify the type of trie node, i.e., if it is
-an hash table, a leaf node or an hashed node.
+a hash table, a leaf node or a hashed node.
 For hash tables, we extended the answer hash table with the time stamp indexes to create the
 time stamped hash table. The index data structure was integrally copied from XSB Prolog.
 
@@ -1826,11 +1826,11 @@ we needed to change each trie instruction to do unification instead of simple va
 
 Another important modification was the hash instructions. Two new instructions were
 implemented: \texttt{trie\_do\_hash} and \texttt{trie\_retry\_hash}.
-The instruction \texttt{trie\_do\_hash} is executed once an hash table node is reached.
+The instruction \texttt{trie\_do\_hash} is executed once a hash table node is reached.
 If the next term to unify is a variable (case 1) each hash bucket will be executed, if it is an instantiated term (case 2)
 the indexed bucket will be executed first, followed by the variable bucket.
 
-We use an hash choice point (\texttt{hash\_choice\_pt}) to execute each bucket.
+We use a hash choice point (\texttt{hash\_choice\_pt}) to execute each bucket.
 For instantiated terms, the hash choice point is only allocated when both variable and indexed bucket
 exist and are different. For variables, the choice point is always stored. The instruction
 set to execute upon backtracking is \texttt{trie\_retry\_hash}.
